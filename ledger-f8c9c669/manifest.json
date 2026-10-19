@@ -1,0 +1,15 @@
+{
+ "name": "Side Hustle Ledger",
+ "short_name": "Ledger",
+ "start_url": ".",
+ "display": "standalone",
+ "background_color": "#16213b",
+ "theme_color": "#f4eee2",
+ "icons": [
+  {
+   "src": "icon-180.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  }
+ ]
+}
