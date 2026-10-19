@@ -1,0 +1,15 @@
+{
+ "name": "Wedding Planner",
+ "short_name": "Wedding",
+ "start_url": ".",
+ "display": "standalone",
+ "background_color": "#f8f4ee",
+ "theme_color": "#f8f4ee",
+ "icons": [
+  {
+   "src": "icon-180.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  }
+ ]
+}
