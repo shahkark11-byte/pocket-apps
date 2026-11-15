@@ -176,6 +176,15 @@ nav button.on{color:var(--terra)}
 .steps{display:flex;gap:6px;justify-content:center;margin-bottom:18px}.steps i{width:28px;height:6px;border-radius:3px;background:rgba(120,80,40,.15)}.steps i.on{background:var(--terra)}
 .hero-ill{width:150px;height:150px;margin:0 auto 10px;display:block}
 .rescue-bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;right:12px;z-index:70;max-width:536px;margin:0 auto;background:#fff3ec;border:2px solid var(--terra);border-radius:16px;padding:14px}
+.pic{display:inline-block;object-fit:cover;flex:none;vertical-align:middle;border-radius:8px;box-shadow:2px 3px 6px rgba(120,80,40,.18)}
+.slot .pic{width:28px;height:28px;border-radius:8px}
+.rcard .pic{width:64px;height:64px;border-radius:14px}
+.plate .pic{width:100%;height:100%;border-radius:50%}
+.pickr .pic{width:34px;height:34px;border-radius:9px}
+.logo img{width:100%;height:100%;object-fit:cover;border-radius:15px}
+.logo{overflow:hidden}
+.photo-tile{display:flex;align-items:center;gap:12px;margin-top:10px}
+.photo-tile img{width:72px;height:72px;border-radius:14px;object-fit:cover;box-shadow:3px 5px 10px rgba(120,80,40,.2)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){#dust,.ray,.panes{display:none}}
 </style>
@@ -185,6 +194,7 @@ nav button.on{color:var(--terra)}
 <main id="app"></main>
 <nav id="nav" aria-label="Main"></nav>
 <input type="file" id="importFile" accept=".json,application/json" hidden>
+<input type="file" id="photoFile" accept="image/*" hidden>
 <script>
 "use strict";
 /* ───────── data ───────── */
@@ -198,7 +208,7 @@ const EMOJI = ["🍝","🍛","🌶️","🥘","🐟","🥢","🌮","🍲","🥔"
 const TAGS = ["Quick","Budget","Veggie","Batch","Breakfast","Lunchbox"];
 const CURS = ["£","$","€","A$","C$","NZ$","R","₹"];
 const blank = () => ({v:1, hero:null, ready:false, step:0, settings:{cur:"£", budget:60, people:2, slots:{b:false, l:true, d:true}, ws:1},
-  recipes:[], plan:{}, lists:{}, spend:[], wbud:{}, xp:0, badges:{}, caps:{}, flags:{}, sample:false});
+  recipes:[], plan:{}, lists:{}, spend:[], wbud:{}, photo:"", xp:0, badges:{}, caps:{}, flags:{}, sample:false});
 let S, RESCUED = null;
 const isObj = o => o && typeof o === "object" && !Array.isArray(o);
 const isD = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
@@ -217,7 +227,8 @@ function normalize(){
   S.ready = !!S.ready && !!S.hero; S.step = Math.round(num(S.step, 0, 0, 3)); S.xp = Math.max(0, Math.round(num(S.xp, 0, 0, 1e9))); S.sample = !!S.sample;
   S.recipes = S.recipes.map(r => ({id: typeof r.id === "string" ? r.id : uid(), name: str(r.name, 60).trim() || "Recipe", emoji: EMOJI.includes(r.emoji) ? r.emoji : "🍲",
     serves: Math.round(num(r.serves, 4, 1, 50)), mins: Math.round(num(r.mins, 0, 0, 1440)), tags: Array.isArray(r.tags) ? r.tags.filter(t => TAGS.includes(t)) : [],
-    ing: Array.isArray(r.ing) ? r.ing.filter(isObj).map(normIng) : [], steps: str(r.steps, 4000), fav: !!r.fav, own: !!r.own, made: Math.round(num(r.made, 0, 0, 1e6))}));
+    ing: Array.isArray(r.ing) ? r.ing.filter(isObj).map(normIng) : [], steps: str(r.steps, 4000), fav: !!r.fav, own: !!r.own, made: Math.round(num(r.made, 0, 0, 1e6)), photo: okPhoto(r.photo)}));
+  S.photo = okPhoto(S.photo);
   Object.keys(S.plan).forEach(d => { const day = S.plan[d]; if(!isD(d) || !isObj(day)){ delete S.plan[d]; return; }
     Object.keys(day).forEach(k => { const s = day[k]; if(!SLOTS.some(x => x[0] === k) || !isObj(s) || !["r","left","out"].includes(s.k)){ delete day[k]; return; }
       if(s.k === "r" && !S.recipes.some(r => r.id === s.rid)){ delete day[k]; return; }
@@ -238,7 +249,19 @@ function load(){
   catch(e){ S = blank(); RESCUED = raw; try{ const prev = localStorage.getItem(RESCUE); if(prev !== null && prev !== raw) localStorage.setItem(RESCUE + ".prev", prev); localStorage.setItem(RESCUE, raw); }catch(_){} }
   normalize();
 }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Couldn't save on this phone. Free up some space."); } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }catch(e){ toast("Couldn't save on this phone. Free up some space."); return false; } }
+/* photos are shrunk on the phone and kept inside the save, so backups carry them too */
+const okPhoto = v => typeof v === "string" && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length < 400000 ? v : "";
+const pic = r => r.photo ? `<img class="pic" src="${r.photo}" alt="">` : r.emoji;
+function pickPhoto(max, done){ const inp = document.getElementById("photoFile"); inp.value = "";
+  inp.onchange = () => { const f = inp.files[0]; if(!f) return; const rd = new FileReader();
+    rd.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k));
+        const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height);
+        let out = c.toDataURL("image/jpeg", .78); if(out.length > 380000) out = c.toDataURL("image/jpeg", .55); done(okPhoto(out)); };
+      im.onerror = () => toast("That photo couldn't be opened. Try another one."); im.src = rd.result; };
+    rd.readAsDataURL(f); };
+  inp.click(); }
 const uid = () => Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 5);
 
 /* ───────── dates and money ───────── */
@@ -328,7 +351,7 @@ const I = {
 let tab = "week", wk = null, rq = "", rtag = "";
 const curWs = () => wk || (wk = weekStart(today()));
 function topBar(){ const l = lvlOf(S.xp), a = xpAt(l), b = xpAt(l + 1);
-  return `<div class="top"><div class="logo" aria-hidden="true">🍲</div><div class="grow"><b>${esc(S.hero.name)}'s kitchen</b>
+  return `<div class="top"><button class="logo" data-act="kitchenPic" aria-label="Change your kitchen picture">${S.photo ? `<img src="${S.photo}" alt="">` : "🍲"}</button><div class="grow"><b>${esc(S.hero.name)}'s kitchen</b>
     <div class="small muted"><span class="lvl">LV ${l}</span>${TITLES[Math.min(l, TITLES.length) - 1]} · ${S.xp} XP</div>
     <div class="xpbar" aria-hidden="true"><i style="width:${Math.min(100, (S.xp - a) / (b - a) * 100)}%"></i></div></div>
     <button class="icb" data-act="settings" aria-label="Settings">${I.gear}</button></div>`; }
@@ -339,7 +362,7 @@ function slotRow(d, k, label){
   const s = (S.plan[d] || {})[k], past = d <= today();
   if(!s) return `<div class="slot"><span class="sl">${label}</span><button class="pick empty" data-act="slot" data-d="${d}" data-k="${k}">+ Add</button></div>`;
   let main;
-  if(s.k === "r"){ const r = recOf(s.rid); main = `<span aria-hidden="true">${r.emoji}</span><span class="n">${esc(r.name)}</span><small>· ${s.n}</small>`; }
+  if(s.k === "r"){ const r = recOf(s.rid); main = `<span aria-hidden="true">${pic(r)}</span><span class="n">${esc(r.name)}</span><small>· ${s.n}</small>`; }
   else if(s.k === "left") main = `<span aria-hidden="true">🥡</span><span class="n">Leftovers</span>`;
   else main = `<span aria-hidden="true">🛍️</span><span class="n">Takeaway or eating out</span>`;
   return `<div class="slot"><span class="sl">${label}</span><button class="pick" data-act="slot" data-d="${d}" data-k="${k}">${main}</button>
@@ -351,7 +374,7 @@ function weekView(){
   const est = estShop(ws), bud = weekBudget(ws);
   let tonight = "";
   if(ds.includes(t)){ const s = (S.plan[t] || {}).d || (S.plan[t] || {}).l; const r = s && s.k === "r" && recOf(s.rid);
-    tonight = r ? `<section class="card tonight"><div class="plate" aria-hidden="true">${r.emoji}</div><div class="grow"><div class="lbl">${(S.plan[t] || {}).d === s ? "Tonight" : "Today"}</div>
+    tonight = r ? `<section class="card tonight"><div class="plate" aria-hidden="true">${pic(r)}</div><div class="grow"><div class="lbl">${(S.plan[t] || {}).d === s ? "Tonight" : "Today"}</div>
         <div class="big" style="font-size:24px;margin-top:2px">${esc(r.name)}</div><div class="small muted">${r.mins ? r.mins + " min · " : ""}for ${s.n}</div></div>
         <button class="btn sm ghost" data-act="recipe" data-id="${r.id}" data-n="${s.n}">Recipe</button></section>`
       : `<section class="card tonight"><div class="plate" aria-hidden="true">🤔</div><div class="grow"><div class="lbl">Tonight</div><div style="font-weight:700;font-size:18px;margin-top:2px">Nothing planned yet</div>
@@ -371,7 +394,7 @@ function recipesView(){
   return topBar() + `<div class="h"><h2>Recipes</h2><button data-act="newRecipe">+ New recipe</button></div>
     <input class="in" id="rq" placeholder="Search recipes or ingredients" value="${esc(rq)}" aria-label="Search recipes" style="margin-top:10px">
     <div class="chips" style="margin-top:10px">${[["","All"],["fav","♥ Favourites"]].concat(TAGS.map(t => [t, t])).map(([v, l]) => `<button class="chip ${rtag === v ? "on" : ""}" data-act="rtag" data-v="${v}">${l}</button>`).join("")}</div>
-    ${list.length ? `<div class="rgrid">${list.map(r => `<button class="rcard" data-act="recipe" data-id="${r.id}">${r.fav ? `<span class="fav" aria-label="Favourite">♥</span>` : ""}<span class="e" aria-hidden="true">${r.emoji}</span><b>${esc(r.name)}</b>
+    ${list.length ? `<div class="rgrid">${list.map(r => `<button class="rcard" data-act="recipe" data-id="${r.id}">${r.fav ? `<span class="fav" aria-label="Favourite">♥</span>` : ""}<span class="e" aria-hidden="true">${pic(r)}</span><b>${esc(r.name)}</b>
       <small>${r.mins ? r.mins + " min · " : ""}serves ${r.serves} · ${money(recCost(r))}</small></button>`).join("")}</div>`
       : `<div class="card empty"><div class="e">📖</div>${S.recipes.length ? "Nothing matches that search." : "No recipes yet. Add the ones you cook most."}</div>`}
     <p class="note">Costs are rough guesses. Edit them to match your shop's prices and the shopping estimate gets better.</p>`;
@@ -481,7 +504,7 @@ function slotSheet(d, k){
   const root = sheet(`<h3>${label}, ${dname(d, {weekday:"long", day:"numeric", month:"short"})}</h3>
     <div class="row" style="margin-top:12px"><span class="grow" style="font-weight:700">Cooking for</span>${stepper("sn", cur && cur.n || S.settings.people, 1, 50, "people")}</div>
     <input class="in" id="sq" placeholder="Search recipes" aria-label="Search recipes" style="margin-top:12px">
-    <div class="list-r" id="sl">${list.map(r => `<button class="pickr" data-pick="${r.id}" data-name="${esc(r.name.toLowerCase())}"><span class="e" aria-hidden="true">${r.emoji}</span><span>${r.fav ? "♥ " : ""}${esc(r.name)}</span><small>${r.mins ? r.mins + " min" : ""}</small></button>`).join("")}</div>
+    <div class="list-r" id="sl">${list.map(r => `<button class="pickr" data-pick="${r.id}" data-name="${esc(r.name.toLowerCase())}"><span class="e" aria-hidden="true">${pic(r)}</span><span>${r.fav ? "♥ " : ""}${esc(r.name)}</span><small>${r.mins ? r.mins + " min" : ""}</small></button>`).join("")}</div>
     <div class="row" style="margin-top:12px;gap:8px"><button class="btn sm ghost grow" data-pick="left">🥡 Leftovers</button><button class="btn sm ghost grow" data-pick="out">🛍️ Takeaway or out</button></div>
     ${cur ? `<button class="btn full ghost" style="margin-top:10px;color:var(--terra)" data-pick="clear">Clear this meal</button>` : ""}`);
   root.querySelector("#sq").oninput = e => { const q = e.target.value.toLowerCase(); root.querySelectorAll("#sl .pickr").forEach(b => b.style.display = b.dataset.name.includes(q) ? "" : "none"); };
@@ -503,7 +526,7 @@ function afterPlan(){ const ws = curWs(), dn = days7(ws), on = S.settings.slots.
   if(dn.every(d => (S.plan[d] || {})[on])){ const k = "plan|" + fkey(ws); if(!S.flags[k]){ S.flags[k] = today(); save(); gain(25, "Whole week planned"); } award("full_week"); } }
 function recipeSheet(id, n){
   const r = recOf(id); if(!r) return; n = n || r.serves; const f = n / r.serves;
-  const root = sheet(`<div class="row"><span style="font-size:40px" aria-hidden="true">${r.emoji}</span><div class="grow"><h3>${esc(r.name)}</h3>
+  const root = sheet(`<div class="row">${r.photo ? `<img class="pic" src="${r.photo}" alt="" style="width:64px;height:64px;border-radius:14px">` : `<span style="font-size:40px" aria-hidden="true">${r.emoji}</span>`}<div class="grow"><h3>${esc(r.name)}</h3>
       <div class="small muted">${r.mins ? r.mins + " min · " : ""}${r.tags.join(" · ")}${r.made ? ` · cooked ${r.made}×` : ""}</div></div>
       <button class="icb" data-r="fav" aria-pressed="${r.fav}" aria-label="${r.fav ? "Remove from favourites" : "Add to favourites"}" style="color:${r.fav ? "var(--terra)" : "var(--mut)"};font-size:22px">${r.fav ? "♥" : "♡"}</button></div>
     <div class="row" style="margin-top:14px"><span class="grow" style="font-weight:700">Serves</span>${stepper("rs", n, 1, 50, "servings")}</div>
@@ -534,10 +557,10 @@ function ingRow(i){ i = i || {id:uid(), name:"", qty:"", unit:"x", aisle:"P", co
       <button class="x" data-rm aria-label="Remove ingredient">${I.x}</button></div></div>`; }
 function recipeForm(r){
   const e = !!r; r = r || {name:"", emoji:"🍲", serves:S.settings.people, mins:"", tags:[], ing:[], steps:""};
-  let em = r.emoji, tags = r.tags.slice();
+  let em = r.emoji, tags = r.tags.slice(), photo = r.photo || "";
   const root = sheet(`<h3>${e ? "Edit recipe" : "New recipe"}</h3>
     <label class="f" for="rn">Name</label><input class="in" id="rn" maxlength="60" value="${esc(r.name)}" placeholder="For example Mum's lasagne">
-    <label class="f">Picture</label><div class="chips" id="emj">${EMOJI.map(x => `<button class="chip ${x === em ? "on" : ""}" data-em="${x}" style="font-size:20px;padding:0 10px">${x}</button>`).join("")}</div>
+    <label class="f">Picture</label><div id="ph"></div><div class="chips" id="emj">${EMOJI.map(x => `<button class="chip ${x === em ? "on" : ""}" data-em="${x}" style="font-size:20px;padding:0 10px">${x}</button>`).join("")}</div>
     <div class="row" style="margin-top:14px;align-items:flex-end"><div class="grow"><label class="f" style="margin-top:0">Serves</label>${stepper("rsv", r.serves, 1, 50, "servings")}</div>
       <div style="width:120px"><label class="f" for="rm" style="margin-top:0">Minutes</label><input class="in" id="rm" inputmode="numeric" value="${r.mins || ""}" placeholder="30"></div></div>
     <label class="f">Tags</label><div class="chips" id="tg">${TAGS.map(t => `<button class="chip ${tags.includes(t) ? "on" : ""}" data-tg="${t}">${t}</button>`).join("")}</div>
@@ -548,9 +571,16 @@ function recipeForm(r){
     <div class="actions">${e ? `<button class="btn ghost" id="del" style="color:var(--terra)">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save recipe</button></div>`);
   root.addEventListener("click", ev => { const t = ev.target;
     const st = t.closest("[data-step]"); if(st){ stepBtn(st); return; }
-    const m = t.closest("[data-em]"); if(m){ em = m.dataset.em; root.querySelectorAll("[data-em]").forEach(b => b.classList.toggle("on", b === m)); return; }
+    const m = t.closest("[data-em]"); if(m){ em = m.dataset.em; if(photo){ photo = ""; drawPh(); } root.querySelectorAll("[data-em]").forEach(b => b.classList.toggle("on", b === m)); return; }
     const g = t.closest("[data-tg]"); if(g){ const v = g.dataset.tg; tags = tags.includes(v) ? tags.filter(x => x !== v) : tags.concat(v); g.classList.toggle("on"); return; }
     const rm = t.closest("[data-rm]"); if(rm){ rm.closest(".ingr").remove(); return; } });
+  const drawPh = () => { root.querySelector("#ph").innerHTML = photo
+      ? `<div class="photo-tile"><img src="${photo}" alt="Your photo"><div class="grow"><button class="btn sm ghost" data-ph="pick">Change photo</button><button class="link" data-ph="clear" style="display:block">Use an emoji instead</button></div></div>`
+      : `<button class="btn sm ghost full" data-ph="pick" style="margin-bottom:10px">📷 Use your own photo</button>`; };
+  drawPh();
+  root.querySelector("#ph").addEventListener("click", ev => { const b = ev.target.closest("[data-ph]"); if(!b) return;
+    if(b.dataset.ph === "clear"){ photo = ""; drawPh(); return; }
+    pickPhoto(480, d => { if(!d){ toast("That photo is too big. Try another one."); return; } photo = d; drawPh(); }); });
   root.querySelector("#addIng").onclick = () => { root.querySelector("#ings").insertAdjacentHTML("beforeend", ingRow()); const l = root.querySelectorAll(".ingr"); l[l.length - 1].querySelector("input").focus(); };
   if(e) root.querySelector("#del").onclick = () => { const used = Object.values(S.plan).some(d => Object.values(d).some(s => s.rid === r.id));
     if(!confirm(used ? "Delete this recipe? It's also taken off any days it was planned." : "Delete this recipe?")) return;
@@ -560,9 +590,11 @@ function recipeForm(r){
     const name = root.querySelector("#rn").value.trim(); if(!name){ toast("Give the recipe a name"); root.querySelector("#rn").focus(); return; }
     const ing = [...root.querySelectorAll(".ingr")].map(row => { const g = f => row.querySelector(`[data-f=${f}]`).value; const nm = g("name").trim(); if(!nm) return null;
       return normIng({id: row.dataset.ing, name:nm, qty: parseFloat(g("qty").replace(",", ".")) || 1, unit:g("unit"), aisle:g("aisle"), cost: parseFloat(g("cost").replace(",", ".")) || 0}); }).filter(Boolean);
-    const data = {name: name.slice(0, 60), emoji: em, serves: +root.querySelector("#rsv").textContent, mins: Math.min(1440, parseInt(root.querySelector("#rm").value, 10) || 0), tags, ing, steps: root.querySelector("#rst").value.slice(0, 4000)};
+    const data = {name: name.slice(0, 60), emoji: em, photo, serves: +root.querySelector("#rsv").textContent, mins: Math.min(1440, parseInt(root.querySelector("#rm").value, 10) || 0), tags, ing, steps: root.querySelector("#rst").value.slice(0, 4000)};
+    const before = e ? r.photo : null;
     if(e) Object.assign(r, data); else S.recipes.push(Object.assign({id:uid(), fav:false, own:true, made:0}, data));
-    save(); checkBadges(); closeSheet(); render(); toast(e ? "Recipe saved" : `${esc(data.name)} added to your recipes`); };
+    if(!save()){ const x = e ? r : S.recipes[S.recipes.length - 1]; x.photo = e ? before || "" : ""; save(); toast("Your phone's storage is full, so the photo wasn't kept. The recipe is saved."); }
+    checkBadges(); closeSheet(); render(); toast(e ? "Recipe saved" : `${esc(data.name)} added to your recipes`); };
 }
 function spendForm(kind, pre){
   const K = {shop:"Food shop", take:"Takeaway", out:"Eating out"}, ws = curWs(), t = today(), def = t >= ws && t < addDays(ws, 7) ? t : addDays(ws, 6) < t ? addDays(ws, 6) : ws;
@@ -605,6 +637,16 @@ function settingsForm(){
   root.querySelector("#er").onclick = () => { if(!confirm("Erase everything on this phone? This can't be undone.")) return; if(!confirm("Really erase? Back up first if you might want it.")) return;
     try{ [KEY, RESCUE, RESCUE + ".prev"].forEach(x => localStorage.removeItem(x)); }catch(e){} S = blank(); S.recipes = starters(); wk = null; tab = "week"; closeSheet(); render(); };
 }
+function kitchenPicForm(){
+  const root = sheet(`<h3>Your kitchen picture</h3><p class="sub">It shows at the top of every screen, next to your name.</p>
+    <div style="display:flex;justify-content:center;margin:18px 0"><div class="logo" style="width:120px;height:120px;font-size:60px;border-radius:30px">${S.photo ? `<img src="${S.photo}" alt="" style="border-radius:30px">` : "🍲"}</div></div>
+    <button class="btn full" id="kp">📷 ${S.photo ? "Choose a different photo" : "Choose a photo"}</button>
+    ${S.photo ? `<button class="btn full ghost" style="margin-top:10px" id="kc">Go back to 🍲</button>` : ""}
+    <div class="actions"><button class="btn ghost" data-close>Done</button></div>`);
+  root.querySelector("#kp").onclick = () => pickPhoto(240, d => { if(!d){ toast("That photo is too big. Try another one."); return; } const old = S.photo; S.photo = d;
+    if(!save()){ S.photo = old; save(); toast("Your phone's storage is full, so the photo wasn't kept."); return; } closeSheet(); render(); toast("Kitchen picture updated"); });
+  const kc = root.querySelector("#kc"); if(kc) kc.onclick = () => { S.photo = ""; save(); closeSheet(); render(); };
+}
 function exportData(){ const blob = new Blob([JSON.stringify(S, null, 1)], {type:"application/json"}), a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = `meal-quest-backup-${today()}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast("Backup saved to your downloads"); }
 document.getElementById("importFile").onchange = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader();
@@ -636,6 +678,7 @@ document.addEventListener("click", e => {
   const tb = e.target.closest("[data-tab]"); if(tb){ tab = tb.dataset.tab; closeSheet(); render(); scrollTo({top:0}); return; }
   const el = e.target.closest("[data-act]"); if(!el) return; const act = el.dataset.act, id = el.dataset.id;
   if(act === "settings") settingsForm();
+  else if(act === "kitchenPic") kitchenPicForm();
   else if(act === "wk"){ wk = addDays(curWs(), +el.dataset.d); render(); }
   else if(act === "slot") slotSheet(el.dataset.d, el.dataset.k);
   else if(act === "cook"){ const s = (S.plan[el.dataset.d] || {})[el.dataset.k]; if(!s || s.k !== "r" || el.dataset.d > today()) return; const r = recOf(s.rid);

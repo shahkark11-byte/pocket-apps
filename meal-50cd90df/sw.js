@@ -1,5 +1,5 @@
 // Meal Quest offline cache. Change the end of V on every update.
-const V = "meal-50cd90df-66c63b9059";
+const V = "meal-50cd90df-2df1270e17";
 const PREFIX = "meal-50cd90df-";
 const CORE = ["./", "./index.html", "./manifest.json", "./icon-180.png", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 self.addEventListener("install", e => {
