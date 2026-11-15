@@ -52,6 +52,7 @@ button{cursor:pointer;border:0;background:none}
 .h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 4px 10px}
 .h h2{font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
 .h button,.link{color:var(--gold);font-weight:600;font-size:14px}
+.h button{min-height:44px;margin:-13px 0;padding:0 2px}
 .muted{color:var(--mut)}.dim{color:var(--dim)}
 .big{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1}
 .gold{background:linear-gradient(180deg,#fff1b8,var(--gold) 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -128,7 +129,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .cat{padding:9px 12px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:14px}
 .cat.on{background:rgba(255,201,74,.18);border-color:var(--gold);color:#ffe7a6}
 .seg{display:flex;background:rgba(0,0,0,.25);border-radius:14px;padding:4px;gap:4px}
-.seg button{flex:1;padding:10px;border-radius:11px;font-weight:700;font-size:14px;color:var(--mut)}
+.seg button{flex:1;padding:10px;min-height:44px;border-radius:11px;font-weight:700;font-size:14px;color:var(--mut)}
 .seg button.on{background:var(--card2);color:var(--ink)}
 .actions{display:flex;gap:10px;margin-top:20px}
 .actions .btn{flex:1}
@@ -139,6 +140,59 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .hp i{display:block;height:100%;background:linear-gradient(90deg,#ff4d6d,#ff9f43);border-radius:8px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
 .target{position:absolute;top:-10px;right:16px;background:var(--coral);color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;padding:4px 9px;border-radius:8px}
 .slain{opacity:.55}.slain .hp i{background:var(--mint)}
+/* castle view */
+.castle{position:relative;margin-top:16px;padding:18px 14px 0;border-radius:24px;overflow:hidden;
+  background:radial-gradient(120% 60% at 78% 0%,rgba(255,170,90,.32),transparent 60%),linear-gradient(180deg,#2a1d4d 0%,#1b1436 55%,#130e27 100%);
+  border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),-8px 16px 34px rgba(0,0,0,.35)}
+.castle .rays{position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 200deg at 82% -6%,rgba(255,210,140,.07) 0 4deg,transparent 4deg 11deg);mix-blend-mode:screen}
+.freedom{position:relative;text-align:center;margin:0 auto 4px;max-width:270px}
+.freedom .flag{display:inline-block;background:linear-gradient(180deg,#fff3c4,#ffc94a 60%,#ff9f43);color:#3a2300;font-weight:900;font-size:13px;letter-spacing:.08em;
+  padding:7px 14px;border-radius:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),-3px 5px 12px rgba(0,0,0,.35)}
+.freedom small{display:block;color:#e9dcff;font-size:13px;margin-top:6px}
+.dragon{position:relative;display:flex;flex-direction:column;align-items:center}
+.dragon svg{width:150px;height:118px;filter:drop-shadow(-6px 10px 12px rgba(0,0,0,.45))}
+.dragon.down svg{filter:grayscale(.7) brightness(.8) drop-shadow(-6px 10px 12px rgba(0,0,0,.45));transform:rotate(-8deg) translateY(8px)}
+.tower{width:86%;margin:0 auto;position:relative}
+.floor{position:relative;margin:0 auto;padding:12px 14px 12px;border-radius:6px 6px 4px 4px;color:#f4eefe;
+  background:linear-gradient(180deg,#6a5d86,#4d4266);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -3px 0 rgba(0,0,0,.25),-6px 8px 14px rgba(0,0,0,.35);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.08)),repeating-linear-gradient(90deg,transparent 0 46px,rgba(0,0,0,.18) 46px 48px),linear-gradient(180deg,#6a5d86,#4d4266)}
+.floor+.floor{margin-top:6px}
+.floor.crown::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px;
+  background:linear-gradient(90deg,#6a5d86 0 14%,transparent 14% 22%,#6a5d86 22% 36%,transparent 36% 44%,#6a5d86 44% 56%,transparent 56% 64%,#6a5d86 64% 78%,transparent 78% 86%,#6a5d86 86%)}
+.floor.dragonfloor::before{background:linear-gradient(90deg,#7a4a6e 0 14%,transparent 14% 22%,#7a4a6e 22% 36%,transparent 36% 44%,#7a4a6e 44% 56%,transparent 56% 64%,#7a4a6e 64% 78%,transparent 78% 86%,#7a4a6e 86%)}
+.floor.dragonfloor{background-image:linear-gradient(180deg,rgba(255,80,90,.22),rgba(0,0,0,.1)),repeating-linear-gradient(90deg,transparent 0 46px,rgba(0,0,0,.18) 46px 48px),linear-gradient(180deg,#7a4a6e,#53334f)}
+.floor.next{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 0 2px var(--coral),0 0 22px rgba(255,107,122,.45),-6px 8px 14px rgba(0,0,0,.35)}
+.floor.next .tag{position:absolute;right:10px;top:-9px;background:var(--coral);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.08em;padding:3px 7px;border-radius:6px}
+.floor .fl{display:flex;align-items:center;gap:10px}
+.floor .fl .n{flex:1;min-width:0}
+.floor .fl b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.floor .fl small{display:block;font-size:12.5px;color:#d9cff0}
+.floor .btn.sm{min-width:44px;min-height:44px}
+.floor .lv{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:13px;background:rgba(0,0,0,.28);color:#ffe7a6}
+.floor .hp{height:8px;margin:8px 0 0}
+.rubble{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px 0 2px}
+.rubble span{font-size:12.5px;font-weight:700;color:#bff5dc;background:rgba(75,227,165,.14);border:1px solid rgba(75,227,165,.3);padding:5px 9px;border-radius:999px}
+.gate{position:relative;height:74px;margin:8px -14px 0;background:linear-gradient(180deg,#3a3152,#2a2340);border-top:2px solid rgba(255,255,255,.08);display:flex;align-items:flex-end;justify-content:center}
+.gate .door{width:58px;height:58px;border-radius:30px 30px 0 0;background:linear-gradient(180deg,#1a1430,#0d0a1c);box-shadow:inset 0 2px 0 rgba(255,255,255,.08)}
+.gate .you{position:absolute;left:18%;bottom:8px;font-size:30px;filter:drop-shadow(-3px 4px 4px rgba(0,0,0,.5))}
+.gate .you small{display:block;font-size:11px;font-weight:800;color:#ffe7a6;text-align:center;margin-top:-2px}
+.goblins{display:flex;flex-direction:column;gap:10px}
+.gob{display:flex;align-items:center;gap:12px}
+.gob svg{width:46px;height:46px;flex:none;filter:drop-shadow(-3px 5px 6px rgba(0,0,0,.35))}
+.gob .d{flex:none;text-align:right;font-size:13px}
+.gob .d b{display:block;font-size:15px}
+.defs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.defs button{background:var(--card2);border-radius:16px;padding:12px 8px;text-align:center;min-height:44px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.defs .e{font-size:22px}.defs b{display:block;font-size:17px;margin-top:4px}.defs small{display:block;font-size:11.5px;color:var(--mut);margin-top:2px;line-height:1.25}
+@media (prefers-reduced-motion:no-preference){
+  .dragon:not(.down) svg{animation:dhover 3.6s ease-in-out infinite}
+  .dragon:not(.down) .wing{transform-origin:50% 60%;animation:flap 1.8s ease-in-out infinite}
+  .gob svg{animation:sneak 2.8s ease-in-out infinite}
+  @keyframes dhover{50%{transform:translateY(-5px)}}
+  @keyframes flap{50%{transform:scaleY(.82)}}
+  @keyframes sneak{0%,100%{transform:translateX(0)}50%{transform:translateX(3px) rotate(3deg)}}
+}
+
 .shake{animation:shake .45s}
 @keyframes shake{20%{transform:translateX(-8px) rotate(-4deg)}40%{transform:translateX(7px) rotate(3deg)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
 .dmg{position:fixed;font-weight:900;font-size:30px;color:#ff5c70;text-shadow:0 3px 0 #5a0b18;pointer-events:none;z-index:60;animation:dmg 1.1s forwards}
@@ -758,6 +812,69 @@ function payoff(strategy, extra){
   return {months:m, interest, order, done};
 }
 const monthsOut = m => { const d = new Date(); d.setMonth(d.getMonth()+m); return d.toLocaleDateString(undefined,{month:"short",year:"numeric"}); };
+let bossView = "list";
+function dragonSvg(){ return `<svg viewBox="0 0 160 124" aria-hidden="true">
+  <g class="wing"><path d="M58 52Q22 14 6 30q14 4 18 14-12-2-18 8 16 2 22 12l34-4z" fill="#b8243a"/><path d="M102 52Q138 14 154 30q-14 4-18 14 12-2 18 8-16 2-22 12l-34-4z" fill="#b8243a"/>
+  <path d="M58 52Q30 26 14 32M102 52q28-26 44-20" stroke="#7d1426" stroke-width="2" fill="none"/></g>
+  <path d="M80 112q-30 0-32-30t32-38q34 8 32 38t-32 30z" fill="#e0384f"/>
+  <path d="M80 108q-18 0-20-22t20-24q20 2 20 24t-20 22z" fill="#ffb27a"/>
+  <path d="M66 84h28M68 94h24M70 102h20" stroke="#e08a5a" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M80 50q-22-2-24-20t24-20q24 2 24 20t-24 20z" fill="#e0384f"/>
+  <path d="M60 18l-8-14 14 8M100 18l8-14-14 8" fill="#ffe9a8"/>
+  <path d="M70 6l4 8M90 6l-4 8" stroke="#ffe9a8" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="70" cy="28" rx="6" ry="5" fill="#fff"/><ellipse cx="90" cy="28" rx="6" ry="5" fill="#fff"/><circle cx="71" cy="29" r="2.6" fill="#2b1a4a"/><circle cx="89" cy="29" r="2.6" fill="#2b1a4a"/>
+  <path d="M62 22l12 3M98 22l-12 3" stroke="#2b1a4a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M68 40q12 8 24 0" stroke="#2b1a4a" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="75" cy="36" r="1.6" fill="#7d1426"/><circle cx="85" cy="36" r="1.6" fill="#7d1426"/>
+  <path d="M108 96q22 6 30-6 4 8-2 14" stroke="#e0384f" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <g transform="translate(46 70)"><rect x="-14" y="-10" width="30" height="22" rx="4" fill="#ffc94a"/><path d="M-6-10v-6a7 7 0 0 1 14 0v6" stroke="#ffc94a" stroke-width="4" fill="none"/><circle cx="1" cy="0" r="3" fill="#3a2300"/><path d="M1 0v6" stroke="#3a2300" stroke-width="2.5"/></g>
+  <path d="M44 84q-8-10 2-18M58 70q8-8 2-16" stroke="#b8243a" stroke-width="6" fill="none" stroke-linecap="round"/></svg>`; }
+function goblinSvg(i){ const c = ["#6fbf5a","#8ccf4d","#5fae7a"][i % 3]; return `<svg viewBox="0 0 60 60" aria-hidden="true">
+  <path d="M8 22l14 6-2 8zM52 22l-14 6 2 8z" fill="${c}"/><ellipse cx="30" cy="34" rx="17" ry="16" fill="${c}"/>
+  <ellipse cx="23" cy="31" rx="4.5" ry="5" fill="#fff8c4"/><ellipse cx="37" cy="31" rx="4.5" ry="5" fill="#fff8c4"/><circle cx="24.5" cy="32" r="2.2" fill="#2b1a4a"/><circle cx="38.5" cy="32" r="2.2" fill="#2b1a4a"/>
+  <path d="M22 41q8 6 16 0" stroke="#2b1a4a" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M26 42l2 3 2-3" fill="#fff"/>
+  <path d="M40 46q10 2 12-8" stroke="#c9a227" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="52" cy="37" r="5" fill="#ffc94a"/><text x="52" y="40" font-size="7" text-anchor="middle" fill="#3a2300" font-weight="900">£</text></svg>`; }
+function goblinList(){ const t = today(), p = {start:t, end:addDays(t, 91)}, out = [];
+  S.ybills.forEach(b => yOcc(b, p).forEach(d => { if(!S.billPaid[b.id+"|"+d]) out.push({b, d}); }));
+  return out.sort((a,b) => a.d < b.d ? -1 : 1); }
+function castleView(po, total){
+  const alive = S.debts.filter(d => d.bal > 0), slain = S.debts.filter(d => d.bal <= 0);
+  const fin = isFinite(po.months);   /* floors climb in the order debts fall; the last to fall is the dragon */
+  const up = po.order.map(id => S.debts.find(d => d.id === id)).filter(Boolean)
+    .map((d, i) => ({d, i, m: fin && po.done[d.id] ? po.done[d.id] : 1e6 + i})).sort((a, b) => a.m - b.m || a.i - b.i).map(x => x.d);
+  const drag = up[up.length - 1], floors = up.slice(0, -1).reverse();             /* the last one standing holds the key */
+  const when = !alive.length ? "Every debt defeated" : isFinite(po.months) ? `Debt-free by ${monthsOut(po.months)}` : "Add an extra amount to set a date";
+  const fl = (d, n, cls) => { const last = isFinite(po.months) && po.done[d.id] ? `falls ${monthsOut(po.done[d.id])}` : `${d.apr}% · min ${money(d.min,0)}`;
+    return `<div class="floor ${cls}${d.id === po.order[0] ? " next" : ""}" id="floor-${d.id}">${d.id === po.order[0] ? `<span class="tag">NEXT</span>` : ""}<div class="fl"><span class="lv">${n}</span>
+      <div class="n"><b>${esc(d.name)}</b><small>${money(d.bal)} left · ${last}</small></div>
+      <button class="btn sm red" data-act="strike" data-id="${d.id}" aria-label="Strike ${esc(d.name)}">⚔️</button></div>
+      <div class="hp"><i style="width:${d.start ? Math.max(0, d.bal)/d.start*100 : 0}%"></i></div></div>`; };
+  const gobs = goblinList(), t = today();
+  const days = d => Math.round((parse(d) - parse(t))/864e5);
+  const ns = Object.keys(S.noSpend).length, let_ = S.impulses.filter(i => i.status === "skipped").length, cut = sum(S.cutBills.map(billYear));
+  return `<section class="castle" aria-label="Debt castle">
+    <div class="rays"></div>
+    <div class="freedom"><span class="flag">🗝️ ${alive.length ? "FREEDOM" : "FREE"}</span><small>${when}</small></div>
+    ${drag ? `<div class="dragon"><span>${dragonSvg()}</span></div>
+      <div class="tower">${fl(drag, up.length, "crown dragonfloor" + (floors.length ? "" : ""))}</div>`
+      : `<div class="dragon down"><span>${dragonSvg()}</span></div><p style="text-align:center;font-weight:800;color:#ffe7a6;margin:4px 0 0">The dragon is down. Every debt defeated.</p>`}
+    ${floors.length ? `<div style="margin-top:6px">${floors.map((d, i) => fl(d, floors.length - i, i === 0 ? "" : "")).join("")}</div>` : ""}
+    ${slain.length ? `<div class="rubble" aria-label="Defeated">${slain.map(d => `<span>🏆 ${esc(d.name)}</span>`).join("")}</div>` : ""}
+    <div class="gate"><div class="door"></div><div class="you">🛡️<small>You</small></div></div>
+  </section>
+  <p class="note">Each floor is a debt, in the order they'll fall. The last debt standing is the dragon, and it's holding the key to your freedom. ${S.settings.strategy === "snowball" ? "Snowball: smallest first." : "Avalanche: highest interest first."}</p>
+  <div class="h"><h2>Money goblins</h2><button data-tab="quests">Yearly bills</button></div>
+  ${gobs.length ? `<div class="card goblins">${gobs.slice(0, 6).map((g, i) => { const n = days(g.d), wk = Math.max(1, Math.ceil(n/7));
+      return `<div class="gob">${goblinSvg(i)}<div class="grow"><b>${esc(g.b.name)}</b><div class="muted" style="font-size:13px">${n <= 0 ? "Due today" : `Sneaks in ${n === 1 ? "tomorrow" : `${n} days`}`} · ${money(g.b.amt/wk)} a week covers it</div></div>
+        <div class="d"><b>${money(g.b.amt, 0)}</b><span class="muted">${parse(g.d).toLocaleDateString(undefined, {day:"numeric", month:"short"})}</span></div></div>`; }).join("")}
+      ${gobs.length > 6 ? `<p class="note" style="margin:0">+${gobs.length - 6} more in the next 3 months</p>` : ""}</div>`
+    : `<div class="card empty"><div class="e">👺</div>${S.ybills.length ? "No yearly bills sneaking up in the next 3 months." : "Yearly bills sneak up like goblins. Add them under Quests and they'll show up here 3 months before they're due."}</div>`}
+  <div class="h"><h2>Your defences</h2></div>
+  <div class="defs">
+    <button data-tab="spend"><div class="e">🌙</div><b>${ns}</b><small>no-spend days</small></button>
+    <button data-tab="vault"><div class="e">🔒</div><b>${let_}</b><small>impulse buys let go${S.savedByWaiting ? ` · ${money(S.savedByWaiting, 0)}` : ""}</small></button>
+    <button data-tab="quests"><div class="e">✂️</div><b>${money(cut, 0)}</b><small>a year from cut bills</small></button>
+  </div>`;
+}
 function boss(){
   const st = S.settings.strategy, po = payoff(st, S.settings.extra); const alive = S.debts.filter(d=>d.bal>0);
   const ordered = [...S.debts].sort((a,b)=> (b.bal>0) - (a.bal>0) || po.order.indexOf(a.id) - po.order.indexOf(b.id));
@@ -775,7 +892,10 @@ function boss(){
     <label class="f">Extra I can throw at debt each month</label>
     <input class="in" id="extra" inputmode="decimal" value="${S.settings.extra||""}" placeholder="0">` : ""}
   </section>
-  ${S.debts.length ? `<div class="list" style="gap:16px;margin-top:18px">${ordered.map((d,i) => { const slain = d.bal<=0, isT = !slain && d.id===po.order[0];
+  ${S.debts.length ? `<div class="seg" style="margin-top:16px" role="tablist">
+      <button class="${bossView==="list"?"on":""}" data-act="bossView" data-v="list" role="tab" aria-selected="${bossView==="list"}">⚔️ Bosses</button>
+      <button class="${bossView==="castle"?"on":""}" data-act="bossView" data-v="castle" role="tab" aria-selected="${bossView==="castle"}">🏰 Castle</button></div>` : ""}
+  ${S.debts.length && bossView === "castle" ? castleView(po, total) : S.debts.length ? `<div class="list" style="gap:16px;margin-top:18px">${ordered.map((d,i) => { const slain = d.bal<=0, isT = !slain && d.id===po.order[0];
     return `<div class="card ${slain?"slain":""}" style="margin:0" id="boss-${d.id}">${isT?`<span class="target">NEXT TARGET</span>`:""}
       <div class="boss">${monster(S.debts.indexOf(d), d.bal)}<div class="grow">
         <div class="row"><b class="grow" style="font-size:18px">${esc(d.name)}</b><button class="x" data-act="editDebt" data-id="${d.id}">✎</button></div>
@@ -1515,6 +1635,7 @@ document.addEventListener("click", e => {
   else if(act === "addAllow") allowForm(); else if(act === "editAllow") allowForm(S.allowances.find(x=>x.id===id));
   else if(act === "addDebt") debtForm(); else if(act === "editDebt") debtForm(S.debts.find(d=>d.id===id));
   else if(act === "strike") strikeForm(S.debts.find(d=>d.id===id));
+  else if(act === "bossView"){ bossView = a.dataset.v === "castle" ? "castle" : "list"; render(); }
   else if(act === "strat"){ S.settings.strategy = a.dataset.v; save(); render(); }
   else if(act === "addGoal") goalForm(); else if(act === "editGoal") goalForm(S.goals.find(g=>g.id===id));
   else if(act === "deposit") depositForm(S.goals.find(g=>g.id===id));
