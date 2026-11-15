@@ -97,7 +97,7 @@ button{cursor:pointer;border:0;background:none}
 .empty .e{font-size:38px;margin-bottom:8px}
 /* nav */
 nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));width:min(588px,calc(100% - 24px));height:var(--nav);
-  display:grid;grid-template-columns:1.5fr 1.5fr 72px 1fr 1fr 1fr;align-items:center;background:rgba(24,15,62,.82);border:1px solid var(--line);
+  display:grid;grid-template-columns:1.25fr 1.25fr 66px 1fr 1fr 1fr 1fr;align-items:center;background:rgba(24,15,62,.82);border:1px solid var(--line);
   border-radius:26px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:20;box-shadow:0 18px 40px rgba(0,0,0,.4)}
 nav button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--dim);height:100%;min-width:0;white-space:nowrap}
 nav button svg{width:24px;height:24px}
@@ -234,6 +234,27 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .al-r{font-size:13px;font-weight:600;white-space:nowrap;text-align:right;color:var(--mut)}
 .al-r.neg{color:var(--coral)}
 .al-pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(255,201,74,.16);color:var(--gold);vertical-align:middle;margin-left:4px}
+/* new year upgrade: subscriptions tab and load safety net */
+.sub-row{padding:14px;margin-bottom:10px}
+.sub-row .row b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.sub-row small{color:var(--mut);font-size:13px}
+.sub-acts{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.sub-acts .btn.sm{flex:1;min-width:0;padding:10px 8px}
+.sub-acts .x{width:38px;height:38px;background:var(--card2)}
+.sub-due{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--mut)}
+.sub-due.soon{color:var(--gold)}
+.sub-warn{border-color:rgba(255,201,74,.45);background:rgba(255,201,74,.1)}
+.sub-warn ul{list-style:none;margin-top:8px;font-size:14px;color:var(--ink)}
+.sub-warn li{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.sub-warn li span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stats.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.stats.two .stat b{overflow-wrap:anywhere}
+.rescue-bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:460px;z-index:90;
+  background:#fff;color:#1b1b2b;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.4);padding:16px;font-size:15px;line-height:1.4}
+.rescue-bar b{display:block;font-size:16px;margin-bottom:4px}
+.rescue-bar .rb{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap}
+.rescue-bar button{border-radius:10px;padding:10px 14px;font-weight:700;background:#ececf2;color:#1b1b2b}
+.rescue-bar button.p{background:#1b1b2b;color:#fff}
 @media(max-width:380px){.big{font-size:44px}.ring{width:100px;height:100px}.stats{gap:6px}.stat{padding:9px}}
 </style>
 </head>
@@ -246,12 +267,34 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 "use strict";
 /* ───────────────────────── storage ───────────────────────── */
 const KEY = "moneyquest.v1";
+const RESCUE = KEY + ".rescue";
 const blank = () => ({v:1, hero:null, cur:"USD", pay:{freq:"monthly", amount:0, next:"", anchor:1},
   bills:[], billPaid:{}, spends:[], incomes:[], debts:[], debtLog:[], goals:[], goalLog:[], impulses:[],
   xp:0, streak:{last:"", n:0, best:0}, badges:{}, checkins:{}, noSpend:{}, savedByWaiting:0,
-  settings:{strategy:"snowball", extra:0}, lastPeriodStart:"", allowances:[]});
-let S;
-function load(){ try{ S = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY)||"null")||{}); }catch(e){ S = blank(); } }
+  settings:{strategy:"snowball", extra:0}, lastPeriodStart:"", allowances:[],
+  subs:[], caps:{}});
+let S, RESCUED = null;
+/* old saves and old backups do not have the newer lists, so make sure they exist */
+function normalize(){
+  ["subs"].forEach(k => { if(!Array.isArray(S[k])) S[k] = []; });
+  if(!S.caps || typeof S.caps !== "object" || Array.isArray(S.caps)) S.caps = {};
+  if(!S.settings || typeof S.settings !== "object") S.settings = {strategy:"snowball", extra:0};
+  if(S.settings.strategy !== "avalanche") S.settings.strategy = "snowball";
+  if(!(S.settings.extra >= 0)) S.settings.extra = 0;
+}
+/* if the saved text cannot be read, keep a copy of it before starting fresh, so the next save cannot wipe it */
+function load(){
+  let raw = null; try{ raw = localStorage.getItem(KEY); }catch(e){}
+  try{
+    const d = raw ? JSON.parse(raw) : null;
+    if(d !== null && (typeof d !== "object" || Array.isArray(d))) throw new Error("not a save");
+    S = Object.assign(blank(), d || {});
+  }catch(e){
+    S = blank(); RESCUED = raw;
+    try{ const prev = localStorage.getItem(RESCUE); if(prev !== null && prev !== raw) localStorage.setItem(RESCUE + ".prev", prev); localStorage.setItem(RESCUE, raw); }catch(_){}
+  }
+  normalize();
+}
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Could not save on this device","⚠️"); } }
 const uid = () => Math.random().toString(36).slice(2,10);
 
@@ -353,7 +396,9 @@ const BADGES = [
   ["nospend5","🌌","Silent Week","Five no-spend days"],
   ["survivor","🌅","Payday Survivor","Reach payday in the green"],
   ["lvl5","⭐","Rising Star","Reach level 5"],
-  ["lvl10","🌟","Living Legend","Reach level 10"]];
+  ["lvl10","🌟","Living Legend","Reach level 10"],
+  ["sub_review","🔎","Subscription Sleuth","Review a subscription"],
+  ["sub_cut","✂️","Plan Cutter","Cancel a subscription"]];
 function gain(n, why){
   const before = lvlOf(S.xp); S.xp += n; const after = lvlOf(S.xp); save();
   toast(`<em>+${n} XP</em> ${esc(why)}`, "✨"); coins(Math.min(14, 4 + Math.round(n/10)));
@@ -373,6 +418,7 @@ const I = {
  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
  menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.5-3.5 4-5 7-5s5.5 1.5 7 5"/></svg>',
  medal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="6"/><path d="M8.5 10L6 3h4l2 4 2-4h4l-2.5 7"/></svg>',
+ subs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0113.7-5.6L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 01-13.7 5.6L4 16"/><path d="M4 20v-4h4"/></svg>',
  x:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>'
 };
@@ -465,10 +511,10 @@ function heroPicker(box, st, onChange){
 
 /* ───────────────────────── views ───────────────────────── */
 let tab = "home";
-const NAV = [["home","Home"],["spend","Spending"],["fab",""],["quests","Bills"],["boss","Bosses"],["vault","Vault"]];
+const NAV = [["home","Home"],["spend","Spending"],["fab",""],["quests","Bills"],["subs","Subs"],["boss","Bosses"],["vault","Vault"]];
 function renderNav(){ document.getElementById("nav").innerHTML = NAV.map(([k,l]) => k === "fab"
   ? `<button class="fab" data-act="addSpend" aria-label="Log a spend"><span>${I.plus}</span></button>`
-  : `<button class="${tab===k?"on":""}" data-tab="${k}">${I[k]}${l}</button>`).join(""); }
+  : `<button class="${tab===k?"on":""}" data-tab="${k}"${k==="subs"?' aria-label="Subscriptions"':""}>${I[k]}${l}</button>`).join(""); }
 function renderTop(){ const el = document.getElementById("top"); if(!el || !S.hero) return;
   const l = lvlOf(S.xp), a = xpAt(l), b = xpAt(l+1);
   el.innerHTML = `<div class="ava${S.hero.avatar === "photo" && S.hero.photo ? " photo" : ""}">${avatar(S.hero.avatar, S.hero.skin, S.hero.photo)}</div>
@@ -479,7 +525,7 @@ function renderTop(){ const el = document.getElementById("top"); if(!el || !S.he
 function render(){
   if(!S.hero){ document.getElementById("app").innerHTML = splash(); document.getElementById("nav").style.display = "none"; onboarding(0); return; }
   document.getElementById("nav").style.display = "";
-  const v = {home, spend, quests, boss, vault}[tab] || home;
+  const v = {home, spend, quests, boss, vault, subs:subsView}[tab] || home;
   document.getElementById("app").innerHTML = `<header class="top" id="top"></header>` + v();
   renderTop(); renderNav();
 }
@@ -898,7 +944,7 @@ function settings(){
 function exportData(){ const blob = new Blob([JSON.stringify(S, null, 1)], {type:"application/json"}); const a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = `money-quest-backup-${today()}.json`; document.body.appendChild(a); a.click(); a.remove(); toast("Backup saved","💾"); }
 document.getElementById("importFile").onchange = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader();
-  r.onload = () => { try{ const d = JSON.parse(r.result); if(!d || d.v !== 1 || !("xp" in d)) throw 0; S = Object.assign(blank(), d); save(); closeSheet(); render(); toast("Backup restored","✅"); }
+  r.onload = () => { try{ const d = JSON.parse(r.result); if(!d || d.v !== 1 || !("xp" in d)) throw 0; S = Object.assign(blank(), d); normalize(); save(); closeSheet(); render(); toast("Backup restored","✅"); }
     catch(err){ toast("That file is not a Money Quest backup","⚠️"); } }; r.readAsText(f); e.target.value = ""; };
 
 /* ───────────────────────── onboarding ───────────────────────── */
@@ -940,6 +986,118 @@ function onboarding(step){
 }
 function bgLock(root){ root.onclick = e => e.stopPropagation(); }
 
+/* ───────────────────────── new year upgrade ───────────────────────── */
+/* XP guard: each kind of reward has a daily limit, so it cannot be farmed */
+function capOk(key, max){ const t = today(); const c = S.caps[key] && typeof S.caps[key] === "object" ? S.caps[key] : (S.caps[key] = {day:t, n:0});
+  if(c.day !== t){ c.day = t; c.n = 0; } if(c.n >= max) return false; c.n++; return true; }
+const round2 = n => Math.round(n*100)/100;
+
+/* ── subscriptions ── */
+const SUBCATS = [["streaming","📺","Streaming"],["music","🎵","Music"],["apps","📱","Apps and software"],["games","🎮","Games"],["fitness","🏋️","Fitness"],
+  ["news","📰","News and reading"],["storage","☁️","Cloud storage"],["phone","🌐","Phone and internet"],["insurance","🛡️","Insurance"],["other","✨","Other"]];
+const subCat = k => SUBCATS.find(c=>c[0]===k);
+const subMonthly = s => s.cycle === "yearly" ? s.amt/12 : s.amt;
+const subAnnual = s => s.cycle === "yearly" ? s.amt : s.amt*12;
+const subLive = () => S.subs.filter(s=>s.status !== "cancelled");
+const subSorted = () => subLive().sort((a,b)=> a.next < b.next ? -1 : a.next > b.next ? 1 : String(a.name).localeCompare(String(b.name)));
+/* a due date that has passed rolls to the next one (monthly +1 month, yearly +12), keeping the original day of the month */
+function rollSubs(){ let ch = false; const t = today();
+  S.subs.forEach(s => { if(s.status === "cancelled" || !s.next) return; let n = 0;
+    while(s.next < t && n++ < 1200){ s.next = addMonths(s.next, s.cycle === "yearly" ? 12 : 1, s.day); ch = true; } });
+  if(ch) save(); }
+function subDueChip(s){ const n = daysBetween(today(), s.next);
+  return `<span class="chip ${n <= 7 ? "soon" : "later"}">${n <= 0 ? "Today" : n === 1 ? "Tomorrow" : "In " + n + " days"}</span>`; }
+function subRow(s){ const c = subCat(s.cat), n = daysBetween(today(), s.next);
+  const when = s.cycle === "yearly" ? `${money(s.amt)} a year · ${money(subMonthly(s))} a month` : `${money(s.amt)} every month`;
+  const keepOk = !s.reviewed || daysBetween(s.reviewed, today()) >= 30;
+  return `<div class="card sub-row"><div class="row"><div class="emo">${c ? c[1] : "🔁"}</div>
+    <div class="grow"><b>${esc(s.name)}</b><small>${when}${c ? " · " + c[2] : ""}</small></div>
+    <div style="text-align:right"><span class="amt">${money(subMonthly(s))}</span><small style="display:block">a month</small></div></div>
+    <div class="sub-due ${n <= 7 ? "soon" : ""}">${subDueChip(s)}<span>Next payment ${fmtDate(s.next,{weekday:"short",day:"numeric",month:"short"})}</span></div>
+    <div class="sub-acts"><button class="btn sm ghost" data-act="subKeep" data-id="${s.id}" ${keepOk ? "" : "disabled"}>${keepOk ? "I still use it" : "Reviewed ✓"}</button>
+      <button class="btn sm ghost" data-act="subCancel" data-id="${s.id}">I cancelled it</button>
+      <button class="x" data-act="editSub" data-id="${s.id}" aria-label="Edit ${esc(s.name)}">✎</button></div></div>`; }
+function subsView(){
+  rollSubs(); const live = subSorted(), gone = S.subs.filter(s=>s.status === "cancelled");
+  const mo = sum(live.map(subMonthly)), yr = sum(live.map(subAnnual));
+  const soon = live.filter(s => daysBetween(today(), s.next) <= 7), soonSum = sum(soon.map(s=>s.amt));
+  const savedYr = sum(gone.map(subAnnual)), hasEx = S.subs.some(s=>s.sample);
+  return `
+  <section class="card hero" style="padding:18px"><div class="row"><div class="grow"><div class="lbl">Subscriptions</div>
+    <div style="font-size:34px;font-weight:800;margin-top:4px" class="gold">${money(mo)}</div>
+    <div class="muted">a month across ${live.length} subscription${live.length === 1 ? "" : "s"}</div></div>
+    <button class="btn" data-act="addSub">${I.plus} Add</button></div>
+    <div class="stats two"><div class="stat"><small>Per year</small><b>${money(yr)}</b></div>
+      <div class="stat"><small>Renewing in 7 days</small><b>${soon.length ? money(soonSum) + " · " + soon.length : "None"}</b></div></div></section>
+  ${soon.length ? `<section class="card sub-warn"><b>⚠️ Renewing this week</b><ul>${soon.map(s => `<li><span>${esc(s.name)}</span><span>${money(s.amt)} · ${daysBetween(today(), s.next) <= 0 ? "today" : fmtDate(s.next,{weekday:"short"})}</span></li>`).join("")}</ul>
+    <p class="note" style="margin-top:8px">Not using one of these? Cancel it before the date to skip the payment.</p></section>` : ""}
+  <div class="h"><h2>Next to renew</h2>${hasEx ? `<button data-act="subClearEx">Remove examples</button>` : ""}</div>
+  ${live.length ? live.map(subRow).join("") : `<div class="card empty"><div class="e">🔁</div><b style="color:var(--ink)">${gone.length ? "Nothing active right now." : "Find the leaks."}</b><br>
+    ${gone.length ? "Add one if a new subscription starts." : "Add anything that charges you every month or every year: streaming, apps, memberships, cloud storage. Check your last three bank statements for the ones you forgot."}<br><br>
+    <button class="btn" data-act="addSub">${I.plus} Add a subscription</button>
+    ${S.subs.length ? "" : `<br><br><button class="btn sm ghost" data-act="subExamples">Fill in 4 examples to look around</button>`}</div>`}
+  ${gone.length ? `<div class="h"><h2>Cancelled</h2><span class="muted" style="font-size:14px">${money(savedYr)} a year saved</span></div>
+    <div class="list">${gone.map(s => { const c = subCat(s.cat); return `<div class="item done"><div class="emo">${c ? c[1] : "🔁"}</div><div class="grow"><b>${esc(s.name)}</b><small>${money(subAnnual(s))} a year back in your pocket</small></div>
+      <button class="btn sm ghost" data-act="subRestore" data-id="${s.id}">Undo</button></div>`; }).join("")}</div>` : ""}
+  <p class="note" style="margin:16px 6px 0">This tab only tracks. It does not change Safe to spend, so a subscription you also added as a bill is never counted twice. Cancelling here does not cancel it with the company, so do that first.</p>`;
+}
+function subForm(s){
+  const e = !!s; const v = s || {name:"", amt:"", cycle:"monthly", next:addMonths(today(),1), cat:""};
+  sheet(`<h3>${e ? "Edit subscription" : "Add a subscription"}</h3><p class="sub">Anything that charges you again and again.</p>
+    <label class="f">Name</label><input class="in" id="n" maxlength="40" value="${esc(v.name)}" placeholder="Streaming service">
+    <div class="two"><div><label class="f">Amount</label><input class="in" id="a" inputmode="decimal" value="${v.amt}" placeholder="0.00"></div>
+      <div><label class="f">Billed</label><select class="in" id="c"><option value="monthly" ${v.cycle === "monthly" ? "selected" : ""}>Every month</option><option value="yearly" ${v.cycle === "yearly" ? "selected" : ""}>Every year</option></select></div></div>
+    <div class="note" id="share" hidden></div>
+    <div class="two"><div><label class="f">Next payment</label><input class="in" id="d" type="date" value="${v.next}"></div>
+      <div><label class="f">Category (optional)</label><select class="in" id="k"><option value="">None</option>${SUBCATS.map(c=>`<option value="${c[0]}" ${c[0] === v.cat ? "selected" : ""}>${c[1]} ${c[2]}</option>`).join("")}</select></div></div>
+    <p class="note">Pick the next payment date. Once it passes, it moves forward on its own.</p>
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      const share = () => { const a = num(val(root,"#a")), el = root.querySelector("#share"), y = val(root,"#c") === "yearly";
+        el.hidden = !(y && a > 0); el.textContent = y ? `That works out at ${money(a/12)} a month.` : ""; };
+      root.querySelector("#a").oninput = share; root.querySelector("#c").onchange = share; share();
+      root.querySelector("#ok").onclick = () => { const n = val(root,"#n"), a = num(val(root,"#a")), d = val(root,"#d");
+        if(!n || a <= 0) return toast("Add a name and the amount","✍️"); if(!d) return toast("Pick the next payment date","📅");
+        const o = {name:n, amt:a, cycle:val(root,"#c"), next:d, day:parse(d).getDate(), cat:val(root,"#k")};
+        if(e) Object.assign(s, o); else S.subs.push({id:uid(), status:"active", created:today(), reviewed:"", ...o});
+        rollSubs(); save(); closeSheet(); render(); };
+      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete ${s.name}? This removes it completely.`)) return; S.subs = S.subs.filter(x=>x.id!==s.id); save(); closeSheet(); render(); };
+    });
+}
+function subExamples(){ const t = today(), D = n => addDays(t,n);
+  [["Streaming",12.99,"monthly",3,"streaming"],["Music",10.99,"monthly",9,"music"],["Cloud storage",29.99,"yearly",44,"storage"],["Gym app",4.99,"monthly",18,"fitness"]]
+  .forEach(([name,amt,cycle,n,cat]) => S.subs.push({id:uid(), name, amt, cycle, next:D(n), day:parse(D(n)).getDate(), cat, status:"active", created:D(-45), reviewed:"", sample:true}));
+  save(); render(); toast("Examples added. Remove them any time.","🧪"); }
+function subKeep(s){
+  if(s.reviewed && daysBetween(s.reviewed, today()) < 30) return;
+  s.reviewed = today(); save(); render();
+  if(s.sample){ toast("Examples do not earn XP. Add your own to earn it.","🧪"); return; }
+  if(capOk("subrev", 3)){ gain(5, `Reviewed ${s.name}`); award("sub_review"); }
+  else { save(); toast("Reviewed. That is 3 reviews for XP today, so more tomorrow.","🔎"); } }
+function subCancel(s){
+  if(!confirm(`Mark ${s.name} as cancelled? Make sure you have cancelled it with the company too.`)) return;
+  const old = s.created && s.created < today(); s.status = "cancelled"; s.cancelledOn = today(); save(); render();
+  const yr = money(subAnnual(s));
+  if(s.sample){ toast(`Cancelled. Examples do not earn XP.`,"🧪"); return; }
+  if(old && !s.cutXp && capOk("subcut", 2)){ s.cutXp = true; save(); gain(25, `Cut ${s.name}: ${yr} a year back`); award("sub_cut"); }
+  else toast(`Cancelled. ${yr} a year back in your pocket. ${s.cutXp ? "" : "XP only counts for subscriptions you added at least a day ago."}`,"✂️"); }
+
+function newActs(act, id, a){
+  if(act === "addSub") subForm(); else if(act === "editSub") subForm(S.subs.find(s=>s.id===id));
+  else if(act === "subKeep") subKeep(S.subs.find(s=>s.id===id)); else if(act === "subCancel") subCancel(S.subs.find(s=>s.id===id));
+  else if(act === "subRestore"){ const s = S.subs.find(x=>x.id===id); if(s){ s.status = "active"; delete s.cancelledOn; rollSubs(); save(); render(); } }
+  else if(act === "subExamples") subExamples();
+  else if(act === "subClearEx"){ S.subs = S.subs.filter(s=>!s.sample); save(); render(); }
+  else if(act === "rescueDl") downloadRescue();
+  else return false;
+  return true; }
+function downloadRescue(){ let raw = RESCUED; try{ raw = raw || localStorage.getItem(RESCUE); }catch(e){} if(!raw) return toast("There is no recovered copy","⚠️");
+  const blob = new Blob([raw], {type:"text/plain"}), a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `money-quest-recovered-${today()}.txt`;
+  document.body.appendChild(a); a.click(); a.remove(); }
+function rescueBanner(){ const el = document.createElement("div"); el.className = "rescue-bar"; el.setAttribute("role","alert");
+  el.innerHTML = `<b>We could not read your saved quest</b>Your old data has been copied to a safe spot on this device, so it is not lost. You are starting fresh. If you have a backup file, restore it in Settings.
+    <div class="rb"><button data-act="rescueDl">Download the copy</button><button class="p" id="rbOk">Got it</button></div>`;
+  el.querySelector("#rbOk").onclick = () => el.remove(); document.body.appendChild(el); }
+
 /* ───────────────────────── sample data ───────────────────────── */
 function demo(){
   const t = today(), D = n => addDays(t, n);
@@ -966,6 +1124,9 @@ function demo(){
   for(let i=1;i<=6;i++) S.checkins[D(-i)] = true; S.noSpend = {[D(-4)]:true, [D(-7)]:true, [D(-11)]:true};
   ["first_step","checkin3","streak7","bill5","first_blood","boss_down","loot","goal","jail1","nospend"].forEach((b,i)=> S.badges[b] = D(-30+i*3));
   S.allowances = [{id:"a1",cat:"groceries",amt:250},{id:"a2",cat:"transport",amt:120}];
+  S.subs = [["Streaming",12.99,"monthly",3,"streaming"],["Music",10.99,"monthly",9,"music"],["Cloud storage",29.99,"yearly",44,"storage"],["Gym app",4.99,"monthly",18,"fitness"],["News site",96,"yearly",130,"news"]]
+    .map(([name,amt,cycle,n,cat],i) => ({id:"u"+i, name, amt, cycle, next:D(n), day:parse(D(n)).getDate(), cat, status:"active", created:D(-60), reviewed:"", sample:true}));
+  S.subs.push({id:"u9", name:"Meal box", amt:24, cycle:"monthly", next:D(11), day:parse(D(11)).getDate(), cat:"other", status:"cancelled", cancelledOn:D(-5), created:D(-90), reviewed:"", sample:true});
   S.lastPeriodStart = ""; save();
 }
 
@@ -974,7 +1135,8 @@ document.addEventListener("click", e => {
   const tb = e.target.closest("[data-tab]"); if(tb){ tab = tb.dataset.tab; closeSheet(); render(); scrollTo({top:0,behavior:"smooth"}); return; }
   if(e.target.closest("[data-close]")){ closeSheet(); return; }
   const a = e.target.closest("[data-act]"); if(!a) return; const id = a.dataset.id, act = a.dataset.act, t = today();
-  if(act === "addSpend") spendForm();
+  if(newActs(act, id, a)){}
+  else if(act === "addSpend") spendForm();
   else if(act === "addIncome"){ closeSheet(); incomeForm(); }
   else if(act === "addBill") billForm(); else if(act === "editBill") billForm(S.bills.find(b=>b.id===id));
   else if(act === "pay"){ S.billPaid[id+"|"+a.dataset.d] = t; save(); render(); const late = a.dataset.d < t;
@@ -1007,7 +1169,7 @@ setInterval(() => { document.querySelectorAll(".timer[data-rel]").forEach(el => 
   if(left <= 0){ render(); return; } el.textContent = `${Math.floor(left/36e5)}h ${pad(Math.floor(left%36e5/6e4))}m`; }); }, 30000);
 document.addEventListener("visibilitychange", () => { if(!document.hidden && S.hero) render(); });
 
-load(); render();
+load(); render(); if(RESCUED !== null) rescueBanner();
 </script>
 <style>
 .pwa-card{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:420px;box-sizing:border-box;
