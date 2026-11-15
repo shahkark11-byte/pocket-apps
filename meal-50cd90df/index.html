@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#f4ead9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Meal Quest">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Meal Quest</title>
+<style>
+:root{
+  --bg:#f4ead9;--paper:#fffdf8;--paper2:#f7eee1;--ink:#2b211b;--mut:#6b5d52;--line:rgba(120,80,40,.14);
+  --terra:#c4502f;--terra2:#e0704f;--sage:#5f8752;--sage2:#7ea86f;--mustard:#d99a26;--plum:#7d4a63;
+  --shadow:rgba(120,80,40,.16);--nav:72px;--r:20px;--sy:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{color:var(--ink);font-size:16px;line-height:1.45;background:var(--bg);overflow-x:hidden}
+/* morning window light from the top left. Every highlight faces it, every shadow falls down and right */
+.light{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(110% 70% at 10% -10%,rgba(255,250,232,.97),rgba(255,244,214,.5) 38%,transparent 64%),
+             radial-gradient(90% 60% at 108% 112%,rgba(120,80,40,.20),transparent 70%),var(--bg)}
+.panes{position:fixed;left:-12%;top:-6%;width:78%;height:62vh;pointer-events:none;z-index:0;opacity:.55;
+  transform:translateY(calc(var(--sy) * -0.08px)) skewX(-16deg);
+  background:linear-gradient(90deg,transparent 0 47%,rgba(150,105,60,.10) 47% 50%,transparent 50%),
+             linear-gradient(0deg,transparent 0 46%,rgba(150,105,60,.10) 46% 49%,transparent 49%),
+             radial-gradient(60% 60% at 40% 40%,rgba(255,255,240,.65),transparent 72%);
+  -webkit-mask:linear-gradient(160deg,#000 30%,transparent 85%);mask:linear-gradient(160deg,#000 30%,transparent 85%)}
+.ray{position:fixed;left:-30%;top:-20%;width:120%;height:90vh;pointer-events:none;z-index:0;
+  background:linear-gradient(118deg,transparent 38%,rgba(255,236,190,.28) 46%,transparent 54%,transparent 60%,rgba(255,236,190,.18) 64%,transparent 70%);
+  transform:translateY(calc(var(--sy) * -0.04px))}
+#dust{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(var(--nav) + 40px + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+h1,h2,h3{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;margin:0;letter-spacing:-.01em}
+.card{position:relative;background:linear-gradient(160deg,var(--paper),var(--paper2));border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-top:14px;
+  box-shadow:inset 0 1px 0 #fff,6px 10px 22px var(--shadow)}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(155deg,rgba(255,255,255,.75),transparent 32%)}
+.card>*{position:relative}
+.top{display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:15px;flex:none;display:grid;place-items:center;font-size:26px;
+  background:linear-gradient(160deg,#fff7ea,#f1dcc3);box-shadow:inset 0 1px 0 #fff,4px 6px 12px var(--shadow)}
+.top .grow{min-width:0}
+.top b{display:block;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvl{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.04em;color:#fff;background:linear-gradient(180deg,var(--sage2),var(--sage));padding:2px 8px;border-radius:7px;margin-right:6px}
+.xpbar{height:6px;border-radius:4px;background:rgba(120,80,40,.12);margin-top:6px;overflow:hidden}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--mustard),#f0c060);border-radius:4px}
+.icb{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none;background:linear-gradient(160deg,#fffaf2,#f1e3d0);box-shadow:inset 0 1px 0 #fff,3px 5px 10px var(--shadow);color:var(--mut)}
+.icb svg{width:22px;height:22px}
+.grow{flex:1;min-width:0}
+.row{display:flex;align-items:center;gap:10px}
+.muted{color:var(--mut)}
+.small{font-size:14px}
+.h{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 0}
+.h h2{font-size:22px}
+.h button,.link{color:var(--terra);font-weight:700;font-size:15px;min-height:44px;padding:0 4px}
+.lbl{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:15px;font-weight:700;color:#fff;
+  background:linear-gradient(180deg,var(--terra2),var(--terra));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),3px 5px 12px rgba(150,60,30,.28)}
+.btn.sm{min-height:44px;padding:0 14px;font-size:15px;border-radius:13px}
+.btn.ghost{color:var(--ink);background:linear-gradient(160deg,#fffaf2,#f1e3d0);box-shadow:inset 0 1px 0 #fff,3px 5px 10px var(--shadow)}
+.btn.sage{background:linear-gradient(180deg,var(--sage2),var(--sage));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),3px 5px 12px rgba(60,90,50,.28)}
+.btn.full{width:100%}
+.btn:disabled{opacity:.5}
+.btn svg{width:20px;height:20px}
+.weeknav{display:flex;align-items:center;gap:8px}
+.weeknav b{flex:1;text-align:center;font-size:17px}
+.big{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:30px;font-weight:700;line-height:1.1}
+.tonight{display:flex;gap:14px;align-items:center}
+.plate{width:72px;height:72px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:36px;
+  background:radial-gradient(circle at 34% 30%,#fff,#f3e7d6 58%,#e5d2b8);box-shadow:inset -3px -4px 8px rgba(120,80,40,.15),inset 2px 2px 3px #fff,5px 8px 14px var(--shadow)}
+.day{padding:12px 12px 6px}
+.day.today{box-shadow:inset 0 1px 0 #fff,0 0 0 2px rgba(217,154,38,.6),6px 10px 22px var(--shadow)}
+.dayh{display:flex;align-items:baseline;gap:8px;padding:0 4px 6px}
+.dayh b{font-family:"Iowan Old Style",Palatino,Georgia,serif;font-size:19px}
+.dayh .tag{font-size:12px;font-weight:800;color:#8a5a00;background:rgba(217,154,38,.2);padding:2px 8px;border-radius:7px}
+.slot{display:flex;align-items:center;gap:10px;min-height:52px;border-top:1px dashed var(--line);padding:4px}
+.slot:first-of-type{border-top:0}
+.slot .sl{width:66px;flex:none;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.slot .pick{flex:1;min-width:0;display:flex;align-items:center;gap:8px;text-align:left;min-height:44px;font-weight:600}
+.slot .pick span.n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot .pick.empty{color:var(--terra);font-weight:700}
+.slot .pick small{color:var(--mut);font-weight:500;font-size:13px;flex:none}
+.ck{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;border:2px solid rgba(95,135,82,.45);color:transparent;background:#fffaf2}
+.ck svg{width:22px;height:22px}
+.ck.on{background:linear-gradient(180deg,var(--sage2),var(--sage));border-color:var(--sage);color:#fff;box-shadow:2px 4px 8px rgba(60,90,50,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;font-weight:600;font-size:15px;background:#fffaf2;border:1.5px solid var(--line);color:var(--ink)}
+.chip.on{background:rgba(196,80,47,.12);border-color:var(--terra);color:#8f3418}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.rcard{text-align:left;padding:14px;border-radius:18px;background:linear-gradient(160deg,var(--paper),var(--paper2));border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 #fff,5px 8px 16px var(--shadow);min-height:132px;display:flex;flex-direction:column;gap:6px;position:relative}
+.rcard .e{font-size:32px}
+.rcard b{font-size:16px;line-height:1.2}
+.rcard small{color:var(--mut);font-size:13px;margin-top:auto}
+.rcard .fav{position:absolute;right:10px;top:10px;font-size:16px}
+.in,select.in,textarea.in{width:100%;min-height:48px;border-radius:13px;border:1.5px solid var(--line);background:#fffefb;padding:10px 12px;font:inherit;color:var(--ink)}
+textarea.in{min-height:110px;resize:vertical}
+.in:focus{outline:none;border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,80,47,.15)}
+label.f{display:block;font-size:14px;font-weight:700;margin:16px 2px 6px;color:var(--ink)}
+.note{font-size:14px;color:var(--mut);margin:10px 2px 0}
+.aisle{margin-top:18px}
+.aisle h3{font-size:17px;display:flex;align-items:center;gap:8px;margin:0 4px 6px}
+.item{display:flex;align-items:center;gap:10px;padding:8px 6px;border-top:1px solid var(--line);min-height:56px}
+.item:first-child{border-top:0}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;font-weight:600}
+.item .t small{display:block;color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.got .t b{text-decoration:line-through;color:var(--mut)}
+.item.have{opacity:.6}
+.have-b{min-height:44px;padding:0 10px;border-radius:11px;font-size:13px;font-weight:700;color:var(--mut);background:#fbf3e6;border:1px solid var(--line);flex:none}
+.have-b.on{color:#2f5a25;background:rgba(95,135,82,.15);border-color:rgba(95,135,82,.4)}
+.cost{font-weight:700;font-size:15px;flex:none;min-width:52px;text-align:right}
+.ring{position:relative;width:128px;height:128px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .c b{display:block;font-size:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat{background:#fffaf2;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font-size:18px}.stat span{font-size:13px;color:var(--mut)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:140px;padding:8px 2px 0;position:relative}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bars .b i{display:block;width:100%;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,var(--sage2),var(--sage));min-height:3px}
+.bars .b i.over{background:linear-gradient(180deg,var(--terra2),var(--terra))}
+.bars .b small{font-size:12px;color:var(--mut)}
+.bars .line{position:absolute;left:0;right:0;border-top:2px dashed rgba(217,154,38,.8)}
+.sp{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--line);min-height:56px}
+.sp:first-child{border-top:0}
+.sp .e{font-size:22px;width:30px;text-align:center}
+.x{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--mut);flex:none}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.badge{text-align:center;padding:12px 6px;border-radius:16px;background:#fffaf2;border:1px solid var(--line)}
+.badge .e{font-size:28px}
+.badge b{display:block;font-size:13px;margin-top:4px}
+.badge small{display:block;font-size:12px;color:var(--mut);line-height:1.25;margin-top:2px}
+.badge.off .e{filter:grayscale(1);opacity:.35}
+.empty{text-align:center;color:var(--mut);padding:26px 16px}
+.empty .e{font-size:40px;margin-bottom:6px}
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));width:min(536px,calc(100% - 24px));height:var(--nav);z-index:20;
+  display:grid;grid-template-columns:repeat(4,1fr);border-radius:24px;background:rgba(255,251,244,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border:1px solid var(--line);box-shadow:inset 0 1px 0 #fff,8px 14px 30px rgba(120,80,40,.22)}
+nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12.5px;font-weight:700;color:var(--mut)}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--terra)}
+.sheet-bg{position:fixed;inset:0;z-index:50;background:rgba(60,40,25,.38);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:linear-gradient(170deg,#fffdf8,#f6ecde);border-radius:26px 26px 0 0;
+  padding:18px 18px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(60,40,25,.25)}
+.sheet .grab{width:44px;height:5px;border-radius:3px;background:rgba(120,80,40,.25);margin:0 auto 14px}
+.sheet h3{font-size:24px}
+.sheet .sub{color:var(--mut);margin:6px 0 0}
+.actions{display:flex;gap:10px;margin-top:20px}
+.actions .btn{flex:1}
+.ingr{display:grid;grid-template-columns:1fr 70px;gap:8px;padding:10px;border-radius:14px;background:#fffaf2;border:1px solid var(--line);margin-top:8px}
+.ingr .full{grid-column:1/-1}
+.ingr .r3{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 44px;gap:8px}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:44px;height:44px;border-radius:12px;font-size:22px;font-weight:700;background:#fffaf2;border:1.5px solid var(--line)}
+.stepper b{min-width:30px;text-align:center;font-size:18px}
+.list-r{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:46vh;overflow:auto}
+.pickr{display:flex;align-items:center;gap:10px;text-align:left;min-height:52px;padding:6px 10px;border-radius:13px;background:#fffaf2;border:1px solid var(--line)}
+.pickr .e{font-size:22px}
+.pickr small{color:var(--mut);font-size:13px;margin-left:auto;flex:none}
+.ol{margin:8px 0 0;padding-left:22px}.ol li{margin:6px 0}
+.ul{margin:8px 0 0;padding:0;list-style:none}.ul li{display:flex;gap:8px;padding:7px 2px;border-top:1px solid var(--line)}.ul li:first-child{border-top:0}
+.ul li b{min-width:86px;font-weight:700}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav) + 26px + env(safe-area-inset-bottom,0px));z-index:60;max-width:calc(100% - 32px);
+  background:#2b211b;color:#fff6ea;padding:12px 16px;border-radius:14px;font-weight:600;box-shadow:4px 8px 20px rgba(40,25,15,.35)}
+.toast em{font-style:normal;color:#ffd27a}
+.ob{min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+.ob .big{font-size:34px}
+.steps{display:flex;gap:6px;justify-content:center;margin-bottom:18px}.steps i{width:28px;height:6px;border-radius:3px;background:rgba(120,80,40,.15)}.steps i.on{background:var(--terra)}
+.hero-ill{width:150px;height:150px;margin:0 auto 10px;display:block}
+.rescue-bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:12px;right:12px;z-index:70;max-width:536px;margin:0 auto;background:#fff3ec;border:2px solid var(--terra);border-radius:16px;padding:14px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){#dust,.ray,.panes{display:none}}
+</style>
+</head>
+<body>
+<div class="light"></div><div class="panes"></div><div class="ray"></div><canvas id="dust" aria-hidden="true"></canvas>
+<main id="app"></main>
+<nav id="nav" aria-label="Main"></nav>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<script>
+"use strict";
+/* ───────── data ───────── */
+const KEY = "mealquest.v1", RESCUE = KEY + ".rescue";
+const AISLES = [["P","🥕","Fruit and veg"],["M","🥩","Meat and fish"],["D","🧀","Dairy and chilled"],["B","🍞","Bread and bakery"],["T","🥫","Tins and jars"],
+  ["G","🍚","Pasta, rice and dry"],["F","🧊","Frozen"],["S","🥤","Snacks and drinks"],["H","🧽","Household"],["O","🛒","Other"]];
+const UNITS = ["x","g","kg","ml","l","tsp","tbsp","tin","pack","clove","bunch","cup"];
+const WHOLE = ["x","tin","pack","bunch","clove"];
+const SLOTS = [["b","Breakfast"],["l","Lunch"],["d","Dinner"]];
+const EMOJI = ["🍝","🍛","🌶️","🥘","🐟","🥢","🌮","🍲","🥔","🍳","🥣","🥪","🥗","🍕","🍔","🍜","🥧","🍗","🥙","🍚"];
+const TAGS = ["Quick","Budget","Veggie","Batch","Breakfast","Lunchbox"];
+const CURS = ["£","$","€","A$","C$","NZ$","R","₹"];
+const blank = () => ({v:1, hero:null, ready:false, step:0, settings:{cur:"£", budget:60, people:2, slots:{b:false, l:true, d:true}, ws:1},
+  recipes:[], plan:{}, lists:{}, spend:[], wbud:{}, xp:0, badges:{}, caps:{}, flags:{}, sample:false});
+let S, RESCUED = null;
+const isObj = o => o && typeof o === "object" && !Array.isArray(o);
+const isD = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+const num = (v, d, lo, hi) => { v = +v; return isFinite(v) && v >= lo && v <= hi ? v : d; };
+const str = (v, n) => String(v == null ? "" : v).slice(0, n);
+function normIng(i){ return {id: typeof i.id === "string" ? i.id : uid(), name: str(i.name, 60).trim() || "Item", qty: num(i.qty, 1, 0, 100000),
+  unit: UNITS.includes(i.unit) ? i.unit : "x", aisle: AISLES.some(a => a[0] === i.aisle) ? i.aisle : "O", cost: num(i.cost, 0, 0, 100000)}; }
+function normalize(){
+  const B = blank(); S.v = 1;
+  ["recipes","spend"].forEach(k => { if(!Array.isArray(S[k])) S[k] = []; S[k] = S[k].filter(isObj); });
+  ["plan","lists","wbud","badges","caps","flags"].forEach(k => { if(!isObj(S[k])) S[k] = {}; });
+  if(!isObj(S.settings)) S.settings = {}; const st = S.settings;
+  st.cur = CURS.includes(st.cur) ? st.cur : "£"; st.budget = num(st.budget, 60, 0, 100000); st.people = Math.round(num(st.people, 2, 1, 20)); st.ws = st.ws === 0 ? 0 : 1;
+  if(!isObj(st.slots)) st.slots = Object.assign({}, B.settings.slots); SLOTS.forEach(([k]) => st.slots[k] = !!st.slots[k]); if(!SLOTS.some(([k]) => st.slots[k])) st.slots.d = true;
+  if(S.hero !== null && (!isObj(S.hero) || typeof S.hero.name !== "string")) S.hero = {name:"Friend"};
+  S.ready = !!S.ready && !!S.hero; S.step = Math.round(num(S.step, 0, 0, 3)); S.xp = Math.max(0, Math.round(num(S.xp, 0, 0, 1e9))); S.sample = !!S.sample;
+  S.recipes = S.recipes.map(r => ({id: typeof r.id === "string" ? r.id : uid(), name: str(r.name, 60).trim() || "Recipe", emoji: EMOJI.includes(r.emoji) ? r.emoji : "🍲",
+    serves: Math.round(num(r.serves, 4, 1, 50)), mins: Math.round(num(r.mins, 0, 0, 1440)), tags: Array.isArray(r.tags) ? r.tags.filter(t => TAGS.includes(t)) : [],
+    ing: Array.isArray(r.ing) ? r.ing.filter(isObj).map(normIng) : [], steps: str(r.steps, 4000), fav: !!r.fav, own: !!r.own, made: Math.round(num(r.made, 0, 0, 1e6))}));
+  Object.keys(S.plan).forEach(d => { const day = S.plan[d]; if(!isD(d) || !isObj(day)){ delete S.plan[d]; return; }
+    Object.keys(day).forEach(k => { const s = day[k]; if(!SLOTS.some(x => x[0] === k) || !isObj(s) || !["r","left","out"].includes(s.k)){ delete day[k]; return; }
+      if(s.k === "r" && !S.recipes.some(r => r.id === s.rid)){ delete day[k]; return; }
+      s.n = Math.round(num(s.n, st.people, 1, 50)); s.c = !!s.c; s.p = !!s.p; });
+    if(!Object.keys(day).length) delete S.plan[d]; });
+  Object.keys(S.lists).forEach(w => { const l = S.lists[w]; if(!isD(w) || !isObj(l)){ delete S.lists[w]; return; }
+    ["have","got"].forEach(k => { if(!isObj(l[k])) l[k] = {}; });
+    l.extra = Array.isArray(l.extra) ? l.extra.filter(isObj).map(e => ({id: typeof e.id === "string" ? e.id : uid(), name: str(e.name, 60).trim() || "Item",
+      aisle: AISLES.some(a => a[0] === e.aisle) ? e.aisle : "O", cost: num(e.cost, 0, 0, 100000), got: !!e.got})) : []; });
+  S.spend = S.spend.filter(x => isD(x.date)).map(x => ({id: typeof x.id === "string" ? x.id : uid(), date:x.date, what: str(x.what, 60), amt: num(x.amt, 0, 0, 1e6),
+    kind: ["shop","take","out"].includes(x.kind) ? x.kind : "shop"}));
+  Object.keys(S.wbud).forEach(k => { if(!isD(k) || !(+S.wbud[k] >= 0)) delete S.wbud[k]; });
+  Object.keys(S.badges).forEach(k => { if(!isD(S.badges[k])) delete S.badges[k]; });
+}
+function load(){
+  let raw = null; try{ raw = localStorage.getItem(KEY); }catch(e){}
+  try{ const d = raw ? JSON.parse(raw) : null; if(d !== null && !isObj(d)) throw 0; S = Object.assign(blank(), d || {}); }
+  catch(e){ S = blank(); RESCUED = raw; try{ const prev = localStorage.getItem(RESCUE); if(prev !== null && prev !== raw) localStorage.setItem(RESCUE + ".prev", prev); localStorage.setItem(RESCUE, raw); }catch(_){} }
+  normalize();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Couldn't save on this phone. Free up some space."); } }
+const uid = () => Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 5);
+
+/* ───────── dates and money ───────── */
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const today = () => iso(new Date());
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const weekStart = s => { const d = parse(s), ws = S.settings.ws, k = (d.getDay() - ws + 7) % 7; d.setDate(d.getDate() - k); return iso(d); };
+const monOf = s => { const d = parse(s), k = (d.getDay() + 6) % 7; d.setDate(d.getDate() - k); return iso(d); };
+const fkey = ws => monOf(addDays(ws, 3));   /* the same key whichever day the week starts, so switching it never pays twice */
+const days7 = ws => Array.from({length:7}, (_, i) => addDays(ws, i));
+const dname = (s, o) => parse(s).toLocaleDateString(undefined, o || {weekday:"short", day:"numeric"});
+const wrange = ws => { const a = parse(ws), b = parse(addDays(ws, 6)), m = d => d.toLocaleDateString(undefined, {month:"short"});
+  return m(a) === m(b) ? `${m(a)} ${a.getDate()}–${b.getDate()}` : `${m(a)} ${a.getDate()} – ${m(b)} ${b.getDate()}`; };
+const money = n => { n = +n || 0; const neg = n < 0; n = Math.abs(n); const s = n >= 1000 ? Math.round(n).toLocaleString() : n.toFixed(2); return (neg ? "−" : "") + S.settings.cur + s; };
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtQ = q => String(Math.round(q * 100) / 100);
+const unitTxt = (q, u) => u === "x" ? fmtQ(q) : `${fmtQ(q)} ${u}${(["tin","pack","clove","bunch","cup"].includes(u) && q !== 1) ? "s" : ""}`;
+const recOf = id => S.recipes.find(r => r.id === id);
+const recCost = (r, n) => r.ing.reduce((a, i) => a + i.cost, 0) * (n || r.serves) / r.serves;
+const weekBudget = ws => { const k = fkey(ws); return k in S.wbud ? +S.wbud[k] : S.settings.budget; };
+const spendIn = ws => { const e = addDays(ws, 7); return S.spend.filter(x => x.date >= ws && x.date < e); };
+
+/* ───────── XP, levels, badges ───────── */
+const lvlOf = xp => Math.floor((Math.sqrt(1 + 8 * xp / 100) - 1) / 2) + 1;
+const xpAt = l => 50 * l * (l - 1);
+const TITLES = ["Toast Maker","Pan Starter","Home Cook","Batch Boss","Spice Ranger","Kitchen Captain","Head Chef","Feast Master"];
+const BADGES = [
+  ["first_plan","📝","First plan","Plan your first meal"], ["full_week","🗓️","Week sorted","Plan every dinner in a week"],
+  ["first_cook","🍳","First cook","Cook a planned meal"], ["cook10","👩‍🍳","Home cook","Cook 10 planned meals"], ["cook50","🔥","Kitchen hero","Cook 50 planned meals"],
+  ["cookweek","⭐","Cooked all week","Cook 5 planned dinners in one week"], ["recipe5","📖","Recipe box","Save 5 of your own recipes"], ["recipe15","📚","Cookbook","Save 15 of your own recipes"],
+  ["shop1","🧺","List done","Tick off a whole shopping list"], ["budget1","💰","Under budget","Finish a week under your food budget"],
+  ["budget3","🏆","Steady hands","3 weeks under your food budget"], ["leftover5","🥡","No waste","Plan leftovers 5 times"]];
+function toast(html, ms){ document.querySelectorAll(".toast").forEach(e => e.remove()); const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status");
+  t.innerHTML = html; document.body.appendChild(t); setTimeout(() => t.remove(), ms || 2600); }
+function gain(n, why){ const b = lvlOf(S.xp); S.xp = Math.max(0, S.xp + n); save(); const a = lvlOf(S.xp);
+  if(n > 0) toast(`+${n} XP <em>${esc(why)}</em>`); if(a > b) setTimeout(() => toast(`Level ${a}! You're a <em>${TITLES[Math.min(a, TITLES.length) - 1]}</em>`, 3200), 1400); }
+function award(id){ if(S.badges[id]) return; S.badges[id] = today(); save(); const b = BADGES.find(x => x[0] === id); if(b) setTimeout(() => toast(`${b[1]} Badge: <em>${esc(b[2])}</em>`, 3000), 900); }
+function capOk(key, max){ const t = today(); let c = S.caps[key]; if(!isObj(c) || c.day !== t) c = S.caps[key] = {day:t, n:0}; if(c.n >= max) return false; c.n++; return true; }
+function capBack(key){ const c = S.caps[key]; if(isObj(c) && c.day === today() && c.n > 0) c.n--; }
+const cookedCount = () => { let n = 0; Object.values(S.plan).forEach(d => Object.values(d).forEach(s => { if(s.k === "r" && s.c) n++; })); return n; };
+function checkBadges(){
+  const own = S.recipes.filter(r => r.own).length, cooked = cookedCount(); let left = 0;
+  Object.values(S.plan).forEach(d => Object.values(d).forEach(s => { if(s.k === "left") left++; }));
+  if(Object.keys(S.plan).length) award("first_plan"); if(cooked >= 1) award("first_cook"); if(cooked >= 10) award("cook10"); if(cooked >= 50) award("cook50");
+  if(own >= 5) award("recipe5"); if(own >= 15) award("recipe15"); if(left >= 5) award("leftover5");
+}
+/* once a week has ended: under budget pays once, if you logged a shop and cooked at least 3 planned meals */
+function settleWeeks(){
+  const cur = weekStart(today()), seen = new Set();
+  S.spend.forEach(x => { const ws = weekStart(x.date); if(ws >= cur || seen.has(ws)) return; seen.add(ws);
+    const k = "ub|" + fkey(ws); if(S.flags[k]) return;
+    const sp = spendIn(ws), shops = sp.filter(x => x.kind === "shop").length, tot = sp.reduce((a, x) => a + x.amt, 0);
+    const cooked = days7(ws).reduce((a, d) => a + Object.values(S.plan[d] || {}).filter(s => s.k === "r" && s.c).length, 0);
+    if(shops && cooked >= 3 && tot <= weekBudget(ws)){ S.flags[k] = today(); const n = Object.keys(S.flags).filter(f => f.startsWith("ub|")).length;
+      gain(50, `${wrange(ws)} under budget`); award("budget1"); if(n >= 3) award("budget3"); } });
+}
+
+/* ───────── shopping list: built from the week's plan, same items added together ───────── */
+function buildList(ws){
+  const map = {}, L = S.lists[ws] || {have:{}, got:{}, extra:[]};
+  days7(ws).forEach(d => Object.values(S.plan[d] || {}).forEach(s => { if(s.k !== "r") return; const r = recOf(s.rid); if(!r) return; const f = s.n / r.serves;
+    r.ing.forEach(i => { const k = i.name.toLowerCase().trim() + "|" + i.unit; const m = map[k] || (map[k] = {k, name:i.name, unit:i.unit, aisle:i.aisle, qty:0, cost:0, from:[]});
+      m.qty += i.qty * f; m.cost += i.cost * f; if(!m.from.includes(r.name)) m.from.push(r.name); }); }));
+  const items = Object.values(map).map(m => Object.assign(m, {have: !!L.have[m.k], got: !!L.got[m.k]}));
+  return {items, extra:L.extra, L};
+}
+function listFor(ws){ return S.lists[ws] || (S.lists[ws] = {have:{}, got:{}, extra:[]}); }
+const estShop = ws => { const {items, extra} = buildList(ws); return items.filter(i => !i.have).reduce((a, i) => a + i.cost, 0) + extra.reduce((a, e) => a + e.cost, 0); };
+
+/* ───────── icons ───────── */
+const I = {
+  week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/><path d="M8 15h3"/></svg>',
+  recipes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M8 7c0-1.5 1-2 1-3.5M12 7c0-1.5 1-2 1-3.5M16 7c0-1.5 1-2 1-3.5"/></svg>',
+  shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18l-2 11H5z"/><path d="M8 9l3-6M16 9l-3-6M9 13v4M15 13v4"/></svg>',
+  budget:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.7-1-1.8-1.5-3-1.5-1.7 0-3 1-3 2.4 0 3.3 6 1.7 6 5 0 1.5-1.3 2.6-3 2.6-1.3 0-2.5-.6-3.2-1.6M12 5v2M12 17v2"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
+
+/* ───────── views ───────── */
+let tab = "week", wk = null, rq = "", rtag = "";
+const curWs = () => wk || (wk = weekStart(today()));
+function topBar(){ const l = lvlOf(S.xp), a = xpAt(l), b = xpAt(l + 1);
+  return `<div class="top"><div class="logo" aria-hidden="true">🍲</div><div class="grow"><b>${esc(S.hero.name)}'s kitchen</b>
+    <div class="small muted"><span class="lvl">LV ${l}</span>${TITLES[Math.min(l, TITLES.length) - 1]} · ${S.xp} XP</div>
+    <div class="xpbar" aria-hidden="true"><i style="width:${Math.min(100, (S.xp - a) / (b - a) * 100)}%"></i></div></div>
+    <button class="icb" data-act="settings" aria-label="Settings">${I.gear}</button></div>`; }
+function weekNav(){ const ws = curWs(), isNow = ws === weekStart(today());
+  return `<div class="weeknav" style="margin-top:16px"><button class="icb" data-act="wk" data-d="-7" aria-label="Previous week">${I.left}</button>
+    <b>${isNow ? "This week · " : ""}${wrange(ws)}</b><button class="icb" data-act="wk" data-d="7" aria-label="Next week">${I.right}</button></div>`; }
+function slotRow(d, k, label){
+  const s = (S.plan[d] || {})[k], past = d <= today();
+  if(!s) return `<div class="slot"><span class="sl">${label}</span><button class="pick empty" data-act="slot" data-d="${d}" data-k="${k}">+ Add</button></div>`;
+  let main;
+  if(s.k === "r"){ const r = recOf(s.rid); main = `<span aria-hidden="true">${r.emoji}</span><span class="n">${esc(r.name)}</span><small>· ${s.n}</small>`; }
+  else if(s.k === "left") main = `<span aria-hidden="true">🥡</span><span class="n">Leftovers</span>`;
+  else main = `<span aria-hidden="true">🛍️</span><span class="n">Takeaway or eating out</span>`;
+  return `<div class="slot"><span class="sl">${label}</span><button class="pick" data-act="slot" data-d="${d}" data-k="${k}">${main}</button>
+    ${s.k === "r" && past ? `<button class="ck ${s.c ? "on" : ""}" data-act="cook" data-d="${d}" data-k="${k}" aria-pressed="${s.c}" aria-label="${s.c ? "Cooked" : "Mark as cooked"}">${I.check}</button>` : ""}</div>`;
+}
+function weekView(){
+  const ws = curWs(), t = today(), sl = SLOTS.filter(([k]) => S.settings.slots[k]), ds = days7(ws);
+  const total = ds.length * sl.length, filled = ds.reduce((a, d) => a + sl.filter(([k]) => (S.plan[d] || {})[k]).length, 0);
+  const est = estShop(ws), bud = weekBudget(ws);
+  let tonight = "";
+  if(ds.includes(t)){ const s = (S.plan[t] || {}).d || (S.plan[t] || {}).l; const r = s && s.k === "r" && recOf(s.rid);
+    tonight = r ? `<section class="card tonight"><div class="plate" aria-hidden="true">${r.emoji}</div><div class="grow"><div class="lbl">${(S.plan[t] || {}).d === s ? "Tonight" : "Today"}</div>
+        <div class="big" style="font-size:24px;margin-top:2px">${esc(r.name)}</div><div class="small muted">${r.mins ? r.mins + " min · " : ""}for ${s.n}</div></div>
+        <button class="btn sm ghost" data-act="recipe" data-id="${r.id}" data-n="${s.n}">Recipe</button></section>`
+      : `<section class="card tonight"><div class="plate" aria-hidden="true">🤔</div><div class="grow"><div class="lbl">Tonight</div><div style="font-weight:700;font-size:18px;margin-top:2px">Nothing planned yet</div>
+        <div class="small muted">Tap Pick for me and it chooses from your recipes.</div></div><button class="btn sm" data-act="pickTonight">Pick for me</button></section>`; }
+  return topBar() + weekNav() + `
+  <section class="card"><div class="row"><div class="grow"><div class="lbl">This week's plan</div><div class="big" style="margin-top:4px">${filled} <span class="muted" style="font-size:20px">of ${total} meals</span></div>
+    <div class="small muted" style="margin-top:4px">Shopping estimate <b style="color:${est > bud ? "var(--terra)" : "var(--sage)"}">${money(est)}</b> of ${money(bud)} budget</div></div></div>
+    <div class="row" style="margin-top:14px"><button class="btn sm grow" data-act="fill">✨ Pick dinners</button><button class="btn sm ghost" data-act="copyWeek">Copy last week</button></div></section>
+  ${tonight}
+  ${ds.map(d => `<section class="card day ${d === t ? "today" : ""}"><div class="dayh"><b>${dname(d, {weekday:"long"})}</b><span class="muted small">${dname(d, {day:"numeric", month:"short"})}</span>${d === t ? `<span class="tag">TODAY</span>` : ""}</div>
+    ${sl.map(([k, l]) => slotRow(d, k, l)).join("")}</section>`).join("")}
+  <p class="note">Tick a meal once it's cooked. Leftovers and takeaway nights count too, so the week shows what really happened.</p>`;
+}
+function recipesView(){
+  const q = rq.toLowerCase(), list = S.recipes.filter(r => (!q || r.name.toLowerCase().includes(q) || r.ing.some(i => i.name.toLowerCase().includes(q))) && (!rtag || (rtag === "fav" ? r.fav : r.tags.includes(rtag))))
+    .sort((a, b) => (b.fav - a.fav) || (b.made - a.made) || a.name.localeCompare(b.name));
+  return topBar() + `<div class="h"><h2>Recipes</h2><button data-act="newRecipe">+ New recipe</button></div>
+    <input class="in" id="rq" placeholder="Search recipes or ingredients" value="${esc(rq)}" aria-label="Search recipes" style="margin-top:10px">
+    <div class="chips" style="margin-top:10px">${[["","All"],["fav","♥ Favourites"]].concat(TAGS.map(t => [t, t])).map(([v, l]) => `<button class="chip ${rtag === v ? "on" : ""}" data-act="rtag" data-v="${v}">${l}</button>`).join("")}</div>
+    ${list.length ? `<div class="rgrid">${list.map(r => `<button class="rcard" data-act="recipe" data-id="${r.id}">${r.fav ? `<span class="fav" aria-label="Favourite">♥</span>` : ""}<span class="e" aria-hidden="true">${r.emoji}</span><b>${esc(r.name)}</b>
+      <small>${r.mins ? r.mins + " min · " : ""}serves ${r.serves} · ${money(recCost(r))}</small></button>`).join("")}</div>`
+      : `<div class="card empty"><div class="e">📖</div>${S.recipes.length ? "Nothing matches that search." : "No recipes yet. Add the ones you cook most."}</div>`}
+    <p class="note">Costs are rough guesses. Edit them to match your shop's prices and the shopping estimate gets better.</p>`;
+}
+function shopView(){
+  const ws = curWs(), {items, extra} = buildList(ws), all = items.length + extra.length;
+  const left = items.filter(i => !i.have && !i.got).length + extra.filter(e => !e.got).length, est = estShop(ws);
+  const groups = AISLES.map(([a, e, n]) => ({a, e, n, its: items.filter(i => i.aisle === a).sort((x, y) => (x.got - y.got) || x.name.localeCompare(y.name)), ex: extra.filter(x => x.aisle === a)})).filter(g => g.its.length || g.ex.length);
+  const qtyTxt = i => { const need = Math.round(i.qty * 100) / 100; return WHOLE.includes(i.unit) && need % 1 ? `${unitTxt(Math.ceil(need), i.unit)} (${fmtQ(need)} needed)` : unitTxt(need, i.unit); };
+  return topBar() + weekNav() + `
+  <section class="card"><div class="row"><div class="grow"><div class="lbl">Shopping list</div><div class="big" style="margin-top:4px">${money(est)}</div>
+    <div class="small muted">${all ? `${left} of ${all} still to get · estimate, not counting what you have` : "Plan some meals and the list fills itself"}</div></div></div>
+    <div class="row" style="margin-top:14px"><button class="btn sm ghost grow" data-act="addExtra">+ Add item</button>${all ? `<button class="btn sm ghost grow" data-act="shareList">Share list</button>` : ""}</div></section>
+  ${groups.length ? groups.map(g => `<div class="aisle"><h3><span aria-hidden="true">${g.e}</span>${g.n}</h3><div class="card" style="margin-top:0;padding:4px 10px">
+    ${g.its.map(i => `<div class="item ${i.got ? "got" : ""} ${i.have ? "have" : ""}"><button class="ck ${i.got ? "on" : ""}" data-act="got" data-k="${esc(i.k)}" aria-pressed="${i.got}" aria-label="Got ${esc(i.name)}" ${i.have ? "disabled" : ""}>${I.check}</button>
+      <div class="t"><b>${esc(i.name)}</b><small>${qtyTxt(i)} · ${esc(i.from.join(", "))}</small></div>
+      <button class="have-b ${i.have ? "on" : ""}" data-act="have" data-k="${esc(i.k)}" aria-pressed="${i.have}">${i.have ? "Have it" : "Have?"}</button></div>`).join("")}
+    ${g.ex.map(e => `<div class="item ${e.got ? "got" : ""}"><button class="ck ${e.got ? "on" : ""}" data-act="gotX" data-id="${e.id}" aria-pressed="${e.got}" aria-label="Got ${esc(e.name)}">${I.check}</button>
+      <div class="t"><b>${esc(e.name)}</b><small>Added by you${e.cost ? " · " + money(e.cost) : ""}</small></div><button class="x" data-act="delX" data-id="${e.id}" aria-label="Remove ${esc(e.name)}">${I.x}</button></div>`).join("")}
+  </div></div>`).join("")
+  : `<div class="card empty"><div class="e">🧺</div>Your list builds itself from the meals you plan this week. Same items are added together, so two recipes with onions means one line for onions.</div>`}
+  ${all ? `<button class="btn full sage" style="margin-top:20px" data-act="doneShop">Done shopping? Log what you paid</button>` : ""}
+  <p class="note">Tap "Have?" for anything already in the cupboard. It drops off the estimate.</p>`;
+}
+function budgetView(){
+  const ws = curWs(), bud = weekBudget(ws), sp = spendIn(ws), spent = sp.reduce((a, x) => a + x.amt, 0), est = estShop(ws), frac = bud > 0 ? spent / bud : 0;
+  const cooked = days7(ws).reduce((a, d) => a + Object.values(S.plan[d] || {}).filter(s => s.k === "r" && s.c).length, 0);
+  const takes = sp.filter(x => x.kind !== "shop").length;
+  const r = 52, c = 2 * Math.PI * r, col = frac > 1 ? "var(--terra)" : frac > .85 ? "var(--mustard)" : "var(--sage)";
+  const weeks = Array.from({length:8}, (_, i) => addDays(ws, -7 * (7 - i))), tots = weeks.map(w => spendIn(w).reduce((a, x) => a + x.amt, 0)), mx = Math.max(bud, ...tots, 1);
+  const K = {shop:["🧺","Food shop"], take:["🥡","Takeaway"], out:["🍽️","Eating out"]};
+  return topBar() + weekNav() + `
+  <section class="card"><div class="row" style="gap:16px"><div class="ring"><svg viewBox="0 0 128 128"><circle cx="64" cy="64" r="${r}" fill="none" stroke="rgba(120,80,40,.12)" stroke-width="14"/>
+      <circle cx="64" cy="64" r="${r}" fill="none" stroke="${col}" stroke-width="14" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - Math.min(1, frac))}"/></svg>
+      <div class="c"><div><b>${money(Math.max(0, bud - spent))}</b><span class="small muted">${spent > bud ? "over by " + money(spent - bud) : "left"}</span></div></div></div>
+    <div class="grow"><div class="lbl">Food budget</div><div style="font-size:15px;margin-top:6px">Spent <b>${money(spent)}</b><br>of <b>${money(bud)}</b> this week</div>
+      <button class="link" data-act="settings" style="padding:0">Change budget</button></div></div>
+    <div class="stats"><div class="stat"><b>${money(est)}</b><span>shop estimate</span></div><div class="stat"><b>${cooked}</b><span>meals cooked</span></div><div class="stat"><b>${takes}</b><span>takeaways or meals out</span></div></div></section>
+  <div class="stats" style="margin-top:14px"><button class="btn sm" data-act="addSpend" data-k="shop" style="padding:0 6px">🧺 Shop</button><button class="btn sm ghost" data-act="addSpend" data-k="take" style="padding:0 6px">🥡 Takeaway</button><button class="btn sm ghost" data-act="addSpend" data-k="out" style="padding:0 6px">🍽️ Meal out</button></div>
+  <div class="h"><h2>This week</h2></div>
+  <section class="card" style="padding:4px 12px">${sp.length ? sp.slice().sort((a, b) => a.date < b.date ? 1 : -1).map(x => `<div class="sp"><span class="e" aria-hidden="true">${K[x.kind][0]}</span>
+      <div class="grow"><b>${esc(x.what || K[x.kind][1])}</b><div class="small muted">${dname(x.date, {weekday:"short", day:"numeric", month:"short"})}</div></div><b>${money(x.amt)}</b>
+      <button class="x" data-act="delSpend" data-id="${x.id}" aria-label="Delete ${esc(x.what || K[x.kind][1])}">${I.x}</button></div>`).join("")
+    : `<div class="empty">Nothing logged this week. Add your food shop and any takeaways to see where the money goes.</div>`}</section>
+  <div class="h"><h2>Last 8 weeks</h2></div>
+  <section class="card"><div class="bars" role="img" aria-label="Food spending for the last 8 weeks">${`<div class="line" style="bottom:calc(${bud / mx * 100}% * .82 + 18px)"></div>`}
+    ${weeks.map((w, i) => `<div class="b"><i class="${tots[i] > weekBudget(w) ? "over" : ""}" style="height:${tots[i] / mx * 82}%"></i><small>${parse(w).getDate()}/${parse(w).getMonth() + 1}</small></div>`).join("")}</div>
+    <p class="note" style="margin-top:8px">Dashed line: this week's budget. Red bars went over.</p></section>
+  <div class="h"><h2>Badges</h2><span class="small muted">${Object.keys(S.badges).length} of ${BADGES.length}</span></div>
+  <div class="badges" style="margin-top:12px">${BADGES.map(([id, e, n, d]) => `<div class="badge ${S.badges[id] ? "" : "off"}"><div class="e" aria-hidden="true">${e}</div><b>${n}</b><small>${S.badges[id] ? "Earned " + dname(S.badges[id], {day:"numeric", month:"short"}) : d}</small></div>`).join("")}</div>`;
+}
+function renderNav(){ document.getElementById("nav").innerHTML = [["week","Week"],["recipes","Recipes"],["shop","Shop"],["budget","Budget"]]
+  .map(([k, l]) => `<button class="${tab === k ? "on" : ""}" data-tab="${k}" ${tab === k ? 'aria-current="page"' : ""}>${I[k]}${l}</button>`).join(""); }
+function render(){
+  const app = document.getElementById("app"), nav = document.getElementById("nav");
+  if(!S.ready){ nav.style.display = "none"; app.innerHTML = obView(); bindOb(); return; }
+  nav.style.display = ""; settleWeeks();
+  const v = {week:weekView, recipes:recipesView, shop:shopView, budget:budgetView}[tab] || weekView;
+  try{ app.innerHTML = v(); }
+  catch(e){ app.innerHTML = `<div class="card empty" style="margin-top:40px"><div class="e">🧰</div><b style="color:var(--ink)">This screen couldn't load</b><br>Your data is still saved. Back it up from Settings, then try another tab.<br><br><button class="btn sm" data-act="settings">Open Settings</button></div>`; }
+  renderNav();
+}
+
+/* ───────── onboarding ───────── */
+function obView(){
+  const st = S.settings, s = S.step, dots = `<div class="steps">${[0,1,2,3].map(i => `<i class="${i <= s ? "on" : ""}"></i>`).join("")}</div>`;
+  if(s === 0) return `<div class="ob">${dots}<svg class="hero-ill" viewBox="0 0 160 160" aria-hidden="true"><ellipse cx="88" cy="140" rx="52" ry="9" fill="rgba(120,80,40,.18)"/>
+      <path d="M26 74h108v12a54 54 0 0 1-108 0z" fill="#c4502f"/><path d="M26 74h108v8H26z" fill="#e0704f"/><path d="M34 90a46 46 0 0 0 30 38" stroke="#f3a07f" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/>
+      <rect x="18" y="68" width="124" height="10" rx="5" fill="#9e3a1f"/><path d="M60 54c0-8 6-10 6-18M80 54c0-8 6-10 6-18M100 54c0-8 6-10 6-18" stroke="#d9c3a6" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M118 40q14-6 18 6-12 6-18-6z" fill="#7ea86f"/></svg>
+    <div class="big" style="text-align:center">What's for dinner, sorted</div>
+    <p class="muted" style="text-align:center;margin:10px 4px 0">Plan the week, and your shopping list writes itself. See what you spend on food, and earn XP for every meal you cook.</p>
+    <label class="f" for="nm">What should we call you?</label><input class="in" id="nm" maxlength="24" autocomplete="given-name" placeholder="Your name" value="${esc(S.hero ? S.hero.name : "")}">
+    <button class="btn full" style="margin-top:16px" data-ob="next">Let's go</button>
+    <button class="btn full ghost" style="margin-top:10px" data-ob="demo">Look around with sample data</button>
+    <div style="text-align:center;margin-top:6px"><button class="link" data-ob="restore">New phone? Restore a backup</button></div>
+    <p class="note" style="text-align:center">Everything stays on your phone. No account, no subscription.</p></div>`;
+  if(s === 1) return `<div class="ob">${dots}<div class="big">Who are you cooking for?</div><p class="muted">Recipes scale to this. You can change it for any meal.</p>
+    <div class="row" style="margin-top:18px"><span class="grow" style="font-weight:700">People</span><div class="stepper"><button data-ob="ppl" data-d="-1" aria-label="Fewer people">−</button><b id="ppl">${st.people}</b><button data-ob="ppl" data-d="1" aria-label="More people">+</button></div></div>
+    <label class="f">Which meals do you want to plan?</label><div class="chips">${SLOTS.map(([k, l]) => `<button class="chip ${st.slots[k] ? "on" : ""}" data-ob="slot" data-k="${k}" aria-pressed="${st.slots[k]}">${l}</button>`).join("")}</div>
+    <p class="note">Most people start with dinners only. Fewer slots, less to think about.</p>
+    <div class="actions"><button class="btn ghost" data-ob="back">Back</button><button class="btn" data-ob="next">Next</button></div></div>`;
+  if(s === 2) return `<div class="ob">${dots}<div class="big">Your weekly food budget</div><p class="muted">Groceries, takeaways and eating out. A rough number is fine.</p>
+    <label class="f">Currency</label><div class="chips">${CURS.map(c => `<button class="chip ${st.cur === c ? "on" : ""}" data-ob="cur" data-v="${c}">${c}</button>`).join("")}</div>
+    <label class="f" for="bud">Each week</label><input class="in" id="bud" inputmode="decimal" value="${st.budget || ""}" placeholder="60">
+    <label class="f">Week starts on</label><div class="chips"><button class="chip ${st.ws === 1 ? "on" : ""}" data-ob="ws" data-v="1">Monday</button><button class="chip ${st.ws === 0 ? "on" : ""}" data-ob="ws" data-v="0">Sunday</button></div>
+    <div class="actions"><button class="btn ghost" data-ob="back">Back</button><button class="btn" data-ob="next">Next</button></div></div>`;
+  return `<div class="ob">${dots}<div class="big">Your recipe box</div><p class="muted">We've added 13 simple starter recipes so you can plan straight away. Change them, delete them, or add your own.</p>
+    <div class="card" style="padding:12px 14px">${S.recipes.slice(0, 6).map(r => `<div class="row" style="min-height:40px"><span style="font-size:22px">${r.emoji}</span><span class="grow">${esc(r.name)}</span><span class="small muted">${money(recCost(r))}</span></div>`).join("")}
+      <div class="small muted" style="margin-top:6px">and ${Math.max(0, S.recipes.length - 6)} more</div></div>
+    <p class="note">Prices are rough guesses for the whole recipe. Edit them to match your shop.</p>
+    <div class="actions"><button class="btn ghost" data-ob="back">Back</button><button class="btn" data-ob="finish">Start planning</button></div></div>`;
+}
+function bindOb(){ const n = document.getElementById("nm"); if(n) n.oninput = () => { S.hero = {name: n.value.trim().slice(0, 24) || "Friend", created: today()}; save(); };
+  const b = document.getElementById("bud"); if(b) b.oninput = () => { const v = parseFloat(b.value.replace(",", ".")); if(isFinite(v) && v >= 0){ S.settings.budget = Math.min(100000, v); save(); } }; }
+
+/* ───────── sheets ───────── */
+function sheet(html){ closeSheet(); const bg = document.createElement("div"); bg.className = "sheet-bg"; bg.id = "sheet";
+  bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
+  bg.addEventListener("click", e => { if(e.target === bg || e.target.closest("[data-close]")) closeSheet(); }); document.body.appendChild(bg);
+  const f = bg.querySelector("input:not([type=hidden]),textarea"); return bg.querySelector(".sheet"); }
+function closeSheet(){ const s = document.getElementById("sheet"); if(s) s.remove(); }
+const stepper = (id, v, lo, hi, lbl) => `<div class="stepper" data-lo="${lo}" data-hi="${hi}"><button data-step="${id}" data-d="-1" aria-label="Less ${lbl}">−</button><b id="${id}">${v}</b><button data-step="${id}" data-d="1" aria-label="More ${lbl}">+</button></div>`;
+function slotSheet(d, k){
+  const cur = (S.plan[d] || {})[k], label = SLOTS.find(x => x[0] === k)[1];
+  const list = S.recipes.slice().sort((a, b) => (b.fav - a.fav) || (k === "b") * (b.tags.includes("Breakfast") - a.tags.includes("Breakfast")) || (b.made - a.made) || a.name.localeCompare(b.name));
+  const root = sheet(`<h3>${label}, ${dname(d, {weekday:"long", day:"numeric", month:"short"})}</h3>
+    <div class="row" style="margin-top:12px"><span class="grow" style="font-weight:700">Cooking for</span>${stepper("sn", cur && cur.n || S.settings.people, 1, 50, "people")}</div>
+    <input class="in" id="sq" placeholder="Search recipes" aria-label="Search recipes" style="margin-top:12px">
+    <div class="list-r" id="sl">${list.map(r => `<button class="pickr" data-pick="${r.id}" data-name="${esc(r.name.toLowerCase())}"><span class="e" aria-hidden="true">${r.emoji}</span><span>${r.fav ? "♥ " : ""}${esc(r.name)}</span><small>${r.mins ? r.mins + " min" : ""}</small></button>`).join("")}</div>
+    <div class="row" style="margin-top:12px;gap:8px"><button class="btn sm ghost grow" data-pick="left">🥡 Leftovers</button><button class="btn sm ghost grow" data-pick="out">🛍️ Takeaway or out</button></div>
+    ${cur ? `<button class="btn full ghost" style="margin-top:10px;color:var(--terra)" data-pick="clear">Clear this meal</button>` : ""}`);
+  root.querySelector("#sq").oninput = e => { const q = e.target.value.toLowerCase(); root.querySelectorAll("#sl .pickr").forEach(b => b.style.display = b.dataset.name.includes(q) ? "" : "none"); };
+  root.addEventListener("click", e => { const st = e.target.closest("[data-step]"); if(st){ stepBtn(st); return; }
+    const p = e.target.closest("[data-pick]"); if(!p) return; const n = +root.querySelector("#sn").textContent, v = p.dataset.pick;
+    if(v === "clear"){ clearSlot(d, k); closeSheet(); render(); return; }
+    clearSlot(d, k, true);
+    const day = S.plan[d] || (S.plan[d] = {});
+    day[k] = v === "left" ? {k:"left", n, c:false, p:false} : v === "out" ? {k:"out", n, c:false, p:false} : {k:"r", rid:v, n, c:false, p:false};
+    save(); closeSheet(); afterPlan(); render(); });
+}
+function stepBtn(b){ const id = b.dataset.step, el = document.getElementById(id), box = b.closest(".stepper"); el.textContent = Math.max(+box.dataset.lo, Math.min(+box.dataset.hi, +el.textContent + +b.dataset.d)); }
+/* removing a cooked meal takes its XP back, so moving meals around never pays twice */
+function clearSlot(d, k, keepDay){ const day = S.plan[d]; if(!day || !day[k]) return; const s = day[k];
+  if(s.k === "r" && s.c){ const r = recOf(s.rid); if(r) r.made = Math.max(0, r.made - 1); if(s.p){ capBack("cook"); S.xp = Math.max(0, S.xp - 10); } }
+  delete day[k]; if(!keepDay && !Object.keys(day).length) delete S.plan[d]; save(); }
+function afterPlan(){ const ws = curWs(), dn = days7(ws), on = S.settings.slots.d ? "d" : SLOTS.find(([k]) => S.settings.slots[k])[0];
+  checkBadges();
+  if(dn.every(d => (S.plan[d] || {})[on])){ const k = "plan|" + fkey(ws); if(!S.flags[k]){ S.flags[k] = today(); save(); gain(25, "Whole week planned"); } award("full_week"); } }
+function recipeSheet(id, n){
+  const r = recOf(id); if(!r) return; n = n || r.serves; const f = n / r.serves;
+  const root = sheet(`<div class="row"><span style="font-size:40px" aria-hidden="true">${r.emoji}</span><div class="grow"><h3>${esc(r.name)}</h3>
+      <div class="small muted">${r.mins ? r.mins + " min · " : ""}${r.tags.join(" · ")}${r.made ? ` · cooked ${r.made}×` : ""}</div></div>
+      <button class="icb" data-r="fav" aria-pressed="${r.fav}" aria-label="${r.fav ? "Remove from favourites" : "Add to favourites"}" style="color:${r.fav ? "var(--terra)" : "var(--mut)"};font-size:22px">${r.fav ? "♥" : "♡"}</button></div>
+    <div class="row" style="margin-top:14px"><span class="grow" style="font-weight:700">Serves</span>${stepper("rs", n, 1, 50, "servings")}</div>
+    <label class="f">Ingredients · about ${money(recCost(r, n))}</label>
+    ${r.ing.length ? `<ul class="ul" id="ingl">${r.ing.map(i => `<li><b>${unitTxt(Math.round(i.qty * f * 100) / 100, i.unit)}</b><span>${esc(i.name)}</span></li>`).join("")}</ul>` : `<p class="muted">No ingredients yet.</p>`}
+    ${r.steps.trim() ? `<label class="f">Method</label><ol class="ol">${r.steps.split(/\n+/).filter(x => x.trim()).map(x => `<li>${esc(x.trim())}</li>`).join("")}</ol>` : ""}
+    <div class="actions"><button class="btn ghost" data-r="edit">Edit</button><button class="btn" data-r="plan">Plan it</button></div>`);
+  root.addEventListener("click", e => { const st = e.target.closest("[data-step]"); if(st){ stepBtn(st); recipeSheet(id, +root.querySelector("#rs").textContent); return; }
+    const a = e.target.closest("[data-r]"); if(!a) return;
+    if(a.dataset.r === "fav"){ r.fav = !r.fav; save(); recipeSheet(id, n); render(); }
+    else if(a.dataset.r === "edit") recipeForm(r);
+    else if(a.dataset.r === "plan") planPick(r, +root.querySelector("#rs").textContent); });
+}
+function planPick(r, n){
+  const ws = curWs(), k = S.settings.slots.d ? "d" : SLOTS.find(([x]) => S.settings.slots[x])[0], lbl = SLOTS.find(x => x[0] === k)[1].toLowerCase();
+  const root = sheet(`<h3>Plan ${esc(r.name)}</h3><p class="sub">Pick a day for ${lbl}, ${wrange(ws)}.</p>
+    <div class="list-r">${days7(ws).map(d => { const s = (S.plan[d] || {})[k]; const now = s ? (s.k === "r" ? recOf(s.rid).name : s.k === "left" ? "Leftovers" : "Takeaway or out") : "";
+      return `<button class="pickr" data-day="${d}"><b style="min-width:94px">${dname(d, {weekday:"long"})}</b><span class="muted small">${now ? "replaces " + esc(now) : "free"}</span></button>`; }).join("")}</div>`);
+  root.addEventListener("click", e => { const b = e.target.closest("[data-day]"); if(!b) return; const d = b.dataset.day; clearSlot(d, k, true);
+    (S.plan[d] || (S.plan[d] = {}))[k] = {k:"r", rid:r.id, n, c:false, p:false}; save(); closeSheet(); afterPlan(); tab = "week"; render(); toast(`${esc(r.name)} planned for ${dname(d, {weekday:"long"})}`); });
+}
+function ingRow(i){ i = i || {id:uid(), name:"", qty:"", unit:"x", aisle:"P", cost:""};
+  return `<div class="ingr" data-ing="${i.id}"><input class="in full" data-f="name" maxlength="60" placeholder="Ingredient, for example onion" value="${esc(i.name)}" aria-label="Ingredient name">
+    <input class="in" data-f="qty" inputmode="decimal" placeholder="Amount" value="${i.qty === "" ? "" : fmtQ(i.qty)}" aria-label="Amount">
+    <select class="in" data-f="unit" aria-label="Unit">${UNITS.map(u => `<option ${u === i.unit ? "selected" : ""} value="${u}">${u === "x" ? "each" : u}</option>`).join("")}</select>
+    <div class="r3"><select class="in" data-f="aisle" aria-label="Aisle">${AISLES.map(([a, e, nm]) => `<option ${a === i.aisle ? "selected" : ""} value="${a}">${e} ${nm}</option>`).join("")}</select>
+      <input class="in" data-f="cost" inputmode="decimal" placeholder="Cost ${S.settings.cur}" value="${i.cost === "" ? "" : i.cost}" aria-label="Rough cost for this amount">
+      <button class="x" data-rm aria-label="Remove ingredient">${I.x}</button></div></div>`; }
+function recipeForm(r){
+  const e = !!r; r = r || {name:"", emoji:"🍲", serves:S.settings.people, mins:"", tags:[], ing:[], steps:""};
+  let em = r.emoji, tags = r.tags.slice();
+  const root = sheet(`<h3>${e ? "Edit recipe" : "New recipe"}</h3>
+    <label class="f" for="rn">Name</label><input class="in" id="rn" maxlength="60" value="${esc(r.name)}" placeholder="For example Mum's lasagne">
+    <label class="f">Picture</label><div class="chips" id="emj">${EMOJI.map(x => `<button class="chip ${x === em ? "on" : ""}" data-em="${x}" style="font-size:20px;padding:0 10px">${x}</button>`).join("")}</div>
+    <div class="row" style="margin-top:14px;align-items:flex-end"><div class="grow"><label class="f" style="margin-top:0">Serves</label>${stepper("rsv", r.serves, 1, 50, "servings")}</div>
+      <div style="width:120px"><label class="f" for="rm" style="margin-top:0">Minutes</label><input class="in" id="rm" inputmode="numeric" value="${r.mins || ""}" placeholder="30"></div></div>
+    <label class="f">Tags</label><div class="chips" id="tg">${TAGS.map(t => `<button class="chip ${tags.includes(t) ? "on" : ""}" data-tg="${t}">${t}</button>`).join("")}</div>
+    <label class="f">Ingredients</label><div id="ings">${(r.ing.length ? r.ing : [null]).map(ingRow).join("")}</div>
+    <button class="btn ghost full sm" style="margin-top:10px" id="addIng">+ Add ingredient</button>
+    <p class="note">Cost is a rough guess for the amount in this recipe. It's used for your shopping estimate.</p>
+    <label class="f" for="rst">Method, one step per line</label><textarea class="in" id="rst" maxlength="4000" placeholder="Fry the onion until soft.&#10;Add the rest and simmer for 20 minutes.">${esc(r.steps)}</textarea>
+    <div class="actions">${e ? `<button class="btn ghost" id="del" style="color:var(--terra)">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save recipe</button></div>`);
+  root.addEventListener("click", ev => { const t = ev.target;
+    const st = t.closest("[data-step]"); if(st){ stepBtn(st); return; }
+    const m = t.closest("[data-em]"); if(m){ em = m.dataset.em; root.querySelectorAll("[data-em]").forEach(b => b.classList.toggle("on", b === m)); return; }
+    const g = t.closest("[data-tg]"); if(g){ const v = g.dataset.tg; tags = tags.includes(v) ? tags.filter(x => x !== v) : tags.concat(v); g.classList.toggle("on"); return; }
+    const rm = t.closest("[data-rm]"); if(rm){ rm.closest(".ingr").remove(); return; } });
+  root.querySelector("#addIng").onclick = () => { root.querySelector("#ings").insertAdjacentHTML("beforeend", ingRow()); const l = root.querySelectorAll(".ingr"); l[l.length - 1].querySelector("input").focus(); };
+  if(e) root.querySelector("#del").onclick = () => { const used = Object.values(S.plan).some(d => Object.values(d).some(s => s.rid === r.id));
+    if(!confirm(used ? "Delete this recipe? It's also taken off any days it was planned." : "Delete this recipe?")) return;
+    Object.keys(S.plan).forEach(d => Object.keys(S.plan[d]).forEach(k => { if(S.plan[d][k].rid === r.id) clearSlot(d, k); }));
+    S.recipes = S.recipes.filter(x => x.id !== r.id); save(); closeSheet(); render(); toast("Recipe deleted"); };
+  root.querySelector("#ok").onclick = () => {
+    const name = root.querySelector("#rn").value.trim(); if(!name){ toast("Give the recipe a name"); root.querySelector("#rn").focus(); return; }
+    const ing = [...root.querySelectorAll(".ingr")].map(row => { const g = f => row.querySelector(`[data-f=${f}]`).value; const nm = g("name").trim(); if(!nm) return null;
+      return normIng({id: row.dataset.ing, name:nm, qty: parseFloat(g("qty").replace(",", ".")) || 1, unit:g("unit"), aisle:g("aisle"), cost: parseFloat(g("cost").replace(",", ".")) || 0}); }).filter(Boolean);
+    const data = {name: name.slice(0, 60), emoji: em, serves: +root.querySelector("#rsv").textContent, mins: Math.min(1440, parseInt(root.querySelector("#rm").value, 10) || 0), tags, ing, steps: root.querySelector("#rst").value.slice(0, 4000)};
+    if(e) Object.assign(r, data); else S.recipes.push(Object.assign({id:uid(), fav:false, own:true, made:0}, data));
+    save(); checkBadges(); closeSheet(); render(); toast(e ? "Recipe saved" : `${esc(data.name)} added to your recipes`); };
+}
+function spendForm(kind, pre){
+  const K = {shop:"Food shop", take:"Takeaway", out:"Eating out"}, ws = curWs(), t = today(), def = t >= ws && t < addDays(ws, 7) ? t : addDays(ws, 6) < t ? addDays(ws, 6) : ws;
+  const root = sheet(`<h3>${K[kind]}</h3><label class="f" for="sa">Amount ${S.settings.cur}</label><input class="in" id="sa" inputmode="decimal" value="${pre ? pre.toFixed(2) : ""}" placeholder="0.00">
+    <label class="f" for="sw">What was it? (optional)</label><input class="in" id="sw" maxlength="60" placeholder="${kind === "shop" ? "For example Big weekly shop" : "For example Friday pizza"}">
+    <label class="f" for="sd">Day</label><input class="in" id="sd" type="date" value="${def}" max="${t}">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`);
+  root.querySelector("#ok").onclick = () => { const a = parseFloat(root.querySelector("#sa").value.replace(",", ".")), d = root.querySelector("#sd").value;
+    if(!(a > 0)){ toast("Add the amount"); return; } if(!isD(d) || d > t){ toast("Pick a day up to today"); return; }
+    const k = fkey(weekStart(d)); if(!(k in S.wbud)) S.wbud[k] = S.settings.budget;
+    S.spend.push({id:uid(), date:d, what: root.querySelector("#sw").value.trim().slice(0, 60), amt: Math.min(1e6, a), kind}); save(); closeSheet(); render(); toast(`${money(a)} logged`); };
+}
+function settingsForm(){
+  const st = S.settings;
+  const root = sheet(`<h3>Settings</h3>
+    <label class="f" for="snm">Your name</label><input class="in" id="snm" maxlength="24" value="${esc(S.hero.name)}">
+    <label class="f" for="sbd">Weekly food budget ${st.cur}</label><input class="in" id="sbd" inputmode="decimal" value="${st.budget}">
+    <p class="note">A new budget counts from this week on. Weeks you already logged keep the budget they had.</p>
+    <label class="f">Currency</label><div class="chips">${CURS.map(c => `<button class="chip ${st.cur === c ? "on" : ""}" data-s="cur" data-v="${c}">${c}</button>`).join("")}</div>
+    <div class="row" style="margin-top:16px"><span class="grow" style="font-weight:700">Usually cooking for</span>${stepper("spp", st.people, 1, 20, "people")}</div>
+    <label class="f">Meals to plan</label><div class="chips">${SLOTS.map(([k, l]) => `<button class="chip ${st.slots[k] ? "on" : ""}" data-s="slot" data-v="${k}">${l}</button>`).join("")}</div>
+    <label class="f">Week starts on</label><div class="chips"><button class="chip ${st.ws === 1 ? "on" : ""}" data-s="ws" data-v="1">Monday</button><button class="chip ${st.ws === 0 ? "on" : ""}" data-s="ws" data-v="0">Sunday</button></div>
+    <label class="f">Your data</label><p class="note" style="margin-top:0">Everything lives on this phone. Back up now and then, and before you change phones.</p>
+    <div class="row" style="margin-top:10px;gap:8px"><button class="btn sm ghost grow" id="bk">Back up</button><button class="btn sm ghost grow" id="rs">Restore</button></div>
+    ${S.sample ? `<button class="btn sm ghost full" style="margin-top:10px" id="cs">Remove sample data</button>` : ""}
+    <button class="btn sm ghost full" style="margin-top:10px;color:var(--terra)" id="er">Erase everything</button>
+    <div class="actions"><button class="btn full" id="ok">Done</button></div>
+    <p class="note" style="text-align:center">Meal Quest is a planning tool. It doesn't give diet, nutrition or medical advice.</p>`);
+  root.addEventListener("click", e => { const st2 = e.target.closest("[data-step]"); if(st2){ stepBtn(st2); return; } const b = e.target.closest("[data-s]"); if(!b) return;
+    if(b.dataset.s === "cur"){ st.cur = b.dataset.v; root.querySelectorAll('[data-s="cur"]').forEach(x => x.classList.toggle("on", x === b)); }
+    if(b.dataset.s === "slot"){ const k = b.dataset.v; st.slots[k] = !st.slots[k]; if(!SLOTS.some(([x]) => st.slots[x])){ st.slots[k] = true; toast("Keep at least one meal"); } b.classList.toggle("on", st.slots[k]); }
+    if(b.dataset.s === "ws"){ st.ws = +b.dataset.v; wk = null; root.querySelectorAll('[data-s="ws"]').forEach(x => x.classList.toggle("on", x === b)); }
+    save(); });
+  root.querySelector("#ok").onclick = () => { const n = root.querySelector("#snm").value.trim(); if(n) S.hero.name = n.slice(0, 24);
+    const bv = parseFloat(root.querySelector("#sbd").value.replace(",", "."));
+    if(isFinite(bv) && bv >= 0 && bv !== st.budget){ const cur = fkey(weekStart(today())); S.spend.forEach(x => { const k = fkey(weekStart(x.date)); if(k < cur && !(k in S.wbud)) S.wbud[k] = st.budget; }); st.budget = Math.min(100000, bv); }
+    st.people = +root.querySelector("#spp").textContent; save(); closeSheet(); render(); };
+  root.querySelector("#bk").onclick = exportData; root.querySelector("#rs").onclick = () => document.getElementById("importFile").click();
+  const cs = root.querySelector("#cs"); if(cs) cs.onclick = () => { if(!confirm("Remove the sample data? Your name and settings stay.")) return; const h = S.hero, se = S.settings; S = blank(); S.hero = h; S.settings = se; S.ready = true; S.recipes = starters(); save(); wk = null; closeSheet(); render(); };
+  root.querySelector("#er").onclick = () => { if(!confirm("Erase everything on this phone? This can't be undone.")) return; if(!confirm("Really erase? Back up first if you might want it.")) return;
+    try{ [KEY, RESCUE, RESCUE + ".prev"].forEach(x => localStorage.removeItem(x)); }catch(e){} S = blank(); S.recipes = starters(); wk = null; tab = "week"; closeSheet(); render(); };
+}
+function exportData(){ const blob = new Blob([JSON.stringify(S, null, 1)], {type:"application/json"}), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `meal-quest-backup-${today()}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast("Backup saved to your downloads"); }
+document.getElementById("importFile").onchange = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader();
+  r.onload = () => { try{ const d = JSON.parse(r.result); if(!isObj(d) || d.v !== 1 || !("recipes" in d)) throw 0;
+      if(S.ready && !confirm("Replace what's on this phone with this backup?")) return; S = Object.assign(blank(), d); normalize(); save(); wk = null; tab = "week"; closeSheet(); render(); toast("Backup restored"); }
+    catch(_){ toast("That file isn't a Meal Quest backup"); } e.target.value = ""; };
+  r.readAsText(f); };
+function shareList(){ const ws = curWs(), {items, extra} = buildList(ws); let out = `Shopping list, ${wrange(ws)}\n`;
+  AISLES.forEach(([a, , n]) => { const its = items.filter(i => i.aisle === a && !i.have && !i.got), ex = extra.filter(x => x.aisle === a && !x.got); if(!its.length && !ex.length) return;
+    out += `\n${n}\n` + its.map(i => `- ${i.name} (${unitTxt(WHOLE.includes(i.unit) ? Math.ceil(i.qty - 1e-9) : Math.round(i.qty * 100) / 100, i.unit)})`).concat(ex.map(x => `- ${x.name}`)).join("\n") + "\n"; });
+  if(navigator.share) navigator.share({title:"Shopping list", text:out}).catch(() => {});
+  else if(navigator.clipboard) navigator.clipboard.writeText(out).then(() => toast("List copied. Paste it into a message."), () => toast("Couldn't copy on this phone"));
+}
+
+/* ───────── actions ───────── */
+document.addEventListener("click", e => {
+  const ob = e.target.closest("[data-ob]");
+  if(ob){ const a = ob.dataset.ob, st = S.settings;
+    if(a === "next"){ if(S.step === 0 && !S.hero){ toast("Type your name first"); document.getElementById("nm").focus(); return; } S.step = Math.min(3, S.step + 1); }
+    else if(a === "back") S.step = Math.max(0, S.step - 1);
+    else if(a === "ppl") st.people = Math.max(1, Math.min(20, st.people + +ob.dataset.d));
+    else if(a === "slot"){ const k = ob.dataset.k; st.slots[k] = !st.slots[k]; if(!SLOTS.some(([x]) => st.slots[x])) st.slots[k] = true; }
+    else if(a === "cur") st.cur = ob.dataset.v;
+    else if(a === "ws"){ st.ws = +ob.dataset.v; wk = null; }
+    else if(a === "finish"){ S.ready = true; tab = "week"; wk = null; save(); render(); scrollTo(0, 0); toast("Tap + Add on any day to plan a meal"); return; }
+    else if(a === "demo"){ demo(); render(); scrollTo(0, 0); return; }
+    else if(a === "restore"){ document.getElementById("importFile").click(); return; }
+    save(); render(); scrollTo(0, 0); return; }
+  const tb = e.target.closest("[data-tab]"); if(tb){ tab = tb.dataset.tab; closeSheet(); render(); scrollTo({top:0}); return; }
+  const el = e.target.closest("[data-act]"); if(!el) return; const act = el.dataset.act, id = el.dataset.id;
+  if(act === "settings") settingsForm();
+  else if(act === "wk"){ wk = addDays(curWs(), +el.dataset.d); render(); }
+  else if(act === "slot") slotSheet(el.dataset.d, el.dataset.k);
+  else if(act === "cook"){ const s = (S.plan[el.dataset.d] || {})[el.dataset.k]; if(!s || s.k !== "r" || el.dataset.d > today()) return; const r = recOf(s.rid);
+    if(!s.c){ s.c = true; if(r) r.made++; if(capOk("cook", 3)){ s.p = true; save(); gain(10, `Cooked ${r ? r.name : "a meal"}`); } else { save(); toast("Ticked. That's today's XP for cooking, more tomorrow."); }
+      checkBadges(); const ws = weekStart(el.dataset.d); if(days7(ws).filter(d => ((S.plan[d] || {}).d || {}).c).length >= 5) award("cookweek"); }
+    else { s.c = false; if(r) r.made = Math.max(0, r.made - 1); if(s.p){ s.p = false; capBack("cook"); gain(-10, ""); } else save(); }
+    render(); }
+  else if(act === "recipe") recipeSheet(id, +el.dataset.n || 0);
+  else if(act === "newRecipe") recipeForm();
+  else if(act === "rtag"){ rtag = el.dataset.v; render(); }
+  else if(act === "fill"){ fillWeek(); }
+  else if(act === "pickTonight"){ const k = S.settings.slots.d ? "d" : SLOTS.find(([x]) => S.settings.slots[x])[0], r = pickRecipe(new Set());
+    if(!r){ toast("Add a recipe first"); return; } (S.plan[today()] || (S.plan[today()] = {}))[k] = {k:"r", rid:r.id, n:S.settings.people, c:false, p:false}; save(); afterPlan(); render(); toast(`${r.emoji} ${esc(r.name)} it is`); }
+  else if(act === "copyWeek"){ const ws = curWs(), prev = addDays(ws, -7); let n = 0;
+    days7(prev).forEach((d, i) => { const src = S.plan[d]; if(!src) return; const to = addDays(ws, i); Object.keys(src).forEach(k => { if(!S.settings.slots[k] || (S.plan[to] || {})[k]) return;
+      (S.plan[to] || (S.plan[to] = {}))[k] = {k:src[k].k, rid:src[k].rid, n:src[k].n, c:false, p:false}; n++; }); });
+    if(!n){ toast("Nothing to copy into the empty spots"); return; } save(); afterPlan(); render(); toast(`${n} meal${n === 1 ? "" : "s"} copied from last week`); }
+  else if(act === "got" || act === "have"){ const L = listFor(curWs()), k = el.dataset.k, m = act === "got" ? L.got : L.have; if(m[k]) delete m[k]; else m[k] = true; save(); shopCheck(); render(); }
+  else if(act === "gotX"){ const x = listFor(curWs()).extra.find(q => q.id === id); if(x){ x.got = !x.got; save(); shopCheck(); render(); } }
+  else if(act === "delX"){ const L = listFor(curWs()); L.extra = L.extra.filter(q => q.id !== id); save(); render(); }
+  else if(act === "addExtra") extraForm();
+  else if(act === "shareList") shareList();
+  else if(act === "doneShop") spendForm("shop", estShop(curWs()));
+  else if(act === "addSpend") spendForm(el.dataset.k);
+  else if(act === "delSpend"){ if(!confirm("Delete this entry?")) return; S.spend = S.spend.filter(x => x.id !== id); save(); render(); }
+});
+document.addEventListener("input", e => { if(e.target.id === "rq"){ rq = e.target.value; const pos = e.target.selectionStart; render(); const n = document.getElementById("rq"); n.focus(); try{ n.setSelectionRange(pos, pos); }catch(_){} } });
+function extraForm(){ const root = sheet(`<h3>Add to the list</h3><label class="f" for="xn">Item</label><input class="in" id="xn" maxlength="60" placeholder="For example washing-up liquid">
+    <label class="f" for="xa">Aisle</label><select class="in" id="xa">${AISLES.map(([a, e, n]) => `<option value="${a}" ${a === "O" ? "selected" : ""}>${e} ${n}</option>`).join("")}</select>
+    <label class="f" for="xc">Rough cost ${S.settings.cur} (optional)</label><input class="in" id="xc" inputmode="decimal" placeholder="0.00">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Add</button></div>`);
+  root.querySelector("#ok").onclick = () => { const n = root.querySelector("#xn").value.trim(); if(!n){ toast("Type the item"); return; }
+    listFor(curWs()).extra.push({id:uid(), name:n.slice(0, 60), aisle:root.querySelector("#xa").value, cost: Math.min(1e5, parseFloat(root.querySelector("#xc").value.replace(",", ".")) || 0), got:false}); save(); closeSheet(); render(); };
+}
+/* a whole list ticked pays once a week, and only for a real list of 5 or more things */
+function shopCheck(){ const ws = curWs(), {items, extra} = buildList(ws), need = items.filter(i => !i.have), all = need.length + extra.length;
+  if(all >= 5 && need.every(i => i.got) && extra.every(x => x.got)){ const k = "shop|" + fkey(ws); award("shop1"); if(!S.flags[k]){ S.flags[k] = today(); save(); gain(30, "Shopping done"); } } }
+function pickRecipe(avoid){ const pool = S.recipes.filter(r => !avoid.has(r.id) && !r.tags.includes("Breakfast")); if(!pool.length) return null;
+  const favs = pool.filter(r => r.fav), from = favs.length && Math.random() < .6 ? favs : pool; return from[Math.floor(Math.random() * from.length)]; }
+function fillWeek(){ const ws = curWs(), k = S.settings.slots.d ? "d" : SLOTS.find(([x]) => S.settings.slots[x])[0], used = new Set(); let n = 0;
+  days7(ws).forEach(d => { const s = (S.plan[d] || {})[k]; if(s && s.rid) used.add(s.rid); });
+  days7(ws).forEach(d => { if((S.plan[d] || {})[k]) return; const r = pickRecipe(used) || pickRecipe(new Set()); if(!r) return; used.add(r.id);
+    (S.plan[d] || (S.plan[d] = {}))[k] = {k:"r", rid:r.id, n:S.settings.people, c:false, p:false}; n++; });
+  if(!n){ toast(S.recipes.length ? "Every day already has a meal" : "Add a recipe first"); return; } save(); afterPlan(); render(); toast(`${n} dinner${n === 1 ? "" : "s"} picked. Tap any of them to swap.`); }
+
+/* ───────── starter recipes (prices are rough guesses for the whole recipe) ───────── */
+function starters(){
+  const R = (emoji, name, serves, mins, tags, ing, steps) => ({id:uid(), emoji, name, serves, mins, tags, fav:false, own:false, made:0, steps,
+    ing: ing.map(([n, q, u, a, c]) => ({id:uid(), name:n, qty:q, unit:u, aisle:a, cost:c}))});
+  return [
+    R("🍝","Spaghetti bolognese",4,35,["Budget","Batch"],[["Spaghetti",400,"g","G",.8],["Beef mince",500,"g","M",3.5],["Chopped tomatoes",2,"tin","T",1.2],["Onion",1,"x","P",.2],["Carrot",1,"x","P",.15],["Garlic",2,"clove","P",.1],["Dried oregano",1,"tsp","G",.05]],
+      "Soften the chopped onion, carrot and garlic in a little oil for 5 minutes.\nAdd the mince and brown it, breaking it up.\nStir in the tomatoes and oregano, then simmer for 20 minutes.\nCook the spaghetti, drain and serve with the sauce."),
+    R("🌶️","Veggie chilli",4,40,["Veggie","Budget","Batch"],[["Kidney beans",2,"tin","T",1.2],["Chopped tomatoes",2,"tin","T",1.2],["Onion",1,"x","P",.2],["Peppers",2,"x","P",1.2],["Garlic",2,"clove","P",.1],["Chilli powder",2,"tsp","G",.1],["Rice",300,"g","G",.4]],
+      "Fry the onion, peppers and garlic until soft.\nStir in the chilli powder for a minute.\nAdd the tomatoes and drained beans and simmer for 25 minutes.\nServe with rice."),
+    R("🍛","Chickpea curry",4,30,["Veggie","Quick","Budget"],[["Chickpeas",2,"tin","T",1.2],["Coconut milk",1,"tin","T",1],["Onion",1,"x","P",.2],["Garlic",2,"clove","P",.1],["Curry paste",3,"tbsp","T",.8],["Spinach",200,"g","P",1],["Rice",300,"g","G",.4]],
+      "Soften the onion and garlic, then stir in the curry paste.\nAdd the drained chickpeas and coconut milk and simmer for 15 minutes.\nStir in the spinach until it wilts.\nServe with rice."),
+    R("🥘","Sausage traybake",4,45,["Batch"],[["Sausages",8,"x","M",2.5],["Potatoes",800,"g","P",.8],["Peppers",2,"x","P",1.2],["Red onion",2,"x","P",.4],["Olive oil",2,"tbsp","G",.2]],
+      "Heat the oven to 200°C (400°F).\nCut the potatoes, peppers and onions into chunks and toss with oil in a big tray.\nAdd the sausages and roast for 35 to 40 minutes, turning once."),
+    R("🐟","Tuna pasta bake",4,35,["Budget"],[["Pasta",400,"g","G",.7],["Tuna",2,"tin","T",2],["Sweetcorn",1,"tin","T",.6],["Cheddar",150,"g","D",1.2],["Milk",400,"ml","D",.4],["Butter",30,"g","D",.3],["Plain flour",30,"g","G",.05]],
+      "Cook the pasta and drain.\nMelt the butter, stir in the flour, then slowly whisk in the milk until thick.\nMix in most of the cheese, the tuna, sweetcorn and pasta.\nTop with the rest of the cheese and bake at 200°C (400°F) for 15 minutes."),
+    R("🥢","Chicken stir-fry",4,20,["Quick"],[["Chicken breast",400,"g","M",3.2],["Noodles",300,"g","G",1],["Stir-fry veg",1,"pack","P",1.5],["Soy sauce",3,"tbsp","T",.2],["Garlic",2,"clove","P",.1]],
+      "Slice the chicken thinly and fry it hot until cooked through.\nAdd the garlic and veg and stir-fry for 3 minutes.\nAdd the cooked noodles and soy sauce and toss together."),
+    R("🌮","Chicken fajitas",4,25,["Quick"],[["Chicken breast",400,"g","M",3.2],["Tortilla wraps",8,"x","B",1.2],["Peppers",2,"x","P",1.2],["Onion",1,"x","P",.2],["Fajita seasoning",1,"pack","G",.6],["Soured cream",150,"ml","D",.8]],
+      "Slice the chicken, peppers and onion into strips.\nFry the chicken with the seasoning until cooked, then add the veg for 5 minutes.\nWarm the wraps and fill them at the table."),
+    R("🍲","Red lentil soup",4,35,["Veggie","Budget","Batch","Lunchbox"],[["Red lentils",250,"g","G",.6],["Carrot",2,"x","P",.3],["Onion",1,"x","P",.2],["Stock cube",2,"x","G",.2],["Chopped tomatoes",1,"tin","T",.6],["Bread",1,"x","B",1]],
+      "Soften the chopped onion and carrot for 5 minutes.\nAdd the lentils, tomatoes, stock cubes and 1.2 litres (5 cups) of water.\nSimmer for 25 minutes, then blend if you like it smooth.\nServe with bread."),
+    R("🥔","Jacket potatoes",4,70,["Budget","Veggie"],[["Baking potatoes",4,"x","P",1.2],["Baked beans",2,"tin","T",1],["Cheddar",150,"g","D",1.2],["Butter",30,"g","D",.3]],
+      "Prick the potatoes and bake at 200°C (400°F) for about an hour, until soft inside.\nWarm the beans.\nSplit the potatoes and top with butter, beans and cheese."),
+    R("🍳","Veggie fried rice",2,15,["Quick","Veggie","Budget"],[["Cooked rice",400,"g","G",.5],["Eggs",3,"x","D",.6],["Frozen peas",150,"g","F",.3],["Spring onions",1,"bunch","P",.5],["Soy sauce",2,"tbsp","T",.15]],
+      "Scramble the eggs in a hot pan and set aside.\nFry the rice and peas for 4 minutes until hot.\nStir the eggs back in with the spring onions and soy sauce."),
+    R("🥣","Overnight oats",2,5,["Breakfast","Quick","Veggie"],[["Porridge oats",100,"g","G",.2],["Milk",300,"ml","D",.3],["Yogurt",150,"g","D",.5],["Frozen berries",150,"g","F",.8],["Honey",1,"tbsp","T",.2]],
+      "Mix the oats, milk and yogurt in two jars.\nTop with the berries and honey.\nLeave in the fridge overnight."),
+    R("🍳","Cheese omelette",1,10,["Breakfast","Quick","Veggie"],[["Eggs",3,"x","D",.6],["Cheddar",40,"g","D",.3],["Butter",10,"g","D",.1],["Tomato",1,"x","P",.2]],
+      "Beat the eggs with a pinch of salt.\nMelt the butter in a pan and pour in the eggs.\nWhen nearly set, add the cheese, fold and serve with sliced tomato."),
+    R("🥪","Hummus wraps",2,10,["Lunchbox","Quick","Veggie"],[["Tortilla wraps",2,"x","B",.3],["Hummus",100,"g","D",.6],["Carrot",1,"x","P",.15],["Cucumber",.5,"x","P",.3],["Cheddar",40,"g","D",.3]],
+      "Spread the wraps with hummus.\nAdd grated carrot, sliced cucumber and cheese.\nRoll up tightly and cut in half.")];
+}
+/* sample data: a plan for this week and last, a few shops and takeaways, and some cooked meals */
+function demo(){
+  const keepSet = S.settings; S = blank(); S.settings = Object.assign(keepSet, {budget: keepSet.budget || 60}); S.hero = {name:"Sam", created: addDays(today(), -30)}; S.ready = true; S.sample = true;
+  S.recipes = starters(); const R = n => S.recipes.find(r => r.name === n).id; S.recipes.find(r => r.name === "Chickpea curry").fav = true; S.recipes.find(r => r.name === "Veggie chilli").fav = true;
+  const ws = weekStart(today()), prev = addDays(ws, -7), t = today(), dn = ["Spaghetti bolognese","Chickpea curry","Sausage traybake","Chicken stir-fry","Veggie chilli","Chicken fajitas","Jacket potatoes"];
+  [prev, ws].forEach((w, wi) => days7(w).forEach((d, i) => { const p = S.plan[d] = {};
+    p.d = i === (wi ? 4 : 5) ? {k:"out", n:2, c:false, p:false} : i === 2 && wi ? {k:"left", n:2, c:false, p:false} : {k:"r", rid:R(dn[(i + wi * 3) % 7]), n:2, c: d < t, p:false};
+    if(S.settings.slots.l) p.l = i % 2 ? {k:"r", rid:R("Red lentil soup"), n:2, c: d < t, p:false} : {k:"r", rid:R("Hummus wraps"), n:2, c: d < t, p:false}; }));
+  Object.values(S.plan).forEach(day => Object.values(day).forEach(s => { if(s.c){ const r = recOf(s.rid); r.made++; } }));
+  S.wbud[fkey(prev)] = S.settings.budget; S.wbud[fkey(ws)] = S.settings.budget;
+  S.spend = [{id:uid(), date: addDays(prev, 1), what:"Weekly shop", amt: +(S.settings.budget * .62).toFixed(2), kind:"shop"}, {id:uid(), date: addDays(prev, 5), what:"Friday pizza", amt: +(S.settings.budget * .2).toFixed(2), kind:"take"}];
+  const sd = addDays(ws, 1) <= t ? addDays(ws, 1) : ws; S.spend.push({id:uid(), date: sd, what:"Weekly shop", amt: +(S.settings.budget * .58).toFixed(2), kind:"shop"});
+  const L = listFor(ws); const {items} = buildList(ws); items.slice(0, 3).forEach(i => L.have[i.k] = true); items.slice(3, 9).forEach(i => L.got[i.k] = true);
+  L.extra.push({id:uid(), name:"Washing-up liquid", aisle:"H", cost:1.2, got:false});
+  S.flags["plan|" + fkey(prev)] = prev; S.flags["plan|" + fkey(ws)] = ws; S.flags["ub|" + fkey(prev)] = addDays(prev, 7);
+  ["first_plan","full_week","first_cook","cook10","budget1","shop1"].forEach((b, i) => S.badges[b] = addDays(prev, i));
+  S.xp = 25 * 2 + 50 + 30 + 10 * cookedCount(); wk = null; tab = "week"; save();
+}
+
+/* ───────── start ───────── */
+load();
+if(!S.recipes.length && !S.ready){ S.recipes = starters(); }
+render();
+if(RESCUED !== null){ const el = document.createElement("div"); el.className = "rescue-bar"; el.setAttribute("role", "alert");
+  el.innerHTML = `<b>Your saved data couldn't be read</b><div class="small" style="margin-top:4px">A copy is kept safe on this phone. Download it and message me on Etsy, and I'll help get it back.</div>
+    <div class="row" style="margin-top:10px;justify-content:flex-end"><button class="btn sm ghost" id="rdl">Download the copy</button><button class="btn sm" id="rok">Got it</button></div>`;
+  document.body.appendChild(el); el.querySelector("#rok").onclick = () => el.remove();
+  el.querySelector("#rdl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([RESCUED || ""], {type:"text/plain"})); a.download = "meal-quest-unreadable-save.txt"; a.click(); }; }
+
+/* ───────── dust in the window light: slow, few, paused when hidden or when motion is reduced ───────── */
+(function(){
+  const cv = document.getElementById("dust"), cx = cv.getContext && cv.getContext("2d"); if(!cx) return;
+  const mq = matchMedia("(prefers-reduced-motion: reduce)"); let W = 0, H = 0, ps = [], run = !document.hidden, last = 0, raf = 0;
+  function size(){ const r = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * r; cv.height = H * r; cx.setTransform(r, 0, 0, r, 0, 0);
+    ps = Array.from({length:22}, () => ({x: Math.random() * W * .7, y: Math.random() * H * .6, r: .6 + Math.random() * 1.6, vx: .05 + Math.random() * .12, vy: .02 + Math.random() * .08, a: .15 + Math.random() * .35})); }
+  function frame(ts){ raf = 0; if(!run || mq.matches) return; if(ts - last > 33){ last = ts; cx.clearRect(0, 0, W, H);
+      ps.forEach(p => { p.x += p.vx; p.y += p.vy; if(p.x > W * .8 || p.y > H * .7){ p.x = Math.random() * W * .3; p.y = Math.random() * H * .2; }
+        const g = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3); g.addColorStop(0, `rgba(255,236,190,${p.a})`); g.addColorStop(1, "rgba(255,236,190,0)");
+        cx.fillStyle = g; cx.beginPath(); cx.arc(p.x, p.y, p.r * 3, 0, 7); cx.fill(); }); }
+    raf = requestAnimationFrame(frame); }
+  size(); addEventListener("resize", size); raf = requestAnimationFrame(frame);
+  document.addEventListener("visibilitychange", () => { run = !document.hidden; if(!run){ if(raf){ cancelAnimationFrame(raf); raf = 0; } } else if(!raf){ last = 0; raf = requestAnimationFrame(frame); } });
+  if(mq.addEventListener) mq.addEventListener("change", () => { if(!mq.matches && !raf) raf = requestAnimationFrame(frame); else cx.clearRect(0, 0, W, H); });
+  let tk = false; addEventListener("scroll", () => { if(tk) return; tk = true; requestAnimationFrame(() => { document.documentElement.style.setProperty("--sy", Math.min(1200, scrollY)); tk = false; }); }, {passive:true});
+})();
+</script>
+<style>
+.pwa-card{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:420px;box-sizing:border-box;
+ z-index:2147483000;background:#fff;color:#2b211b;border-radius:18px;box-shadow:6px 10px 30px rgba(60,40,25,.28);padding:16px;
+ font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-align:left}
+.pwa-card *{box-sizing:border-box}
+.pwa-row{display:flex;gap:12px;align-items:flex-start}
+.pwa-icon{width:36px;height:36px;border-radius:9px;flex:none}
+.pwa-title{font-weight:700;font-size:15px;margin:0 0 4px;color:#2b211b}
+.pwa-text{margin:0;color:#2b211b}
+.pwa-share{display:inline-block;vertical-align:-4px;margin:0 2px}
+.pwa-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.pwa-btn{appearance:none;border:0;border-radius:10px;padding:9px 14px;min-height:40px;font:inherit;font-weight:600;background:#f1e6d6;color:#2b211b;cursor:pointer}
+.pwa-btn.pwa-primary{background:#c4502f;color:#fff}
+</style><script>
+(function(){
+  var FOLDER = "meal-50cd90df", NAME = "Meal Quest", KEY = "pwa.card." + FOLDER, DAY = 864e5;
+  var ua = navigator.userAgent || "";
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+  }
+  var installed = false;
+  try { installed = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true; } catch(e) {}
+  if (installed) return;
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  if (!isIOS && !isAndroid) return;
+  var pwaDeferred = null, pwaCard = null, pwaShown = false;
+  function pwaGet(){ try { return localStorage.getItem(KEY); } catch(e) { return null; } }
+  function pwaSet(v){ try { localStorage.setItem(KEY, v); } catch(e) {} }
+  function pwaHide(){ if (pwaCard && pwaCard.parentNode) pwaCard.parentNode.removeChild(pwaCard); pwaCard = null; }
+  function pwaDone(){ pwaSet("done"); pwaHide(); }
+  function pwaLater(){ pwaSet(String(Date.now())); pwaHide(); }
+  function pwaEl(tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; }
+  function pwaBtn(label, cls, fn){ var b = pwaEl("button", "pwa-btn" + (cls ? " " + cls : ""), label); b.type = "button"; b.addEventListener("click", fn); return b; }
+  var SHARE = '<svg class="pwa-share" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b6ef3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Share"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg>';
+  function pwaRender(){
+    pwaHide();
+    var card = pwaEl("div", "pwa-card"); card.setAttribute("role", "dialog"); card.setAttribute("aria-label", "Add " + NAME + " to your home screen");
+    var row = pwaEl("div", "pwa-row"), img = pwaEl("img", "pwa-icon"); img.src = "icon-180.png"; img.alt = "";
+    var box = pwaEl("div"); box.appendChild(pwaEl("p", "pwa-title", "Add " + NAME + " to your home screen"));
+    var t = pwaEl("p", "pwa-text"), btns = pwaEl("div", "pwa-btns");
+    if (isIOS) {
+      if (/CriOS|FxiOS|EdgiOS/.test(ua)) t.textContent = "Open this link in Safari, then tap Share and Add to Home Screen.";
+      else t.innerHTML = 'Tap the Share button ' + SHARE + ', then Add to Home Screen. It opens like an app and works offline.';
+    } else if (pwaDeferred) {
+      t.textContent = "Install it to open like an app, even with no internet.";
+      btns.appendChild(pwaBtn("Install app", "pwa-primary", function(){
+        var ev = pwaDeferred; pwaDeferred = null;
+        try { ev.prompt(); ev.userChoice.then(function(c){ if (c && c.outcome === "accepted") pwaDone(); else pwaRender(); }); } catch(e) { pwaRender(); }
+      }));
+    } else {
+      t.textContent = "Tap the ⋮ menu, then Install app or Add to Home screen.";
+    }
+    box.appendChild(t); row.appendChild(img); row.appendChild(box); card.appendChild(row);
+    btns.appendChild(pwaBtn("Later", "", pwaLater)); btns.appendChild(pwaBtn("Got it", isAndroid && pwaDeferred ? "" : "pwa-primary", pwaDone));
+    card.appendChild(btns); document.body.appendChild(card); pwaCard = card;
+  }
+  window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); pwaDeferred = e; if (pwaShown && pwaCard) pwaRender(); });
+  window.addEventListener("appinstalled", pwaDone);
+  var v = pwaGet();
+  if (v === "done") return;
+  if (v && Date.now() - Number(v) < 3 * DAY) return;
+  setTimeout(function(){ if (pwaGet() === "done") return; pwaShown = true; pwaRender(); }, 2500);
+})();
+</script></body>
+</html>
