@@ -255,6 +255,34 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .rescue-bar .rb{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap}
 .rescue-bar button{border-radius:10px;padding:10px 14px;font-weight:700;background:#ececf2;color:#1b1b2b}
 .rescue-bar button.p{background:#1b1b2b;color:#fff}
+/* listing update: paycheck planner, side money, ADHD tax */
+.segtop{margin-bottom:14px}
+.pc{padding:16px;margin-bottom:12px}
+.pc.now{border-color:rgba(75,227,165,.5)}
+.pc.bonus{border-color:rgba(255,201,74,.55)}
+.pc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pc-top b{font-size:17px;font-weight:700}
+.pc-amt{font-size:20px;font-weight:800;color:var(--ink);white-space:nowrap}
+.pc-amt span{color:var(--gold);font-size:14px}
+.pc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pc-bills{margin-top:12px;border-top:1px solid var(--line);padding-top:6px}
+.pc-bill{display:flex;align-items:center;gap:10px;padding:8px 0}
+.pc-bill b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-bill small{color:var(--mut);font-size:12px}
+.pc-e{width:28px;text-align:center;font-size:18px;flex:none}
+.pc .mv{width:36px;height:36px;background:var(--card2);color:var(--gold);font-size:16px}
+.pc-parts{margin-top:8px;font-size:13px;color:var(--mut);line-height:1.4}
+.pc-left{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.pc-left b{font-size:20px;font-weight:800}
+.pc-job{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(255,201,74,.1);border:1px solid rgba(255,201,74,.35)}
+.pc-job b{display:block;font-weight:700}.pc-job small{color:var(--mut);font-size:12px}
+.pc-job.done{color:var(--mint);font-weight:600;background:rgba(75,227,165,.1);border-color:rgba(75,227,165,.35)}
+.pickc{display:flex;flex-direction:column;gap:10px}
+.pick{display:flex;align-items:center;gap:10px;text-align:left;padding:13px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line);width:100%}
+.pick b{display:block;font-weight:700}.pick small{color:var(--mut);font-size:13px}
+.pick.on{border-color:var(--gold);background:rgba(255,201,74,.1)}
+.taxc{padding:9px 12px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:14px}
+.taxc.on{background:rgba(255,107,122,.18);border-color:var(--coral);color:#ffd0d5}
 @media(max-width:380px){.big{font-size:44px}.ring{width:100px;height:100px}.stats{gap:6px}.stat{padding:9px}}
 </style>
 </head>
@@ -272,11 +300,27 @@ const blank = () => ({v:1, hero:null, cur:"USD", pay:{freq:"monthly", amount:0, 
   bills:[], billPaid:{}, spends:[], incomes:[], debts:[], debtLog:[], goals:[], goalLog:[], impulses:[],
   xp:0, streak:{last:"", n:0, best:0}, badges:{}, checkins:{}, noSpend:{}, savedByWaiting:0,
   settings:{strategy:"snowball", extra:0}, lastPeriodStart:"", allowances:[],
-  subs:[], caps:{}});
+  subs:[], caps:{}, ybills:[], cutBills:[], payPlan:{bonus:0, over:{}, moves:{}, jobs:{}}, side:{goal:0, hit:""}, sales:[], owed:[], adhd:[]});
 let S, RESCUED = null;
 /* old saves and old backups do not have the newer lists, so make sure they exist */
 function normalize(){
-  ["subs"].forEach(k => { if(!Array.isArray(S[k])) S[k] = []; });
+  ["subs","ybills","cutBills","sales","owed","adhd"].forEach(k => { if(!Array.isArray(S[k])) S[k] = []; });
+  const isObj = o => o && typeof o === "object" && !Array.isArray(o);
+  if(!isObj(S.payPlan)) S.payPlan = {};
+  S.payPlan.bonus = +S.payPlan.bonus > 0 ? +S.payPlan.bonus : 0;
+  ["over","moves","jobs"].forEach(k => { if(!isObj(S.payPlan[k])) S.payPlan[k] = {}; });
+  if(!isObj(S.side)) S.side = {};
+  S.side.goal = +S.side.goal > 0 ? +S.side.goal : 0; if(typeof S.side.hit !== "string") S.side.hit = "";
+  ["ybills","cutBills","sales","owed","adhd"].forEach(k => { S[k] = S[k].filter(x => x && typeof x === "object" && !Array.isArray(x)); });
+  const nowD = today(), isD = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  S.ybills = S.ybills.filter(b => +b.month >= 1 && +b.month <= 12 && +b.day >= 1 && +b.amt > 0 && typeof b.id === "string");
+  S.cutBills = S.cutBills.filter(b => +b.amt > 0 && typeof b.id === "string");
+  S.sales.forEach(x => { if(!isD(x.added)) x.added = nowD; if(x.status !== "sold") x.status = "listed"; x.ask = +x.ask || 0; if(x.status === "sold"){ x.soldFor = +x.soldFor || 0; if(!isD(x.soldOn)) x.soldOn = nowD; } });
+  S.owed.forEach(o => { if(!Array.isArray(o.pays)) o.pays = []; o.pays = o.pays.filter(p => p && +p.amt > 0); if(!isD(o.date)) o.date = nowD; o.amt = +o.amt || 0; o.who = String(o.who || "Someone"); if(o.status !== "paid") o.status = "open"; });
+  S.adhd.forEach(x => { if(!isD(x.date)) x.date = nowD; x.amt = +x.amt || 0; if(!["late","return","cancel","rush"].includes(x.kind)) x.kind = "late"; });
+  Object.keys(S.payPlan.over).forEach(k => { const o = S.payPlan.over[k]; if(!o || typeof o !== "object" || !(+o.amt >= 0)) delete S.payPlan.over[k]; });
+  Object.keys(S.payPlan.moves).forEach(k => { if(!isD(S.payPlan.moves[k])) delete S.payPlan.moves[k]; });
+  Object.keys(S.payPlan.jobs).forEach(k => { const j = S.payPlan.jobs[k]; if(!j || typeof j !== "object" || (j.type !== "goal" && j.type !== "debt")) delete S.payPlan.jobs[k]; });
   if(!S.caps || typeof S.caps !== "object" || Array.isArray(S.caps)) S.caps = {};
   if(!S.settings || typeof S.settings !== "object") S.settings = {strategy:"snowball", extra:0};
   if(S.settings.strategy !== "avalanche") S.settings.strategy = "snowball";
@@ -345,19 +389,18 @@ function occurrences(day, p){ // every date with this day-of-month inside [start
     if(inP(o,p)) out.push(o); d = new Date(d.getFullYear(), d.getMonth()+1, 1); }
   return out;
 }
-function plan(p){
-  p = p || period(); if(!p) return null;
-  const bills = []; S.bills.forEach(b => occurrences(b.day,p).forEach(d => bills.push({b, d, paid: !!S.billPaid[b.id+"|"+d]})));
-  bills.sort((a,b) => a.d < b.d ? -1 : 1);
+function plan(p, cur){
+  const isCur = !!cur || !p; p = p || period(); if(!p) return null;
+  const bills = billsForPeriod(p, isCur);
   const mins = []; S.debts.filter(d => d.bal > 0).forEach(d => occurrences(d.day||1,p).forEach(o => mins.push({d, o, amt: Math.min(d.min, d.bal)})));
   const live = S.goals.filter(g => g.saved < g.target);
-  const billsDue = sum(bills.map(x=>x.b.amt)), minsDue = sum(mins.map(x=>x.amt)), saveSet = sum(live.map(g=>g.perPay||0));
+  const billsDue = sum(bills.filter(x=>!x.carry).map(x=>x.b.amt)), minsDue = sum(mins.map(x=>x.amt)), saveSet = sum(live.map(g=>g.perPay||0));
   const daysLeft = Math.max(1, daysBetween(today(), p.end));
   const allow = S.allowances.map(a => { const used = sum(S.spends.filter(s=>inP(s.date,p) && s.cat === a.cat).map(s=>s.amt));
     return {a, used, left: a.amt - used, over: Math.max(0, used - a.amt)}; });
   const allowSet = sum(S.allowances.map(a=>a.amt));
   const income = sum(S.incomes.filter(x=>inP(x.date,p)).map(x=>x.amt));
-  const budget = S.pay.amount + income - billsDue - minsDue - saveSet - allowSet;
+  const budget = payFor(p.start) + income - billsDue - minsDue - saveSet - allowSet;
   const covered = new Set(S.allowances.map(a=>a.cat));
   const spentFree = sum(S.spends.filter(s=>inP(s.date,p) && !covered.has(s.cat)).map(s=>s.amt));
   const spent = spentFree + sum(allow.map(x=>x.over)); // what came out of spending money
@@ -398,7 +441,11 @@ const BADGES = [
   ["lvl5","⭐","Rising Star","Reach level 5"],
   ["lvl10","🌟","Living Legend","Reach level 10"],
   ["sub_review","🔎","Subscription Sleuth","Review a subscription"],
-  ["sub_cut","✂️","Plan Cutter","Cancel a subscription"]];
+  ["sub_cut","✂️","Plan Cutter","Cancel a subscription"],
+  ["billbuster","🧾","Bill Buster","Cut a bill you do not need"],
+  ["bonusboss","🎯","Bonus Boss","Put a bonus paycheck to work"],
+  ["sidehustle","💼","Side Hustler","Log side income or a sale"],
+  ["payback","🤝","Paid Back","Get paid back in full"]];
 function gain(n, why){
   const before = lvlOf(S.xp); S.xp += n; const after = lvlOf(S.xp); save();
   toast(`<em>+${n} XP</em> ${esc(why)}`, "✨"); coins(Math.min(14, 4 + Math.round(n/10)));
@@ -600,13 +647,14 @@ function billRow(x){ const t = today(); const late = !x.paid && x.d < t, soon = 
   const chip = x.paid ? `<span class="chip ok">Cleared</span>` : late ? `<span class="chip late">Overdue</span>`
     : soon ? `<span class="chip soon">${x.d===t?"Today":"In "+daysBetween(t,x.d)+"d"}</span>` : `<span class="chip later">${fmtDate(x.d)}</span>`;
   return `<div class="item ${x.paid?"done":""}"><div class="emo">${esc(x.b.emoji||"📜")}</div>
-    <div class="grow"><b>${esc(x.b.name)}</b><small>${money(x.b.amt)}${x.b.auto?" · autopay":""}</small></div>${chip}
+    <div class="grow"><b>${esc(x.b.name)}</b><small>${money(x.b.amt)}${x.b.auto?" · autopay":""}${x.early ? " · due " + fmtDate(x.d) + " · paid early" : ""}</small></div>${chip}
     ${x.paid ? `<button class="x" data-act="unpay" data-id="${x.b.id}" data-d="${x.d}" title="Undo">↺</button>`
              : `<button class="btn sm mint" data-act="pay" data-id="${x.b.id}" data-d="${x.d}">Clear</button>`}</div>`; }
 
 const CATS = [["food","🍔","Eating out"],["groceries","🛒","Groceries"],["transport","🚗","Transport"],["fun","🎮","Fun"],["shopping","🛍️","Shopping"],
   ["home","🏠","Home"],["health","💊","Health"],["kids","🧸","Kids"],["pets","🐾","Pets"],["gifts","🎁","Gifts"],["other","✨","Other"]];
-const INC = [["cashback","💸","Cash back"],["interest","🏦","Interest"],["refund","↩️","Refund"],["gift","🎁","Gift"],["other","✨","Other"]];
+const INC = [["cashback","💸","Cash back"],["interest","🏦","Interest"],["refund","↩️","Refund"],["gift","🎁","Gift"],["side","💼","Side job"],["sale","🏷️","Sold something"],["payback","🤝","Paid back"],["other","✨","Other"]];
+const INCF = INC.filter(c => c[0] !== "sale" && c[0] !== "payback");
 const incOf = k => INC.find(c=>c[0]===k) || INC[INC.length-1];
 const catOf = k => CATS.find(c=>c[0]===k) || CATS[CATS.length-1];
 const allowName = k => catOf(k)[2];
@@ -669,6 +717,7 @@ function spend(){
   ${top.length ? `<div class="h"><h2>Where it went</h2></div><div class="card bars">${top.map(([k,v]) => { const c = catOf(k);
      return `<div class="bar"><span>${c[1]}</span><div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>${c[2]}${S.allowances.some(a=>a.cat===k) ? ` <span class="al-pill">essential</span>` : ""}</span><b>${money(v)}</b></div>
      <div class="t"><i style="width:${v/mx*100}%"></i></div></div><span></span></div>`; }).join("")}</div>` : ""}
+  ${adhdSection()}
   <div class="h"><h2>Spending log</h2></div>
   ${log.length ? Object.entries(days).map(([d,list]) => `<div class="muted" style="margin:14px 6px 8px;font-weight:600;font-size:14px">${d===today()?"Today":fmtDate(d,{weekday:"long",day:"numeric",month:"short"})}</div>
     <div class="list">${list.map(s => { if(s.kind){ const k = incOf(s.kind); return `<div class="item"><div class="emo">${k[1]}</div><div class="grow"><b>${esc(s.note || k[2])}</b><small>${k[2]}</small></div>
@@ -678,7 +727,7 @@ function spend(){
    : `<div class="card empty"><div class="e">🪙</div>Nothing logged this paycheck yet.<br>Tap the gold button any time you spend.</div>`}`;
 }
 
-function quests(){
+function questsNow(){
   const pl = plan();
   return `
   <section class="card hero" style="padding:18px"><div class="row"><div class="grow"><div class="lbl">Bills this paycheck</div>
@@ -690,11 +739,10 @@ function quests(){
   <div class="h"><h2>Due before ${fmtDate(pl.p.end)}</h2></div>
   ${pl.bills.length ? `<div class="list">${pl.bills.map(billRow).join("")}</div>` : `<div class="card empty"><div class="e">🗓️</div>No bills fall in this paycheck.</div>`}
   <div class="h"><h2>All recurring bills</h2></div>
-  ${S.bills.length ? `<div class="list">${[...S.bills].sort((a,b)=>a.day-b.day).map(b => `<div class="item"><div class="emo">${esc(b.emoji||"📜")}</div>
-     <div class="grow"><b>${esc(b.name)}</b><small>Day ${b.day} every month${b.auto?" · autopay":""}</small></div><span class="amt">${money(b.amt)}</span>
-     <button class="x" data-act="editBill" data-id="${b.id}" aria-label="Edit">✎</button></div>`).join("")}</div>`
-   : `<div class="card empty"><div class="e">📜</div>Rent, phone, subscriptions, insurance.<br>Add them once and every paycheck sets money aside for them.</div>`}`;
+  ${recurringBills()}
+  ${cutSection()}`;
 }
+function quests(){ return segBills() + (billsView === "plan" ? planAhead() : questsNow()); }
 
 function payoff(strategy, extra){
   const ds = S.debts.filter(d=>d.bal>0).map(d=>({id:d.id, bal:d.bal, apr:d.apr, min:d.min}));
@@ -748,7 +796,7 @@ function jailCell(x){ const rel = x.added + x.hours*36e5, left = rel - Date.now(
     ${free ? `<div style="display:flex;flex-direction:column;gap:6px"><button class="btn sm mint" data-act="letgo" data-id="${x.id}">Let go</button>
        <button class="btn sm ghost" data-act="buyit" data-id="${x.id}">Buy</button></div>`
      : `<button class="x" data-act="letgo" data-id="${x.id}" title="Let it go now">✓</button>`}</div>`; }
-function vault(){
+function vaultTreasure(){
   const saved = sum(S.goals.map(g=>g.saved)); const w = S.impulses.filter(x=>x.status==="waiting");
   const hist = S.impulses.filter(x=>x.status!=="waiting").slice(-6).reverse();
   return `
@@ -770,15 +818,18 @@ function vault(){
   ${ringGradient()}`;
 }
 
+function vault(){ return segVault() + (vaultView === "side" ? sideView() : vaultTreasure()); }
+
 /* ───────────────────────── forms ───────────────────────── */
-function spendForm(){
-  let cat = "food";
-  sheet(`<h3>Log a spend</h3><p class="sub">Two taps. Logging earns XP, even the bad days.</p>
+function spendForm(preTax){
+  let cat = preTax ? "other" : "food", tax = preTax || "";
+  sheet(`<h3>${preTax ? "Log an ADHD tax" : "Log a spend"}</h3><p class="sub">${preTax ? "Late fee, missed return, forgotten cancellation or rush delivery. It is logged as a spend too." : "Two taps. Logging earns XP, even the bad days."}</p>
     <button class="link" data-act="addIncome" type="button">Got money in? Log income instead ›</button>
     <input class="in huge" id="a" inputmode="decimal" placeholder="${money(0)}" autocomplete="off">
     <label class="f">Category</label><div class="cats">${CATS.map(c=>`<button class="cat ${c[0]===cat?"on":""}" data-c="${c[0]}">${c[1]} ${c[2]}</button>`).join("")}</div>
     <div class="note" id="alNote" hidden></div>
     <label class="f">Note (optional)</label><input class="in" id="n" maxlength="60" placeholder="Coffee with Sam">
+    <label class="f">ADHD tax? (optional)</label><div class="cats" id="tx">${TAXK.map(k=>`<button type="button" class="taxc ${k[0]===tax?"on":""}" data-k="${k[0]}">${k[1]} ${k[2]}</button>`).join("")}</div>
     <div class="two"><div><label class="f">Date</label><input class="in" id="d" type="date" value="${today()}"></div><div></div></div>
     <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Log it</button></div>`, root => {
       const showNote = () => { const el = root.querySelector("#alNote"), pl = plan(), x = pl && pl.allow.find(y=>y.a.cat===cat);
@@ -786,18 +837,20 @@ function spendForm(){
         el.hidden = false; el.textContent = x.left > 0 ? `From your ${catOf(cat)[2]} allowance: ${money(x.left)} left`
           : `${catOf(cat)[2]} allowance used up. This comes from spending money.`; };
       root.querySelectorAll(".cat").forEach(b => b.onclick = () => { cat = b.dataset.c; root.querySelectorAll(".cat").forEach(x=>x.classList.toggle("on", x===b)); showNote(); });
+      root.querySelectorAll(".taxc").forEach(b => b.onclick = () => { tax = tax === b.dataset.k ? "" : b.dataset.k; root.querySelectorAll(".taxc").forEach(x=>x.classList.toggle("on", x.dataset.k === tax)); });
       showNote(); root.querySelector("#a").focus();
       root.querySelector("#ok").onclick = () => { const a = num(val(root,"#a")); if(a <= 0) return root.querySelector("#a").focus();
-        const date = val(root,"#d") || today(); const first = !S.spends.length;
-        S.spends.push({id:uid(), amt:a, cat, note:val(root,"#n"), date, t:Date.now()}); if(S.noSpend[date]) delete S.noSpend[date];
-        save(); closeSheet(); render(); gain(5, "Spend logged"); if(first) award("first_step"); };
+        const date = val(root,"#d") || today(); const first = !S.spends.length; const id = uid(), note = val(root,"#n");
+        S.spends.push({id, amt:a, cat, note, date, t:Date.now()}); if(S.noSpend[date]) delete S.noSpend[date];
+        if(tax) S.adhd.push({id:uid(), kind:tax, amt:a, note, date, spendId:id});
+        save(); closeSheet(); render(); gain(5, tax ? "ADHD tax logged. Spotting it is the first step" : "Spend logged"); if(first) award("first_step"); };
     });
 }
 function incomeForm(){
   let kind = "cashback";
   sheet(`<h3>Log income</h3><p class="sub">Money in on top of your pay: cash back, interest, refunds.</p>
     <input class="in huge" id="a" inputmode="decimal" placeholder="${money(0)}" autocomplete="off">
-    <label class="f">Type</label><div class="cats">${INC.map(c=>`<button class="cat ${c[0]===kind?"on":""}" data-c="${c[0]}">${c[1]} ${c[2]}</button>`).join("")}</div>
+    <label class="f">Type</label><div class="cats">${INCF.map(c=>`<button class="cat ${c[0]===kind?"on":""}" data-c="${c[0]}">${c[1]} ${c[2]}</button>`).join("")}</div>
     <label class="f">Note (optional)</label><input class="in" id="n" maxlength="60" placeholder="Grocery cash back">
     <div class="two"><div><label class="f">Date</label><input class="in" id="d" type="date" value="${today()}"></div><div></div></div>
     <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Add it</button></div>`, root => {
@@ -808,28 +861,12 @@ function incomeForm(){
         S.incomes.push({id:uid(), amt:a, kind, note:val(root,"#n"), date, t:Date.now()}); save(); closeSheet(); render(); gain(5, "Income logged"); };
     });
 }
-function billForm(b){
-  const e = !!b; b = b || {name:"", amt:"", day:1, emoji:"📜", auto:false};
-  sheet(`<h3>${e?"Edit bill":"New bill quest"}</h3><p class="sub">Repeats every month on the same day.</p>
-    <label class="f">Name</label><input class="in" id="n" value="${esc(b.name)}" placeholder="Rent">
-    <div class="two"><div><label class="f">Amount</label><input class="in" id="a" inputmode="decimal" value="${b.amt}" placeholder="0.00"></div>
-      <div><label class="f">Due day of month</label><input class="in" id="d" type="number" min="1" max="31" value="${b.day}"></div></div>
-    <div class="two"><div><label class="f">Icon</label><select class="in" id="e">${["📜","🏠","📱","💡","🌐","🚗","🛡️","📺","🎵","💳","🏋️","🎓","💧","🔥","👶","🐾"].map(x=>`<option ${x===b.emoji?"selected":""}>${x}</option>`).join("")}</select></div>
-      <div><label class="f">Autopay</label><select class="in" id="au"><option value="0">No</option><option value="1" ${b.auto?"selected":""}>Yes</option></select></div></div>
-    <div class="actions">${e?`<button class="btn red" id="del">Delete</button>`:`<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
-      root.querySelector("#ok").onclick = () => { const n = val(root,"#n"), a = num(val(root,"#a")), d = Math.min(31, Math.max(1, parseInt(val(root,"#d"))||1));
-        if(!n || a <= 0) return toast("Add a name and an amount","✍️");
-        const o = {name:n, amt:a, day:d, emoji:val(root,"#e"), auto:val(root,"#au")==="1"};
-        if(e) Object.assign(b, o); else S.bills.push({id:uid(), ...o}); save(); closeSheet(); render(); };
-      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete ${b.name}?`)) return; S.bills = S.bills.filter(x=>x.id!==b.id); save(); closeSheet(); render(); };
-    });
-}
 function allowForm(a){
   const e = !!a; const taken = new Set(S.allowances.filter(x=>!a || x.id!==a.id).map(x=>x.cat));
   const first = ["groceries","transport","home"]; const opts = [...first.map(k=>catOf(k)), ...CATS.filter(c=>!first.includes(c[0]))].filter(c=>!taken.has(c[0]));
   let cat = a ? a.cat : (opts[0] ? opts[0][0] : "");
   sheet(`<h3>Essentials allowance</h3><p class="sub">Set aside every paycheck before your spending money.</p>
-    <label class="f">Category</label><div class="cats">${opts.map(c=>`<button class="cat ${c[0]===cat?"on":""}" data-c="${c[0]}">${c[1]} ${c[0]==="transport" ? "Transport (fuel)" : c[2]}</button>`).join("")}</div>
+    <label class="f">Category</label><div class="cats">${opts.map(c=>`<button class="cat ${c[0]===cat?"on":""}" data-c="${c[0]}">${c[1]} ${c[0]==="transport" ? "Transport (fuel)" : c[0]==="home" ? "Home (household)" : c[2]}</button>`).join("")}</div>
     <label class="f">Amount each paycheck</label><input class="in" id="a" inputmode="decimal" value="${e?a.amt:""}" placeholder="0.00" autocomplete="off">
     <div class="actions">${e?`<button class="btn red" id="del">Delete</button>`:`<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
       root.querySelectorAll(".cat").forEach(b => b.onclick = () => { cat = b.dataset.c; root.querySelectorAll(".cat").forEach(x=>x.classList.toggle("on", x===b)); });
@@ -1098,35 +1135,359 @@ function rescueBanner(){ const el = document.createElement("div"); el.className 
     <div class="rb"><button data-act="rescueDl">Download the copy</button><button class="p" id="rbOk">Got it</button></div>`;
   el.querySelector("#rbOk").onclick = () => el.remove(); document.body.appendChild(el); }
 
+/* ───────────────────────── listing update: paycheck planner ───────────────────────── */
+/* how many paychecks a normal calendar month has; anything beyond that is a "bonus paycheck" */
+const PERMONTH = {weekly:4, biweekly:2, fourweekly:1, monthly:1};
+const PERYEAR = {weekly:52, biweekly:26, fourweekly:13, monthly:12};
+const perYear = () => PERYEAR[S.pay.freq] || 12;
+function isBonus(date){
+  if(S.pay.freq === "monthly" || !PERMONTH[S.pay.freq]) return false;
+  const ym = date.slice(0,7); let n = 1, d = date;
+  for(let i=0;i<8;i++){ d = retreat(d); if(d.slice(0,7) !== ym) break; n++; }
+  return n > PERMONTH[S.pay.freq];
+}
+/* what a paycheck is worth: an amount you entered, else the bonus amount on a bonus paycheck, else the usual amount */
+function payFor(date){
+  const o = S.payPlan && S.payPlan.over && S.payPlan.over[date];
+  if(o && isFinite(o.amt) && o.amt >= 0) return o.amt;
+  if(S.payPlan && S.payPlan.bonus > 0 && isBonus(date)) return S.payPlan.bonus;
+  return S.pay.amount;
+}
+/* every paycheck from the current one to 12 months later */
+function paychecks(){ const p = period(); if(!p) return []; const out = []; let d = p.start; const stop = addDays(p.start, 364);
+  while(d < stop && out.length < 80){ out.push(d); d = advance(d); } return out; }
+const findBill = id => S.bills.find(b=>b.id===id) || S.ybills.find(b=>b.id===id);
+const billCycle = b => b.month ? "yearly" : "monthly";
+function yOcc(b, p){ const out = []; const y0 = parse(p.start).getFullYear(), y1 = parse(p.end).getFullYear();
+  for(let y=y0; y<=y1; y++){ const o = iso(new Date(y, b.month-1, Math.min(b.day, dim(y, b.month-1)))); if(inP(o,p)) out.push(o); } return out; }
+/* the bills that belong to one paycheck. A bill you moved to an earlier paycheck counts there and nowhere else. */
+function billsForPeriod(p, isCur){
+  const mv = S.payPlan.moves, out = [];
+  const add = (b,d) => { const k = b.id+"|"+d; if(mv[k] && mv[k] !== p.start) return; out.push({b, d, paid: !!S.billPaid[k]}); };
+  S.bills.forEach(b => occurrences(b.day,p).forEach(d => add(b,d)));
+  S.ybills.forEach(b => yOcc(b,p).forEach(d => add(b,d)));
+  Object.keys(mv).forEach(k => { const i = k.indexOf("|"), id = k.slice(0,i), d = k.slice(i+1); const b = findBill(id); if(!b) return; const paid = !!S.billPaid[k];
+    if(mv[k] === p.start){ if(!inP(d,p)) out.push({b, d, paid, early:true}); }
+    else if(isCur && mv[k] < p.start && d >= p.start && !paid) out.push({b, d, paid:false, early:true, carry:true}); });
+  out.sort((a,b) => a.d < b.d ? -1 : 1);
+  return out;
+}
+let billsView = "now";
+const segBills = () => `<div class="seg segtop"><button class="${billsView==="now"?"on":""}" data-act="bview" data-v="now">This paycheck</button><button class="${billsView==="plan"?"on":""}" data-act="bview" data-v="plan">Plan ahead</button></div>`;
+const wd = d => fmtDate(d,{weekday:"short",month:"short",day:"numeric"});
+function planAhead(){
+  const pcs = paychecks(); if(!pcs.length) return `<div class="card empty"><div class="e">🗓️</div>Set your next payday in Settings to see your paychecks.</div>`;
+  const rows = pcs.map((d,i) => { const pp = {start:d, end: pcs[i+1] || advance(d)}; return {d, pp, pl:plan(pp, i===0), pay:payFor(d), bonus:isBonus(d)}; });
+  const total = sum(rows.map(r=>r.pay)), bm = [];
+  rows.forEach(r => { if(r.bonus){ const m = parse(r.d).toLocaleDateString(undefined,{month:"short"}); if(!bm.includes(m)) bm.push(m); } });
+  const tight = rows.reduce((a,r) => !a || r.pl.budget < a.pl.budget ? r : a, null);
+  let lastM = "";
+  return `<section class="card hero" style="padding:18px"><div class="row" style="align-items:flex-start"><div class="grow"><div class="lbl">Next 12 months</div>
+    <div style="margin-top:6px"><span style="font-size:34px;font-weight:800">${rows.length}</span> <b class="muted" style="font-size:18px">paycheck${rows.length === 1 ? "" : "s"}</b></div>
+    <div class="muted">about ${money(total,0)} coming in</div></div><button class="btn ghost sm" data-act="payAmounts">Pay amounts</button></div>
+    <div class="stats two"><div class="stat"><small>Bonus paychecks</small><b>${bm.length ? bm.join(", ") : "None"}</b></div>
+      <div class="stat"><small>Tightest paycheck</small><b>${tight ? money(tight.pl.budget,0) + " · " + fmtDate(tight.d) : "-"}</b></div></div>
+    ${S.pay.freq === "monthly" ? `<p class="note" style="margin-top:10px">Paid monthly, so there are no bonus paychecks. Pick every 2 weeks or weekly in Settings to see the months with an extra one.</p>` : ""}</section>
+  ${rows.map((r,i) => { const m = r.d.slice(0,7), head = m !== lastM ? `<div class="h"><h2>${parse(r.d).toLocaleDateString(undefined,{month:"long",year:"numeric"})}</h2></div>` : ""; lastM = m;
+    const o = S.payPlan.over[r.d], now = i === 0, job = S.payPlan.jobs[r.d], pl = r.pl;
+    const tag = o && r.d <= today() ? `<span class="chip ok">Actual</span>` : o ? `<span class="chip soon">Edited</span>` : `<span class="chip later">Estimate</span>`;
+    const parts = [pl.minsDue > 0 ? `Debt minimums ${money(pl.minsDue)}` : "", pl.allowSet > 0 ? `Essentials ${money(pl.allowSet)}` : "", pl.saveSet > 0 ? `Savings ${money(pl.saveSet)}` : ""].filter(Boolean);
+    return head + `<div class="card pc ${r.bonus ? "bonus" : ""} ${now ? "now" : ""}"><div class="pc-top"><b>${wd(r.d)}</b><button class="pc-amt" data-act="pcAmt" data-d="${r.d}" aria-label="Change this paycheck amount">${money(r.pay,0)} <span aria-hidden="true">✎</span></button></div>
+      <div class="pc-tags">${now ? `<span class="chip ok">Now</span>` : ""}${r.bonus ? `<span class="chip soon">Bonus paycheck</span>` : ""}${tag}</div>
+      ${pl.bills.length ? `<div class="pc-bills">${pl.bills.map(x => `<div class="pc-bill"><span class="pc-e">${esc(x.b.emoji||"📜")}</span><div class="grow"><b>${esc(x.b.name)}</b><small>due ${fmtDate(x.d)}${x.early ? " · paid early" : ""}${x.paid ? " · cleared" : ""}</small></div>
+        <span class="amt">${money(x.b.amt)}</span><button class="x mv" data-act="moveBill" data-id="${x.b.id}" data-d="${x.d}" aria-label="Pay ${esc(x.b.name)} from a different paycheck">⇄</button></div>`).join("")}</div>` : `<p class="note" style="margin:10px 0 0">No bills land on this paycheck.</p>`}
+      ${parts.length ? `<p class="pc-parts">${parts.join(" · ")}</p>` : ""}
+      <div class="pc-left"><span class="muted">Left over</span><b class="${pl.budget < 0 ? "neg" : "pos"}">${money(pl.budget)}</b></div>
+      ${r.bonus ? bonusJob(r.d, job, pl) : ""}</div>`; }).join("")}
+  <p class="note" style="margin:12px 6px 0">Future paychecks are estimates, using today's bills, minimums and savings. Tap the amount to enter what you really got. Tap ⇄ to pay a bill from an earlier paycheck.</p>`;
+}
+function jobTarget(j){ return !j ? null : j.type === "goal" ? S.goals.find(g=>g.id===j.id) : S.debts.find(d=>d.id===j.id); }
+function bonusJob(d, j, pl){
+  const tg = jobTarget(j);
+  if(j && j.done) return `<div class="pc-job done">✅ Sent ${money(j.sent)} to ${esc(tg ? tg.name : "your " + (j.type === "goal" ? "goal" : "debt"))}</div>`;
+  if(tg){ const ready = d <= today();
+    return `<div class="pc-job"><div class="grow"><b>${j.type === "goal" ? "💎" : "⚔️"} ${esc(tg.name)}</b><small>${ready ? "This paycheck has arrived. Send the leftover." : "Ready on " + fmtDate(d)}</small></div>
+      <button class="btn sm mint" data-act="jobSend" data-d="${d}" ${ready ? "" : "disabled"}>Send it</button><button class="x" data-act="jobGive" data-d="${d}" aria-label="Change the job">✎</button></div>`; }
+  return `<button class="btn full" style="margin-top:12px" data-act="jobGive" data-d="${d}">🎯 Give this bonus a job</button>`;
+}
+function payAmountsForm(){
+  const mo = S.pay.freq === "monthly";
+  sheet(`<h3>Pay amounts</h3><p class="sub">${mo ? "You are paid monthly, so every paycheck is the same amount and there are no bonus paychecks." : "A bonus paycheck is the extra one in a month. Every 2 weeks, that is the 3rd paycheck. Weekly is the 5th."}</p>
+    <label class="f">Usual paycheck</label><input class="in" id="u" inputmode="decimal" value="${S.pay.amount}">
+    ${mo ? "" : `<label class="f">Bonus paycheck (leave empty to use the usual amount)</label><input class="in" id="b" inputmode="decimal" value="${S.payPlan.bonus || ""}" placeholder="${S.pay.amount}">`}
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const u = num(val(root,"#u")); if(u <= 0) return toast("Add your usual paycheck","💰");
+        S.pay.amount = u; if(!mo) S.payPlan.bonus = Math.max(0, num(val(root,"#b"))); save(); closeSheet(); render(); toast("Pay amounts saved","✅"); }; });
+}
+function pcAmtForm(d){
+  const o = S.payPlan.over[d], arrived = d <= today();
+  sheet(`<h3>${wd(d)} paycheck</h3><p class="sub">${arrived ? "What did you actually get? Overtime counts. Safe to spend uses this amount." : "Expecting something different? Enter it and the plan updates."}</p>
+    <input class="in huge" id="a" inputmode="decimal" value="${payFor(d)}">
+    <div class="actions">${o ? `<button class="btn ghost" id="reset">Use estimate</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const a = num(val(root,"#a")); if(a < 0) return; S.payPlan.over[d] = {amt:a, actual: arrived}; save(); closeSheet(); render(); };
+      const r = root.querySelector("#reset"); if(r) r.onclick = () => { delete S.payPlan.over[d]; save(); closeSheet(); render(); }; });
+}
+function moveBillForm(id, due){
+  const b = findBill(id); if(!b) return; const k = id+"|"+due, pcs = paychecks();
+  const usual = pcs.filter(x => x <= due).pop() || pcs[0], cur = S.payPlan.moves[k] || usual;
+  const opts = pcs.filter(x => x <= due);
+  const planOf = x => plan({start:x, end: pcs[pcs.indexOf(x)+1] || advance(x)}, x === pcs[0]);
+  sheet(`<h3>Pay ${esc(b.name)} from</h3><p class="sub">${money(b.amt)} due ${fmtDate(due,{weekday:"long",month:"short",day:"numeric"})}. Pick the paycheck that covers it.</p>
+    <div class="pickc">${opts.map(x => { const lo = planOf(x).budget, sel = x === cur;
+      return `<button class="pick ${sel ? "on" : ""}" data-pc="${x}"><div class="grow"><b>${wd(x)}${x === usual ? " · usual" : ""}</b><small>${sel ? "Left over: " + money(lo) : "Left over if moved here: " + money(lo - b.amt)}</small></div>${sel ? `<span class="chip ok">Paying from</span>` : ""}</button>`; }).join("")}</div>
+    <p class="note">You can only pick a paycheck that arrives before the bill is due.</p>
+    <div class="actions"><button class="btn full ghost" data-close>Close</button></div>`, root => {
+      root.querySelectorAll("[data-pc]").forEach(bt => bt.onclick = () => { const x = bt.dataset.pc; if(x === usual) delete S.payPlan.moves[k]; else S.payPlan.moves[k] = x; save(); closeSheet(); render(); }); });
+}
+function jobForm(d){
+  const j = S.payPlan.jobs[d]; let type = j ? j.type : "goal", pick = j ? j.id : "";
+  const goals = S.goals.filter(g=>g.saved < g.target), debts = S.debts.filter(x=>x.bal > 0);
+  sheet(`<h3>🎯 A job for this bonus</h3><p class="sub">${wd(d)}. Send the leftover to a savings goal or a debt boss instead of letting it get spent.</p>
+    <div class="seg" id="ty"><button data-t="goal">💎 Savings goal</button><button data-t="debt">⚔️ Debt</button></div>
+    <div class="pickc" id="opts" style="margin-top:14px"></div>
+    <div class="actions">${j ? `<button class="btn red" id="clear">Remove</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save job</button></div>`, root => {
+      const paint = () => { root.querySelectorAll("#ty button").forEach(b => b.classList.toggle("on", b.dataset.t === type));
+        const list = type === "goal" ? goals : debts;
+        root.querySelector("#opts").innerHTML = list.length ? list.map(x => `<button class="pick ${x.id === pick ? "on" : ""}" data-id="${x.id}"><div class="grow"><b>${esc(x.name)}</b><small>${type === "goal" ? money(x.saved,0) + " of " + money(x.target,0) : money(x.bal,0) + " owed"}</small></div></button>`).join("")
+          : `<p class="note">${type === "goal" ? "No open savings goals. Add one in the Vault." : "No debts to pay off. Add a boss first."}</p>`;
+        root.querySelectorAll("#opts [data-id]").forEach(b => b.onclick = () => { pick = b.dataset.id; paint(); }); };
+      root.querySelectorAll("#ty button").forEach(b => b.onclick = () => { type = b.dataset.t; pick = ""; paint(); }); paint();
+      root.querySelector("#ok").onclick = () => { if(!pick) return toast("Pick where it should go","🎯"); S.payPlan.jobs[d] = {type, id:pick, done:false, sent:0}; save(); closeSheet(); render(); };
+      const c = root.querySelector("#clear"); if(c) c.onclick = () => { delete S.payPlan.jobs[d]; save(); closeSheet(); render(); }; });
+}
+function jobSendForm(d){
+  const j = S.payPlan.jobs[d], tg = jobTarget(j); if(!j || !tg || j.done) return; if(d > today()) return toast("Ready once this paycheck arrives","📅");
+  const pcs = paychecks(), i = pcs.indexOf(d), pl = plan({start:d, end: pcs[i+1] || advance(d)}, i === 0);
+  const cap = j.type === "goal" ? Math.max(0, tg.target - tg.saved) : Math.max(0, tg.bal), sug = Math.max(0, Math.min(cap, Math.floor(pl.budget)));
+  sheet(`<h3>${j.type === "goal" ? "💎" : "⚔️"} Send to ${esc(tg.name)}</h3><p class="sub">${money(pl.budget)} is left over from this paycheck. ${money(cap)} ${j.type === "goal" ? "to go on this goal" : "is owed"}.</p>
+    <input class="in huge" id="a" inputmode="decimal" value="${sug || ""}" placeholder="${money(0)}">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn mint" id="ok">Send it</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const a = Math.min(num(val(root,"#a")), cap); if(a <= 0) return root.querySelector("#a").focus();
+        if(j.type === "goal"){ tg.saved = round2(tg.saved + a); S.goalLog.push({id:uid(), goalId:tg.id, amt:a, date:today()}); }
+        else { tg.bal = round2(tg.bal - a); S.debtLog.push({id:uid(), debtId:tg.id, amt:a, date:today()}); }
+        j.done = true; j.sent = a; save(); closeSheet(); render(); award("bonusboss");
+        if(j.type === "goal"){ award("loot"); if(capOk("bonusjob",2)) gain(Math.min(120, 10 + Math.round(a/15)), "Bonus put to work"); if(tg.saved >= tg.target){ award("goal"); setTimeout(()=>victory(null, tg), 900); } }
+        else { award("first_blood"); if(capOk("bonusjob",2)) gain(Math.min(150, 15 + Math.round(a/20)), "Bonus put to work"); if(tg.bal <= 0){ tg.bal = 0; save(); award("boss_down"); setTimeout(()=>victory(tg), 900); } } }; });
+}
+/* ── bills: monthly and yearly, cut a bill ── */
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const billYear = b => billCycle(b) === "yearly" ? b.amt : b.amt*12;
+function recurringBills(){
+  const all = [...S.bills, ...S.ybills].sort((a,b)=>a.day-b.day);
+  return all.length ? `<div class="list">${all.map(b => { const y = billCycle(b) === "yearly";
+    return `<div class="item"><div class="emo">${esc(b.emoji||"📜")}</div>
+     <div class="grow"><b>${esc(b.name)}</b><small>${y ? `Yearly · ${MONTHS[b.month-1].slice(0,3)} ${b.day} · save ${money(b.amt/perYear())} a paycheck` : `Day ${b.day} every month`}${b.auto?" · autopay":""}</small></div><span class="amt">${money(b.amt)}</span>
+     <button class="x" data-act="editBill" data-id="${b.id}" aria-label="Edit ${esc(b.name)}">✎</button></div>`; }).join("")}</div>
+    <p class="note" style="margin:8px 6px 0">Tap ✎ to edit a bill, make it yearly, or cut it.</p>`
+   : `<div class="card empty"><div class="e">📜</div>Rent, phone, insurance, car tax.<br>Add them once and every paycheck sets money aside for them.</div>`;
+}
+function cutSection(){
+  if(!S.cutBills.length) return "";
+  return `<div class="h"><h2>Cut bills</h2><span class="muted" style="font-size:14px">${money(sum(S.cutBills.map(billYear)))} a year saved</span></div>
+    <div class="list">${S.cutBills.map(b => `<div class="item"><div class="emo">✂️</div><div class="grow"><b>${esc(b.name)}</b><small>${money(billYear(b))} a year saved</small></div>
+      <button class="btn sm ghost" data-act="uncutBill" data-id="${b.id}">Undo</button></div>`).join("")}</div>`;
+}
+function billForm(b){
+  const e = !!b; b = b || {name:"", amt:"", day:1, emoji:"📜", auto:false}; const yr = e && billCycle(b) === "yearly";
+  sheet(`<h3>${e?"Edit bill":"New bill quest"}</h3><p class="sub" id="bsub"></p>
+    <label class="f">Name</label><input class="in" id="n" value="${esc(b.name)}" placeholder="Rent">
+    <div class="two"><div><label class="f">Amount</label><input class="in" id="a" inputmode="decimal" value="${b.amt}" placeholder="0.00"></div>
+      <div><label class="f">Billed</label><select class="in" id="cy"><option value="m">Every month</option><option value="y" ${yr?"selected":""}>Every year</option></select></div></div>
+    <div class="two"><div id="mw" ${yr?"":"hidden"}><label class="f">Month due</label><select class="in" id="mo">${MONTHS.map((m,i)=>`<option value="${i+1}" ${yr && b.month===i+1 ? "selected":""}>${m}</option>`).join("")}</select></div>
+      <div><label class="f" id="dl">Due day of month</label><input class="in" id="d" type="number" min="1" max="31" value="${b.day}"></div></div>
+    <div class="note" id="sv" hidden></div>
+    <div class="two"><div><label class="f">Icon</label><select class="in" id="e">${["📜","🏠","📱","💡","🌐","🚗","🛡️","📺","🎵","💳","🏋️","🎓","💧","🔥","👶","🐾"].map(x=>`<option ${x===b.emoji?"selected":""}>${x}</option>`).join("")}</select></div>
+      <div><label class="f">Autopay</label><select class="in" id="au"><option value="0">No</option><option value="1" ${b.auto?"selected":""}>Yes</option></select></div></div>
+    ${e ? `<button class="btn ghost full" id="cut" style="margin-top:14px">✂️ Cut this bill</button>` : ""}
+    <div class="actions">${e?`<button class="btn red" id="del">Delete</button>`:`<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      const q = s => root.querySelector(s);
+      const paint = () => { const y = q("#cy").value === "y", a = num(q("#a").value);
+        q("#mw").hidden = !y; q("#bsub").textContent = y ? "Repeats once a year, in the month you pick." : "Repeats every month on the same day.";
+        q("#dl").textContent = y ? "Due day" : "Due day of month"; const sv = q("#sv"); sv.hidden = !(y && a > 0); sv.textContent = y ? `Set aside ${money(a/perYear())} from each paycheck and it is ready when it falls due.` : ""; };
+      q("#cy").onchange = paint; q("#a").oninput = paint; paint();
+      q("#ok").onclick = () => { const n = val(root,"#n"), a = num(val(root,"#a")), d = Math.min(31, Math.max(1, parseInt(val(root,"#d"))||1)), y = q("#cy").value === "y";
+        if(!n || a <= 0) return toast("Add a name and an amount","✍️");
+        const o = {name:n, amt:a, day:d, emoji:val(root,"#e"), auto:val(root,"#au")==="1"}; if(y) o.month = +q("#mo").value;
+        if(!e) (y ? S.ybills : S.bills).push({id:uid(), ...o});
+        else { const was = billCycle(b) === "yearly"; if(was && !y) delete b.month; Object.assign(b, o);
+          if(was !== y){ S.bills = S.bills.filter(x=>x!==b); S.ybills = S.ybills.filter(x=>x!==b); (y ? S.ybills : S.bills).push(b); } }
+        save(); closeSheet(); render(); };
+      if(e){ q("#del").onclick = () => { if(!confirm(`Delete ${b.name}?`)) return; S.bills = S.bills.filter(x=>x.id!==b.id); S.ybills = S.ybills.filter(x=>x.id!==b.id); save(); closeSheet(); render(); };
+        q("#cut").onclick = () => { if(!confirm(`Cut ${b.name}? It stops counting in your plan. Cancel it with the company too.`)) return;
+          S.bills = S.bills.filter(x=>x.id!==b.id); S.ybills = S.ybills.filter(x=>x.id!==b.id); S.cutBills.push({...b, cutOn:today()}); save(); closeSheet(); render();
+          award("billbuster"); toast(`Cut. ${money(billYear(b))} a year back in your pocket.`,"✂️"); }; }
+    });
+}
+function uncutBill(id){ const c = S.cutBills.find(x=>x.id===id); if(!c) return; S.cutBills = S.cutBills.filter(x=>x.id!==id); const b = {...c}; delete b.cutOn;
+  (billCycle(b) === "yearly" ? S.ybills : S.bills).push(b); save(); render(); }
+
+/* ── side money, sell for cash, who owes me ── */
+const monthKey = () => today().slice(0,7);
+const sideEarned = () => round2(sum(S.incomes.filter(x => x.date.slice(0,7) === monthKey() && (x.kind === "side" || x.kind === "sale")).map(x=>x.amt)));
+const ago = d => { const n = daysBetween(d, today()); return n <= 0 ? "today" : n === 1 ? "yesterday" : n + " days ago"; };
+let vaultView = "treasure";
+const segVault = () => `<div class="seg segtop"><button class="${vaultView==="treasure"?"on":""}" data-act="vview" data-v="treasure">💎 Treasure</button><button class="${vaultView==="side"?"on":""}" data-act="vview" data-v="side">💼 Side money</button></div>`;
+function sideGoalHit(){ const k = monthKey(); if(S.side.goal > 0 && sideEarned() >= S.side.goal && S.side.hit !== k){ S.side.hit = k; save(); setTimeout(()=>{ coins(18); gain(50, "Side money goal hit"); }, 500); } }
+function sideView(){
+  const got = sideEarned(), goal = S.side.goal, f = goal > 0 ? got/goal : 0;
+  const open = S.owed.filter(o => o.status !== "paid"), out = round2(sum(open.map(o => o.amt - sum(o.pays.map(p=>p.amt)))));
+  const items = [...S.sales].sort((a,b) => (a.status === "sold") - (b.status === "sold"));
+  return `<section class="card hero" style="padding:18px"><div class="row"><div class="ring" style="width:84px;height:84px">${ring(f, f>=1 ? "var(--mint)" : "url(#g)", 84, 9)}<div class="c" style="font-size:26px">💼</div></div>
+    <div class="grow"><div class="lbl">Side money · ${MONTHS[parse(today()).getMonth()]}</div><div style="font-size:30px;font-weight:800;margin-top:2px" class="gold">${money(got)}</div>
+    <div class="muted" style="font-size:14px">${goal > 0 ? (got >= goal ? "Goal of " + money(goal,0) + " reached 🎉" : money(goal - got) + " to your " + money(goal,0) + " goal") : "No goal yet. Set one for the month."}</div></div></div>
+    <div class="two" style="margin-top:14px"><button class="btn ghost" data-act="sideGoal">${goal > 0 ? "Change goal" : "Set a goal"}</button><button class="btn" data-act="sideIncome">${I.plus} Side income</button></div></section>
+  <div class="h"><h2>Sell for cash</h2><button data-act="saleAdd">+ Item</button></div>
+  ${items.length ? `<div class="list">${items.map(s => s.status === "sold"
+    ? `<div class="item"><div class="emo">✅</div><div class="grow"><b>${esc(s.name)}</b><small>Sold ${fmtDate(s.soldOn)}</small></div><span class="amt pos">+${money(s.soldFor)}</span><button class="x" data-act="saleEdit" data-id="${s.id}" aria-label="Edit ${esc(s.name)}">✎</button></div>`
+    : `<div class="item"><div class="emo">🏷️</div><div class="grow"><b>${esc(s.name)}</b><small>Asking ${money(s.ask)}${s.where ? " · " + esc(s.where) : ""}</small></div>
+       <button class="btn sm mint" data-act="saleSold" data-id="${s.id}">Sold</button><button class="x" data-act="saleEdit" data-id="${s.id}" aria-label="Edit ${esc(s.name)}">✎</button></div>`).join("")}</div>`
+   : `<div class="card empty"><div class="e">🏷️</div>Got things you no longer use? List them here with an asking price, and tap Sold when one goes. The money counts towards your side money goal.<br><br><button class="btn" data-act="saleAdd">${I.plus} List an item</button></div>`}
+  <div class="h"><h2>Owed to me</h2><button data-act="oweAdd">+ Add</button></div>
+  ${open.length ? `<p class="note" style="margin:-4px 6px 10px">${money(out)} still out there with ${open.length} ${open.length === 1 ? "person" : "people"}.</p><div class="list">${open.map(o => { const back = sum(o.pays.map(p=>p.amt)), left = round2(o.amt - back);
+    return `<div class="item"><div class="emo">🤝</div><div class="grow"><b>${esc(o.who)}</b><small>${esc(o.note || "Lent")} · ${ago(o.date)}${back > 0 ? " · " + money(back) + " paid back" : ""}</small></div>
+      <span class="amt">${money(left)}</span><button class="btn sm mint" data-act="owePaid" data-id="${o.id}">Paid</button><button class="x" data-act="oweEdit" data-id="${o.id}" aria-label="Edit ${esc(o.who)}">✎</button></div>`; }).join("")}</div>`
+   : `<div class="card empty"><div class="e">🤝</div>${S.owed.length ? "Everyone has paid you back." : "Lent someone money? Add it here and tick off each payback, even if they pay a bit at a time."}<br><br><button class="btn sm ghost" data-act="oweAdd">Add someone</button></div>`}
+  ${S.owed.some(o => o.status === "paid") ? `<div class="h"><h2>Paid back</h2></div><div class="list">${S.owed.filter(o=>o.status==="paid").slice(-4).reverse().map(o => `<div class="item done"><div class="emo">🤝</div><div class="grow"><b>${esc(o.who)}</b><small>${esc(o.note || "Lent")}</small></div><span class="amt pos">${money(o.amt)}</span></div>`).join("")}</div>` : ""}
+  <p class="note" style="margin:14px 6px 0">Money from sales, side jobs and paybacks is added to this paycheck as extra income, so it counts in Safe to spend.</p>${ringGradient()}`;
+}
+function sideGoalForm(){
+  sheet(`<h3>Side money goal</h3><p class="sub">How much do you want to earn on the side each month? Sales and side jobs count.</p>
+    <input class="in huge" id="a" inputmode="decimal" value="${S.side.goal || ""}" placeholder="${money(0)}">
+    <div class="actions">${S.side.goal > 0 ? `<button class="btn ghost" id="off">No goal</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const a = num(val(root,"#a")); if(a <= 0) return root.querySelector("#a").focus(); S.side.goal = a; save(); closeSheet(); render(); sideGoalHit(); };
+      const o = root.querySelector("#off"); if(o) o.onclick = () => { S.side.goal = 0; save(); closeSheet(); render(); }; });
+}
+function sideIncomeForm(){
+  sheet(`<h3>Side income</h3><p class="sub">Money from a side job, tips, odd jobs.</p>
+    <input class="in huge" id="a" inputmode="decimal" placeholder="${money(0)}">
+    <label class="f">What was it? (optional)</label><input class="in" id="n" maxlength="60" placeholder="Weekend dog walking">
+    <div class="two"><div><label class="f">Date</label><input class="in" id="d" type="date" value="${today()}"></div><div></div></div>
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Add it</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const a = num(val(root,"#a")); if(a <= 0) return root.querySelector("#a").focus();
+        S.incomes.push({id:uid(), amt:a, kind:"side", note:val(root,"#n"), date:val(root,"#d") || today(), t:Date.now()}); save(); closeSheet(); render();
+        award("sidehustle"); if(capOk("sidein", 3)) gain(5, "Side income logged"); sideGoalHit(); }; });
+}
+function saleForm(s){
+  const e = !!s; s = s || {name:"", ask:"", where:""};
+  sheet(`<h3>${e ? "Edit item" : "Sell for cash"}</h3><p class="sub">${e ? "" : "List something you want to sell."}</p>
+    <label class="f">Item</label><input class="in" id="n" maxlength="40" value="${esc(s.name)}" placeholder="Old phone">
+    <div class="two"><div><label class="f">Asking price</label><input class="in" id="a" inputmode="decimal" value="${s.ask}" placeholder="0.00"></div>
+      <div><label class="f">Where (optional)</label><input class="in" id="w" maxlength="24" value="${esc(s.where||"")}" placeholder="eBay"></div></div>
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const n = val(root,"#n"), a = num(val(root,"#a")); if(!n || a <= 0) return toast("Add the item and an asking price","✍️");
+        const o = {name:n, ask:a, where:val(root,"#w")}; if(e) Object.assign(s, o); else S.sales.push({id:uid(), status:"listed", added:today(), ...o}); save(); closeSheet(); render(); };
+      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete ${s.name}?${s.status === "sold" ? " The sale money is removed from your income too." : ""}`)) return;
+        if(s.incId) S.incomes = S.incomes.filter(x=>x.id!==s.incId); S.sales = S.sales.filter(x=>x.id!==s.id); save(); closeSheet(); render(); }; });
+}
+function soldForm(s){
+  sheet(`<h3>Sold: ${esc(s.name)}</h3><p class="sub">What did it sell for? It counts as extra income this paycheck.</p>
+    <input class="in huge" id="a" inputmode="decimal" value="${s.ask}">
+    <div class="two"><div><label class="f">Date</label><input class="in" id="d" type="date" value="${today()}"></div><div></div></div>
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn mint" id="ok">Sold it</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const a = num(val(root,"#a")); if(a <= 0) return root.querySelector("#a").focus(); const date = val(root,"#d") || today(), id = uid();
+        S.incomes.push({id, amt:a, kind:"sale", note:s.name, date, t:Date.now()}); s.status = "sold"; s.soldFor = a; s.soldOn = date; s.incId = id; save(); closeSheet(); render();
+        award("sidehustle"); if(capOk("sale", 3)) gain(10, `Sold ${s.name}`); sideGoalHit(); }; });
+}
+function oweForm(o){
+  const e = !!o; o = o || {who:"", amt:"", note:"", date:today()};
+  sheet(`<h3>${e ? "Edit" : "Money you lent"}</h3><p class="sub">${e ? "" : "Who has your money? Tap Paid whenever they pay some back."}</p>
+    <label class="f">Who</label><input class="in" id="w" maxlength="30" value="${esc(o.who)}" placeholder="Alex">
+    <div class="two"><div><label class="f">Amount lent</label><input class="in" id="a" inputmode="decimal" value="${o.amt}" placeholder="0.00"></div>
+      <div><label class="f">Date</label><input class="in" id="d" type="date" value="${o.date}"></div></div>
+    <label class="f">What for? (optional)</label><input class="in" id="n" maxlength="40" value="${esc(o.note||"")}" placeholder="Concert tickets">
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const w = val(root,"#w"), a = num(val(root,"#a")); if(!w || a <= 0) return toast("Add who and how much","✍️");
+        const back = e ? sum(o.pays.map(p=>p.amt)) : 0; if(a < back) return toast(`They have already paid back ${money(back)}`,"✍️");
+        const x = {who:w, amt:a, note:val(root,"#n"), date:val(root,"#d") || today()}; if(e){ Object.assign(o, x); if(back >= a) o.status = "paid"; } else S.owed.push({id:uid(), status:"open", pays:[], ...x}); save(); closeSheet(); render(); };
+      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete ${o.who}? Money they already paid back stays in your income.`)) return; S.owed = S.owed.filter(x=>x.id!==o.id); save(); closeSheet(); render(); }; });
+}
+function paidForm(o){
+  const left = round2(o.amt - sum(o.pays.map(p=>p.amt)));
+  sheet(`<h3>🤝 ${esc(o.who)} paid back</h3><p class="sub">${money(left)} still owed. A part payment is fine.</p>
+    <input class="in huge" id="a" inputmode="decimal" value="${left}">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn mint" id="ok">Got it</button></div>`, root => {
+      root.querySelector("#ok").onclick = () => { const a = Math.min(num(val(root,"#a")), left); if(a <= 0) return root.querySelector("#a").focus(); const id = uid();
+        S.incomes.push({id, amt:a, kind:"payback", note:o.who + " paid back", date:today(), t:Date.now()}); o.pays.push({amt:a, date:today(), incId:id});
+        const done = round2(sum(o.pays.map(p=>p.amt))) >= o.amt; if(done) o.status = "paid"; save(); closeSheet(); render();
+        if(done){ award("payback"); if(capOk("payback", 2)) gain(10, `${o.who} paid you back`); else toast("Paid back in full","🤝"); } else toast(`${money(round2(left - a))} still to come from ${o.who}`,"🤝"); }; });
+}
+
+/* ── ADHD tax ── */
+const TAXK = [["late","⏰","Late fee"],["return","📦","Missed return"],["cancel","🔁","Forgotten cancellation"],["rush","🚚","Rush delivery"]];
+const taxOf = k => TAXK.find(c=>c[0]===k) || TAXK[0];
+function adhdSection(){
+  const t = today(), ym = t.slice(0,7), yr = t.slice(0,4);
+  const mine = S.adhd.filter(x => S.spends.some(s=>s.id===x.spendId));
+  const m = round2(sum(mine.filter(x=>x.date.slice(0,7)===ym).map(x=>x.amt))), y = round2(sum(mine.filter(x=>x.date.slice(0,4)===yr).map(x=>x.amt)));
+  const by = TAXK.map(k => [k, round2(sum(mine.filter(x=>x.kind===k[0] && x.date.slice(0,4)===yr).map(x=>x.amt)))]).filter(a=>a[1]>0);
+  const last = mine.map(x=>x.date).sort().pop();
+  return `<div class="h"><h2>ADHD tax</h2><button data-act="taxLog">+ Log one</button></div>
+  <section class="card" style="padding:16px">
+    <div class="stats two" style="margin-top:0"><div class="stat"><small>This month</small><b class="${m>0?"neg":""}">${money(m)}</b></div><div class="stat"><small>This year</small><b class="${y>0?"neg":""}">${money(y)}</b></div></div>
+    ${by.length ? `<div class="cats" style="margin-top:12px">${by.map(([k,v]) => `<span class="pill">${k[1]} ${k[2]} · ${money(v,0)}</span>`).join("")}</div>` : ""}
+    <p class="note" style="margin-top:12px">${last ? `${Math.max(0, daysBetween(last, t))} days since the last one.` : "The cost of forgetting: late fees, missed returns, forgotten cancellations, rush delivery. Tag a spend as ADHD tax when you log it and the totals build up here."}</p>
+  </section>`;
+}
+function moreActs(act, id, a){
+  const d = a.dataset.d, v = a.dataset.v;
+  if(act === "bview"){ billsView = v; render(); }
+  else if(act === "vview"){ vaultView = v; render(); }
+  else if(act === "payAmounts") payAmountsForm();
+  else if(act === "pcAmt") pcAmtForm(d);
+  else if(act === "moveBill") moveBillForm(id, d);
+  else if(act === "jobGive") jobForm(d);
+  else if(act === "jobSend") jobSendForm(d);
+  else if(act === "uncutBill") uncutBill(id);
+  else if(act === "sideGoal") sideGoalForm(); else if(act === "sideIncome") sideIncomeForm();
+  else if(act === "saleAdd") saleForm(); else if(act === "saleEdit") saleForm(S.sales.find(s=>s.id===id));
+  else if(act === "saleSold") soldForm(S.sales.find(s=>s.id===id));
+  else if(act === "oweAdd") oweForm(); else if(act === "oweEdit") oweForm(S.owed.find(o=>o.id===id)); else if(act === "owePaid") paidForm(S.owed.find(o=>o.id===id));
+  else if(act === "taxLog") spendForm("late");
+  else return false;
+  return true; }
+
 /* ───────────────────────── sample data ───────────────────────── */
 function demo(){
   const t = today(), D = n => addDays(t, n);
   S = blank(); S.hero = {name:"Sam", avatar:"wizard", skin:SKIN[1], created:D(-40)}; S.cur = guessCur();
-  S.pay = {freq:"monthly", amount:2850, next:D(12), anchor:parse(D(12)).getDate()};
+  S.pay = {freq:"biweekly", amount:2100, next:D(4), anchor:parse(D(4)).getDate()};
+  S.payPlan = {bonus:2310, over:{[D(-10)]:{amt:2163, actual:true}}, moves:{}, jobs:{}};
+  S.bills = [{id:"b2",name:"Phone",amt:42,day:6,emoji:"📱"},{id:"b5",name:"Streaming",amt:15.99,day:12,emoji:"📺"},{id:"b3",name:"Internet",amt:39.99,day:17,emoji:"🌐"},
+    {id:"b4",name:"Car insurance",amt:96,day:20,emoji:"🚗"},{id:"b6",name:"Gym",amt:29,day:24,emoji:"🏋️"},{id:"b1",name:"Rent",amt:1150,day:29,emoji:"🏠",auto:true}];
+  S.ybills = [{id:"y1",name:"Car tax",amt:180,day:25,month:12,emoji:"🚗"}];
+  S.cutBills = [{id:"c1",name:"Magazine",amt:8.99,day:3,emoji:"📰",cutOn:D(-6)}];
   const day = n => parse(D(n)).getDate();
-  S.bills = [{id:"b1",name:"Rent",amt:1150,day:day(-17),emoji:"🏠",auto:true},{id:"b2",name:"Phone",amt:42,day:day(-9),emoji:"📱"},
-    {id:"b3",name:"Internet",amt:39.99,day:day(2),emoji:"🌐"},{id:"b4",name:"Car insurance",amt:96,day:day(5),emoji:"🚗"},
-    {id:"b5",name:"Streaming",amt:15.99,day:day(-3),emoji:"📺"},{id:"b6",name:"Gym",amt:29,day:day(9),emoji:"🏋️"}];
-  S.billPaid = {["b1|"+D(-17)]:D(-17), ["b2|"+D(-9)]:D(-9), ["b5|"+D(-3)]:D(-3)};
   S.debts = [{id:"d1",name:"Credit card",bal:2870,start:3240,apr:24.9,min:95,day:day(-2)},{id:"d2",name:"Car loan",bal:7420,start:9800,apr:6.9,min:260,day:day(4)},
     {id:"d3",name:"Store card",bal:0,start:640,apr:29.9,min:35,day:day(6)},{id:"d4",name:"Pay-later plan",bal:210,start:360,apr:0,min:30,day:day(7)}];
   S.debtLog = [{id:"l1",debtId:"d1",amt:120,date:D(-2)}];
-  S.goals = [{id:"g1",name:"Emergency fund",target:1000,saved:640,perPay:100,emoji:"🛟"},{id:"g2",name:"Summer trip",target:1200,saved:310,perPay:60,emoji:"✈️"},
+  S.goals = [{id:"g1",name:"Emergency fund",target:1000,saved:640,perPay:60,emoji:"🛟"},{id:"g2",name:"Summer trip",target:1200,saved:310,perPay:30,emoji:"✈️"},
     {id:"g3",name:"New laptop",target:900,saved:900,perPay:0,emoji:"💻"}];
   const sp = [[-17,"groceries",64.2,"Weekly shop"],[-15,"food",12.5,"Lunch"],[-14,"transport",45,"Fuel"],[-12,"fun",18,"Cinema"],[-10,"groceries",58.9,"Weekly shop"],
     [-8,"shopping",34.99,"Shoes"],[-6,"food",9.8,"Coffee and cake"],[-5,"health",14.2,"Pharmacy"],[-3,"groceries",71.35,"Big shop"],[-2,"gifts",25,"Birthday card and gift"],
     [-1,"transport",40,"Fuel"],[0,"food",6.4,"Coffee"]];
   S.spends = sp.map(([d,c,a,n],i)=>({id:"s"+i, amt:a, cat:c, note:n, date:D(d), t:i}));
+  S.spends.push({id:"s20", amt:35, cat:"other", note:"Late fee on card", date:D(-3), t:20}, {id:"s21", amt:18.5, cat:"shopping", note:"Rush delivery", date:D(-40), t:21});
+  S.adhd = [{id:"x1", kind:"late", amt:35, note:"Late fee on card", date:D(-3), spendId:"s20"}, {id:"x2", kind:"rush", amt:18.5, note:"Rush delivery", date:D(-40), spendId:"s21"}];
+  S.incomes = [{id:"n1", amt:140, kind:"side", note:"Weekend dog walking", date:D(-3), t:1}, {id:"n2", amt:85, kind:"sale", note:"Bike", date:D(-6), t:2}];
+  S.sales = [{id:"sa1",name:"Old phone",ask:120,where:"eBay",status:"listed",added:D(-12)},{id:"sa2",name:"Winter coat",ask:35,where:"Vinted",status:"listed",added:D(-9)},
+    {id:"sa3",name:"Bike",ask:90,where:"",status:"sold",added:D(-14),soldFor:85,soldOn:D(-6),incId:"n2"}];
+  S.owed = [{id:"o1",who:"Alex",amt:40,note:"Concert tickets",date:D(-19),status:"open",pays:[]},{id:"o2",who:"Jordan",amt:25,note:"Dinner",date:D(-4),status:"open",pays:[]}];
+  S.side = {goal:300, hit:""};
   S.impulses = [{id:"i1",name:"Noise-cancelling headphones",price:129,added:Date.now()-6*36e5,hours:24,status:"waiting"},
     {id:"i2",name:"Mechanical keyboard",price:89,added:Date.now()-50*36e5,hours:48,status:"waiting"},
     {id:"i3",name:"Third water bottle",price:32,added:Date.now()-90*36e5,hours:24,status:"skipped"}];
   S.savedByWaiting = 32; S.xp = 1460; S.streak = {last:D(-1), n:6, best:11};
   for(let i=1;i<=6;i++) S.checkins[D(-i)] = true; S.noSpend = {[D(-4)]:true, [D(-7)]:true, [D(-11)]:true};
   ["first_step","checkin3","streak7","bill5","first_blood","boss_down","loot","goal","jail1","nospend"].forEach((b,i)=> S.badges[b] = D(-30+i*3));
-  S.allowances = [{id:"a1",cat:"groceries",amt:250},{id:"a2",cat:"transport",amt:120}];
+  S.allowances = [{id:"a1",cat:"groceries",amt:150},{id:"a2",cat:"transport",amt:60}];
   S.subs = [["Streaming",12.99,"monthly",3,"streaming"],["Music",10.99,"monthly",9,"music"],["Cloud storage",29.99,"yearly",44,"storage"],["Gym app",4.99,"monthly",18,"fitness"],["News site",96,"yearly",130,"news"]]
     .map(([name,amt,cycle,n,cat],i) => ({id:"u"+i, name, amt, cycle, next:D(n), day:parse(D(n)).getDate(), cat, status:"active", created:D(-60), reviewed:"", sample:true}));
   S.subs.push({id:"u9", name:"Meal box", amt:24, cycle:"monthly", next:D(11), day:parse(D(11)).getDate(), cat:"other", status:"cancelled", cancelledOn:D(-5), created:D(-90), reviewed:"", sample:true});
+  /* this paycheck: Phone and Streaming are cleared, and Car insurance is paid early from this paycheck */
+  const p = period();
+  if(p){ S.bills.forEach(b => occurrences(b.day,p).forEach(d => { if(b.name === "Phone" || b.name === "Streaming") S.billPaid[b.id+"|"+d] = d; }));
+    const q = {start:p.end, end:advance(p.end)}; const ins = S.bills.find(b=>b.name==="Car insurance");
+    occurrences(ins.day,q).forEach(d => { S.payPlan.moves[ins.id+"|"+d] = p.start; }); }
   S.lastPeriodStart = ""; save();
 }
 
@@ -1135,15 +1496,17 @@ document.addEventListener("click", e => {
   const tb = e.target.closest("[data-tab]"); if(tb){ tab = tb.dataset.tab; closeSheet(); render(); scrollTo({top:0,behavior:"smooth"}); return; }
   if(e.target.closest("[data-close]")){ closeSheet(); return; }
   const a = e.target.closest("[data-act]"); if(!a) return; const id = a.dataset.id, act = a.dataset.act, t = today();
-  if(newActs(act, id, a)){}
+  if(newActs(act, id, a) || moreActs(act, id, a)){}
   else if(act === "addSpend") spendForm();
   else if(act === "addIncome"){ closeSheet(); incomeForm(); }
-  else if(act === "addBill") billForm(); else if(act === "editBill") billForm(S.bills.find(b=>b.id===id));
+  else if(act === "addBill") billForm(); else if(act === "editBill") billForm(findBill(id));
   else if(act === "pay"){ S.billPaid[id+"|"+a.dataset.d] = t; save(); render(); const late = a.dataset.d < t;
     gain(late ? 10 : 20, late ? "Bill cleared" : "Bill cleared on time"); if(Object.keys(S.billPaid).length >= 5) award("bill5"); }
   else if(act === "unpay"){ delete S.billPaid[id+"|"+a.dataset.d]; save(); render(); }
-  else if(act === "delSpend"){ S.spends = S.spends.filter(s=>s.id!==id); save(); render(); }
-  else if(act === "delIncome"){ S.incomes = S.incomes.filter(x=>x.id!==id); save(); render(); }
+  else if(act === "delSpend"){ S.spends = S.spends.filter(s=>s.id!==id); S.adhd = S.adhd.filter(x=>x.spendId!==id); save(); render(); }
+  else if(act === "delIncome"){ S.incomes = S.incomes.filter(x=>x.id!==id);
+    S.sales.forEach(x => { if(x.incId === id){ x.status = "listed"; delete x.incId; delete x.soldFor; delete x.soldOn; } });
+    S.owed.forEach(o => { o.pays = o.pays.filter(p => p.incId !== id); if(o.status === "paid" && round2(sum(o.pays.map(p=>p.amt))) < o.amt) o.status = "open"; }); save(); render(); }
   else if(act === "checkin"){ if(S.checkins[t]) return; S.checkins[t] = true; const y = addDays(t,-1);
     S.streak.n = S.streak.last === y ? S.streak.n + 1 : 1; S.streak.last = t; S.streak.best = Math.max(S.streak.best, S.streak.n); save(); render();
     gain(10 + Math.min(20, S.streak.n), `Day ${S.streak.n} check-in`); if(S.streak.n >= 3) award("checkin3"); if(S.streak.n >= 7) award("streak7"); if(S.streak.n >= 30) award("streak30"); }
