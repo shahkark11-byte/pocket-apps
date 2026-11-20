@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#161a36">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reset Quest">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Reset Quest</title>
+<style>
+:root{--bg:#141833;--bg2:#251c43;--ink:#f7f1e8;--mut:#b9b2cc;--dim:#8a83a3;--card:rgba(255,255,255,.06);--card2:rgba(255,255,255,.1);--line:rgba(255,255,255,.12);
+  --sun:#ffc46b;--sun2:#ff8f5a;--coral:#ff7b6b;--mint:#62e0b6;--sky:#86c8ff;--r:22px;--nav:74px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+body{background:
+  radial-gradient(900px 520px at 100% -8%,rgba(255,170,100,.30),transparent 60%),
+  radial-gradient(700px 500px at -10% 110%,rgba(134,200,255,.12),transparent 60%),
+  linear-gradient(170deg,#1d1b40 0%,var(--bg) 45%,#120f26 100%) fixed;overflow-x:hidden}
+/* lighting: one warm light source, the sunrise at the top right. Every highlight faces it, every shadow falls away to the bottom left */
+:root{--sy:0}
+body::before{content:"";position:fixed;inset:-10% -30% auto auto;width:120%;height:80%;pointer-events:none;z-index:0;
+  background:linear-gradient(118deg,transparent 38%,rgba(255,214,150,.09) 46%,transparent 54%),linear-gradient(128deg,transparent 52%,rgba(255,200,140,.06) 58%,transparent 64%);
+  mask-image:linear-gradient(205deg,#000 5%,transparent 60%);-webkit-mask-image:linear-gradient(205deg,#000 5%,transparent 60%);
+  transform:translateY(calc(var(--sy) * -0.12px))}
+body::after{content:"";position:fixed;right:-140px;top:-160px;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle,rgba(255,226,170,.38) 0%,rgba(255,170,100,.16) 35%,transparent 70%);transform:translateY(calc(var(--sy) * -0.06px))}
+#dust{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+button{cursor:pointer;border:0;background:none;color:inherit;font:inherit}
+input,textarea,select{font:inherit;color:var(--ink)}
+#app{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 14px calc(var(--nav) + 40px)}
+.top{display:flex;align-items:center;gap:12px;margin:4px 2px 16px}
+.logo{width:44px;height:44px;border-radius:14px;flex:none;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 72%,#ffe2a8 0 22%,#ffb05e 23% 36%,transparent 37%),linear-gradient(180deg,#3b2f6e,#21194a);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),-4px 6px 14px rgba(0,0,0,.35)}
+.top .grow{min-width:0}
+.top b{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);font-weight:600}
+.lv i{font-style:normal;background:linear-gradient(180deg,#ffe3a3,#ffb45f);color:#3a1d0b;border-radius:7px;padding:1px 7px;font-weight:800}
+.xpbar{height:6px;border-radius:9px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px;width:150px;max-width:100%}
+.xpbar u{display:block;height:100%;background:linear-gradient(180deg,rgba(255,255,255,.55),transparent 55%),linear-gradient(90deg,var(--sun),var(--sun2));border-radius:9px}
+.icb{width:44px;height:44px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.icb svg{width:22px;height:22px}
+.grow{flex:1;min-width:0}
+.row{display:flex;align-items:center;gap:12px}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:-10px 16px 26px -16px rgba(6,4,18,.75),inset 0 1px 0 rgba(255,236,200,.08)}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(205deg,rgba(255,226,180,.13),transparent 38%);mix-blend-mode:screen}
+.hero{background:linear-gradient(155deg,rgba(255,170,100,.20),rgba(134,110,255,.10) 55%,rgba(255,255,255,.04));border-color:rgba(255,220,170,.22)}
+.lbl{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.big{font-size:34px;font-weight:850;letter-spacing:-.02em;line-height:1.1}
+.gold{background:linear-gradient(180deg,#fff2c9,var(--sun) 55%,var(--sun2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.muted{color:var(--mut)}.dim{color:var(--dim)}.pos{color:var(--mint)}.neg{color:var(--coral)}
+.h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:24px 4px 10px}
+.h h2{font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.h button,.link{color:var(--sun);font-weight:700;font-size:15px;padding:12px 8px;margin:-12px -8px;min-height:44px}
+.note{font-size:14px;color:var(--mut);line-height:1.45}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:13px 18px;border-radius:15px;font-weight:800;font-size:15px;color:#3a1d0b;
+  background:linear-gradient(205deg,rgba(255,255,255,.5),transparent 42%),linear-gradient(180deg,#ffdc96,#ffa65f);box-shadow:0 5px 0 #c4642f,-6px 14px 20px -8px rgba(255,140,80,.45);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #c4642f}
+.btn.ghost{background:var(--card2);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
+.btn.mint{background:linear-gradient(205deg,rgba(255,255,255,.45),transparent 42%),linear-gradient(180deg,#8ff0cc,#3fcf9c);color:#06341f;box-shadow:0 5px 0 #219067}
+.btn.red{background:linear-gradient(205deg,rgba(255,255,255,.4),transparent 42%),linear-gradient(180deg,#ff9e92,#f2606a);color:#3d0710;box-shadow:0 5px 0 #a73848}
+.btn.sm{padding:9px 13px;font-size:14px;border-radius:12px;min-height:44px}
+.btn.full{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn svg{width:18px;height:18px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;padding:4px 9px;border-radius:9px;background:var(--card2);color:var(--mut);white-space:nowrap}
+.chip.sun{background:rgba(255,196,107,.18);color:var(--sun)}.chip.mint{background:rgba(98,224,182,.16);color:var(--mint)}.chip.sky{background:rgba(134,200,255,.16);color:var(--sky)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--card2);font-size:13px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+.stats.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.stat{background:rgba(0,0,0,.2);border-radius:15px;padding:10px 12px}
+.stat small{display:block;color:var(--mut);font-size:12px;font-weight:700}
+.stat b{font-size:18px;font-weight:800}
+.ring{position:relative;width:104px;height:104px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-weight:850;font-size:22px;line-height:1}
+.ring .c small{display:block;font-size:12px;font-weight:700;color:var(--mut);margin-top:3px}
+.fut{margin-top:14px;padding:12px 14px;border-radius:15px;background:rgba(0,0,0,.22);font-size:15px;line-height:1.45}
+.fut span{display:block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sun);margin-bottom:3px}
+.banner{display:flex;gap:12px;align-items:flex-start;padding:14px 16px}
+.banner .e{font-size:24px;line-height:1}
+.banner b{display:block}
+.banner.sun{border-color:rgba(255,196,107,.45);background:linear-gradient(160deg,rgba(255,196,107,.16),var(--card))}
+.banner.sky{border-color:rgba(134,200,255,.4);background:linear-gradient(160deg,rgba(134,200,255,.13),var(--card))}
+.q{padding:16px}
+.q-top{display:flex;gap:12px;align-items:flex-start}
+.q-e{width:44px;height:44px;border-radius:14px;background:var(--card2);display:grid;place-items:center;font-size:22px;flex:none}
+.q-top b{display:block;font-size:17px;font-weight:800;line-height:1.25}
+.q-top small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
+.plan{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.plan:first-of-type{margin-top:12px}
+.plan .t{flex:1;min-width:0;font-size:14px;line-height:1.35}
+.plan .t em{font-style:normal;color:var(--mut)}
+.plan .t b{font-weight:700}
+.dots{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.dots i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.14)}
+.dots i.on{background:radial-gradient(circle at 65% 30%,#d9fff0 0 18%,var(--mint) 45%);box-shadow:0 0 0 3px rgba(98,224,182,.15)}
+.tick{width:48px;height:48px;border-radius:15px;flex:none;display:grid;place-items:center;font-size:22px;font-weight:900;color:#06341f;
+  background:linear-gradient(205deg,rgba(255,255,255,.5),transparent 45%),linear-gradient(180deg,#8ff0cc,#3fcf9c);box-shadow:0 4px 0 #219067,-5px 10px 14px -8px rgba(6,4,18,.7)}
+.tick:active{transform:translateY(2px);box-shadow:0 2px 0 #219067}
+.tick.done{background:rgba(98,224,182,.18);color:var(--mint);box-shadow:none;font-size:20px}
+.undo{width:44px;height:44px;border-radius:11px;background:var(--card2);color:var(--dim);display:grid;place-items:center;flex:none;font-size:15px}
+.x{width:44px;height:44px;border-radius:11px;color:var(--dim);display:grid;place-items:center;flex:none;background:var(--card2)}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:18px;background:linear-gradient(205deg,rgba(255,226,180,.07),transparent 40%),var(--card);border:1px solid var(--line);box-shadow:-8px 12px 20px -14px rgba(6,4,18,.7)}
+.item b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item small{display:block;color:var(--mut);font-size:13px}
+.emo{width:42px;height:42px;border-radius:14px;background:var(--card2);display:grid;place-items:center;font-size:21px;flex:none}
+.empty{text-align:center;color:var(--mut);padding:26px 18px}
+.empty .e{font-size:38px;margin-bottom:8px}
+.areas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.area{padding:14px;border-radius:18px;background:linear-gradient(205deg,rgba(255,226,180,.07),transparent 40%),var(--card);box-shadow:-8px 12px 20px -14px rgba(6,4,18,.7);border:1px solid var(--line);min-height:96px;text-align:left;position:relative}
+.area .e{font-size:22px}
+.area b{display:block;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:4px 0 4px}
+.area p{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.area p.dim{font-style:italic}
+.letter{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;background:linear-gradient(205deg,rgba(255,226,180,.07),transparent 40%),var(--card);box-shadow:-8px 12px 20px -14px rgba(6,4,18,.7);border:1px solid var(--line)}
+.letter .seal{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:20px;background:radial-gradient(circle at 35% 30%,#ffb39b,#d9534f 70%);box-shadow:inset 0 -3px 0 rgba(0,0,0,.2)}
+.letter.ready{border-color:rgba(255,196,107,.5);background:linear-gradient(160deg,rgba(255,196,107,.14),var(--card))}
+.sprint{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:5px;margin-top:14px}
+.sprint i{aspect-ratio:1;border-radius:7px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;color:var(--mut)}
+.sprint i.up{background:rgba(98,224,182,.35);color:#dffbf0}
+.sprint i.strong{background:linear-gradient(180deg,#ffd895,#ff9f5e);color:#3a1d0b}
+.sprint i.now{outline:2px solid var(--ink);outline-offset:1px}
+
+.year{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;margin-top:12px}
+.year i{aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.07)}
+.year i{position:relative}.year i.up{background:rgba(98,224,182,.4)}.year i.strong{background:#ffb867}.year i.strong::after{content:"";position:absolute;inset:35%;border-radius:50%;background:#3a1d0b}.year i.fresh{box-shadow:inset 0 0 0 2px var(--sky)}
+.year i.future{background:rgba(255,255,255,.03)}.year i.now{outline:2px solid var(--ink);outline-offset:1px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:12px;color:var(--mut)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.badge{text-align:center;padding:14px 8px;border-radius:18px;background:linear-gradient(205deg,rgba(255,226,180,.07),transparent 40%),var(--card);box-shadow:-8px 12px 20px -14px rgba(6,4,18,.7);border:1px solid var(--line)}
+.badge .e{font-size:30px;line-height:1.1}
+.badge b{display:block;font-size:13px;margin-top:6px;line-height:1.2}
+.badge small{display:block;font-size:12px;color:var(--mut);margin-top:3px;line-height:1.3}
+.badge.off .e{opacity:.35;filter:grayscale(1)}.badge.off b{color:var(--mut)}.badge.off small{color:var(--mut)}
+/* nav */
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));width:min(536px,calc(100% - 24px));height:var(--nav);
+  display:grid;grid-template-columns:repeat(4,1fr);align-items:center;background:rgba(22,20,48,.86);border:1px solid var(--line);border-radius:24px;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:20;box-shadow:-10px 18px 36px rgba(0,0,0,.45)}
+nav button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--dim);height:100%;min-width:0;white-space:nowrap}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--sun)}
+/* sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(8,6,20,.62);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fade .18s}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:linear-gradient(180deg,#2a2253,#1b1838);border:1px solid var(--line);border-bottom:0;
+  border-radius:26px 26px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));animation:up .22s cubic-bezier(.2,.9,.3,1)}
+.sheet h3{font-size:22px;font-weight:850;margin-bottom:4px}
+.sheet .sub{color:var(--mut);margin-bottom:12px}
+@keyframes fade{from{opacity:0}}@keyframes up{from{transform:translateY(40px);opacity:.4}}
+label.f{display:block;font-size:13px;font-weight:800;color:var(--mut);margin:14px 2px 6px;letter-spacing:.03em}
+.in{width:100%;padding:14px 15px;border-radius:15px;background:rgba(0,0,0,.28);border:1px solid var(--line);outline:none;font-size:16px}
+.in:focus{border-color:rgba(255,196,107,.7);box-shadow:0 0 0 3px rgba(255,196,107,.15)}
+textarea.in{min-height:84px;resize:vertical;line-height:1.4}
+select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.actions{display:flex;gap:10px;margin-top:20px}
+.actions .btn{flex:1}
+.cats{display:flex;flex-wrap:wrap;gap:8px}
+.cat{padding:9px 12px;min-height:46px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:14px}
+.cat.on{background:rgba(255,196,107,.18);border-color:rgba(255,196,107,.6);color:#ffe2ad}
+.seg{display:flex;background:rgba(0,0,0,.25);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;padding:10px;border-radius:11px;font-weight:800;font-size:14px;color:var(--mut)}
+.seg button.on{background:var(--card2);color:var(--ink)}
+.tip{margin-top:10px;padding:11px 13px;border-radius:13px;background:rgba(134,200,255,.12);border:1px solid rgba(134,200,255,.3);font-size:14px;line-height:1.4}
+.tip b{color:var(--sky)}
+.count{display:flex;align-items:center;gap:10px}
+.count button{width:44px;height:44px;border-radius:13px;background:var(--card2);font-size:20px;font-weight:800}
+.count b{min-width:28px;text-align:center;font-size:20px}
+/* onboarding */
+.ob{min-height:calc(100vh - 60px);display:flex;flex-direction:column;justify-content:center;padding:10px 4px 30px}
+.ob h1{font-size:40px;line-height:1.02;font-weight:900;letter-spacing:-.03em;margin:18px 0 12px}
+.ob h2{font-size:28px;line-height:1.1;font-weight:850;letter-spacing:-.02em;margin:8px 0 8px}
+.ob .sub{color:var(--mut);font-size:16px;margin-bottom:6px}
+.steps{display:flex;gap:6px;margin-bottom:8px}
+.steps i{height:6px;flex:1;border-radius:9px;background:rgba(255,255,255,.12)}
+.steps i.on{background:linear-gradient(90deg,var(--sun),var(--sun2))}
+.sunart{width:140px;height:110px;position:relative;margin:4px 0}
+.sunart::before{content:"";position:absolute;left:20px;right:20px;bottom:24px;height:84px;border-radius:84px 84px 0 0;
+  background:radial-gradient(circle at 50% 100%,#fff3cf 0 30%,#ffc46b 46%,#ff8f5a 70%,transparent 72%)}
+.sunart::after{content:"";position:absolute;left:0;right:0;bottom:22px;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,#ffe2a8,transparent)}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translateX(-50%);z-index:90;background:#fff6e6;color:#2b1a08;padding:11px 16px;border-radius:14px;font-weight:700;font-size:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);max-width:calc(100% - 28px);animation:fade .2s}
+.toast em{font-style:normal;color:#c2541f}
+.rescue-bar{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:460px;z-index:95;
+  background:#fff;color:#1b1b2b;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.4);padding:16px;font-size:15px;line-height:1.4}
+.rescue-bar b{display:block;font-size:16px;margin-bottom:4px}
+.rescue-bar .rb{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap}
+.rescue-bar button{border-radius:10px;padding:10px 14px;min-height:44px;font-weight:700;background:#ececf2;color:#1b1b2b}
+.rescue-bar button.p{background:#1b1b2b;color:#fff}
+@media(max-width:370px){.big{font-size:30px}.ring{width:92px;height:92px}.areas{grid-template-columns:1fr}.ob h1{font-size:34px}nav button{font-size:11px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#dust{display:none}body::before,body::after{transform:none!important}}
+</style>
+</head>
+<body>
+<canvas id="dust" aria-hidden="true"></canvas>
+<div id="app"></div>
+<nav id="nav" aria-label="Main"></nav>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<script>
+"use strict";
+/* ───────── storage ───────── */
+const KEY = "resetquest.v1", RESCUE = KEY + ".rescue";
+const blank = () => ({v:1, hero:null, step:0, ready:false, review:{}, vision:{}, word:"", who:"",
+  quests:[], sprint:{start:"", n:1, history:[]}, weeks:{}, letters:[], restarts:[], xp:0, badges:{}, caps:{}, flags:{},
+  settings:{ws:1, bday:""}});
+let S, RESCUED = null;
+const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
+const isD = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+function normalize(){
+  ["quests","letters","restarts"].forEach(k => { if(!Array.isArray(S[k])) S[k] = []; S[k] = S[k].filter(isObj); });
+  ["review","vision","weeks","badges","caps","flags"].forEach(k => { if(!isObj(S[k])) S[k] = {}; });
+  if(!isObj(S.sprint)) S.sprint = {}; if(!isD(S.sprint.start)) S.sprint.start = ""; S.sprint.n = Math.max(1, +S.sprint.n || 1);
+  if(!Array.isArray(S.sprint.history)) S.sprint.history = [];
+  if(!isObj(S.settings)) S.settings = {}; S.settings.ws = S.settings.ws === 0 ? 0 : 1;
+  if(typeof S.settings.bday !== "string" || !/^\d{2}-\d{2}$/.test(S.settings.bday)) S.settings.bday = "";
+  if(typeof S.word !== "string") S.word = ""; if(typeof S.who !== "string") S.who = "";
+  S.xp = Math.max(0, +S.xp || 0); S.step = Math.max(0, +S.step || 0); S.ready = !!S.ready;
+  S.quests.forEach(q => { if(!Array.isArray(q.plans)) q.plans = []; q.plans = q.plans.filter(isObj);
+    q.plans.forEach(p => { p.per = Math.min(7, Math.max(1, +p.per || 1)); if(typeof p.id !== "string") p.id = uid(); });
+    if(!["active","paused","done"].includes(q.status)) q.status = "active"; if(typeof q.id !== "string") q.id = uid(); });
+  if(S.hero !== null && (!isObj(S.hero) || typeof S.hero.name !== "string")) S.hero = {name:"Friend", created:today()};
+  if(S.ready && !S.hero) S.hero = {name:"Friend", created:today()};
+  Object.keys(S.vision).forEach(k => { if(typeof S.vision[k] !== "string") delete S.vision[k]; });
+  Object.keys(S.review).forEach(k => { const r = S.review[k]; if(!isObj(r)){ delete S.review[k]; return; } if(!Array.isArray(r.wins)) r.wins = [];
+    r.wins = r.wins.map(x => typeof x === "string" ? x : ""); ["lesson","drop","year"].forEach(f => { if(typeof r[f] !== "string") r[f] = f === "year" ? k : ""; }); });
+  S.letters = S.letters.filter(l => isD(l.written) && isD(l.unlock) && typeof l.text === "string"); S.letters.forEach(l => { if(!isD(l.opened)) l.opened = ""; if(typeof l.id !== "string") l.id = uid(); });
+  S.restarts = S.restarts.filter(r => isD(r.date));
+  S.quests.forEach(q => { if(typeof q.title !== "string") q.title = "Quest"; q.plans.forEach(p => { p.when = String(p.when ?? ""); p.then = String(p.then ?? ""); }); });
+  Object.keys(S.weeks).forEach(k => { const w = S.weeks[k]; if(!isD(k) || !isObj(w)){ delete S.weeks[k]; return; } if(!isObj(w.ticks)) w.ticks = {}; });
+}
+function load(){
+  let raw = null; try{ raw = localStorage.getItem(KEY); }catch(e){}
+  try{ const d = raw ? JSON.parse(raw) : null; if(d !== null && !isObj(d)) throw new Error("not a save"); S = Object.assign(blank(), d || {}); }
+  catch(e){ S = blank(); RESCUED = raw;
+    try{ const prev = localStorage.getItem(RESCUE); if(prev !== null && prev !== raw) localStorage.setItem(RESCUE + ".prev", prev); localStorage.setItem(RESCUE, raw); }catch(_){} }
+  normalize();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("Could not save on this device"); } }
+const uid = () => Math.random().toString(36).slice(2,10);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const sum = a => a.reduce((t,x) => t + (+x || 0), 0);
+const clampTxt = (s, n) => String(s || "").trim().slice(0, n);
+
+/* ───────── dates ───────── */
+const pad = n => String(n).padStart(2,"0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const today = () => iso(new Date());
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate()+n); return iso(d); };
+const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const fmt = (s, o = {day:"numeric", month:"short"}) => parse(s).toLocaleDateString(undefined, o);
+const weekKey = s => { const d = parse(s), dow = d.getDay(), back = (dow - S.settings.ws + 7) % 7; return addDays(s, -back); };
+const curWeek = () => weekKey(today());
+function weekRange(k){ const a = parse(k), e = addDays(k,6), b = parse(e), m = d => d.toLocaleDateString(undefined,{month:"short"});
+  return a.getMonth() === b.getMonth() ? `${m(a)} ${a.getDate()}–${b.getDate()}` : `${m(a)} ${a.getDate()} – ${m(b)} ${b.getDate()}`; }
+const reviewYear = () => String(+today().slice(0,4) - (+today().slice(5,7) >= 10 ? 0 : 1));
+const weekNo = k => S.sprint.start ? Math.floor(daysBetween(S.sprint.start, k) / 7) + 1 : 0;
+function secondFridayJan(y){ const d = new Date(y, 0, 1); let n = 0; while(true){ if(d.getDay() === 5 && ++n === 2) return iso(d); d.setDate(d.getDate()+1); } }
+
+/* ───────── areas ───────── */
+const AREAS = [["money","💰","Money"],["health","💪","Health"],["work","💼","Work and skills"],["people","🤝","People"],
+  ["mind","🧠","Mind"],["faith","🌙","Faith and purpose"],["home","🏡","Home"],["fun","🎨","Fun and adventure"]];
+const areaOf = k => AREAS.find(a => a[0] === k) || ["other","✨","Other"];
+
+/* ───────── XP, levels, badges ───────── */
+const TITLES = ["Fresh Starter","Pathfinder","Steady Climber","Week Keeper","Comeback Hero","Future Builder","Trailblazer","Summit Seeker","Dawn Walker","Legend of the Long Game"];
+const lvlOf = xp => Math.floor((Math.sqrt(1 + 8*xp/100) - 1)/2) + 1;
+const xpAt = l => 100*(l-1)*l/2;
+const titleOf = l => TITLES[Math.min(TITLES.length-1, l-1)];
+const BADGES = [
+  ["first_step","👣","First Step","Tick your first action"],
+  ["future","🔭","Future Me","Write your 5-year vision"],
+  ["lookback","🪞","Look Back","Review the last year"],
+  ["planner","🧭","If-Then Planner","Make 3 if-then plans"],
+  ["checkin1","📝","Checked In","First weekly check-in"],
+  ["checkin4","📒","Four Check-ins","Four weekly check-ins"],
+  ["weeks4","🔥","Four Weeks","Show up in 4 weeks"],
+  ["comeback","🌅","Comeback","Restart after an empty week"],
+  ["quitters","🛡️","Past Quitter's Day","Still going after Quitter's Day"],
+  ["sprint","🏔️","Sprint Done","Finish a 12-week sprint"],
+  ["quest_done","🏆","Quest Complete","Complete a quest"],
+  ["letter_sealed","✉️","Sealed","Write a letter to future you"],
+  ["letter_open","💌","Delivered","Open a letter from past you"],
+  ["full_week","⭐","Full Week","Hit every plan in one week"],
+  ["lvl5","🌟","Level 5","Reach level 5"]];
+let toastT = null;
+function toast(html){ document.querySelectorAll(".toast").forEach(e => e.remove()); const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status");
+  t.innerHTML = html; document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 2600); }
+function gain(n, why){ const b = lvlOf(S.xp); S.xp = Math.max(0, S.xp + n); const a = lvlOf(S.xp); save();
+  if(n > 0) toast(`<em>+${n} XP</em> ${esc(why)}`); if(a > b){ setTimeout(() => toast(`Level ${a}: ${esc(titleOf(a))}`), 900); if(a >= 5) award("lvl5"); } }
+function award(id){ if(S.badges[id]) return; S.badges[id] = today(); save(); const b = BADGES.find(x => x[0] === id); if(b) setTimeout(() => toast(`${b[1]} Badge: ${esc(b[2])}`), 1300); }
+function capOk(key, max){ const t = today(); let c = S.caps[key]; if(!isObj(c) || c.day !== t) c = S.caps[key] = {day:t, n:0}; if(c.n >= max) return false; c.n++; return true; }
+
+/* ───────── week logic ───────── */
+const activeQ = () => S.quests.filter(q => q.status === "active");
+const wk = k => S.weeks[k] || (S.weeks[k] = {ticks:{}});
+const peek = k => S.weeks[k] || {ticks:{}};
+function weekTarget(){ return sum(activeQ().flatMap(q => q.plans.map(p => p.per))); }
+function weekDone(k){ const w = peek(k); return sum(activeQ().flatMap(q => q.plans.map(p => Math.min(p.per, +w.ticks[p.id] || 0)))); }
+function shownUp(k){ const w = S.weeks[k]; return !!w && (sum(Object.values(w.ticks)) > 0 || !!w.check); }
+function strong(k){ const t = weekTarget(); return t > 0 && weekDone(k) >= t; }
+const shownWeeks = () => Object.keys(S.weeks).filter(shownUp);
+const totalTicks = () => sum(Object.values(S.weeks).map(w => sum(Object.values(w.ticks || {}))));
+const checkins = () => Object.values(S.weeks).filter(w => w.check).length;
+function tick(qid, pid, dir){
+  const q = S.quests.find(x => x.id === qid), p = q && q.plans.find(x => x.id === pid); if(!p) return;
+  const k = curWeek(), w = wk(k), cur = +w.ticks[pid] || 0;
+  if(!isObj(w.paid)) w.paid = {};
+  if(dir > 0){ if(cur >= p.per){ toast("That one is done for this week. Nice."); return; }
+    w.ticks[pid] = cur + 1;
+    if(capOk("tick", 15)){ w.paid[pid] = (+w.paid[pid] || 0) + 1; save(); gain(5, p.then ? clampTxt(p.then, 40) : "Action done"); }
+    else { save(); toast("Ticked. That's today's XP limit, more tomorrow."); } award("first_step");
+    const sj = secondFridayJan(+today().slice(0,4)); if(today() >= sj && today().slice(5,7) === "01") award("quitters");
+    if(shownWeeks().length >= 4) award("weeks4"); if(strong(k)) award("full_week");
+  } else { if(cur <= 0) return; w.ticks[pid] = cur - 1; if(!w.ticks[pid]) delete w.ticks[pid];
+    if((+w.paid[pid] || 0) > (+w.ticks[pid] || 0)){ w.paid[pid] = (+w.paid[pid] || 0) - 1; const c = S.caps.tick; if(isObj(c) && c.day === today() && c.n > 0) c.n--; save(); gain(-5, ""); }
+    else save(); }
+  render();
+}
+
+/* ───────── icons ───────── */
+const I = {
+  week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="4.5"/><path d="M12 3v3M4.5 7l2 2M19.5 7l-2 2M2 20h20"/></svg>',
+  quests:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4l7 3 7-3v12l-7 3-7-3"/></svg>',
+  future:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg>',
+  map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+};
+function ring(frac, size = 104, stroke = 11){ const r = (size - stroke)/2, c = 2*Math.PI*r, f = Math.max(0, Math.min(1, frac));
+  return `<svg viewBox="0 0 ${size} ${size}"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe3a3"/><stop offset="1" stop-color="#ff8f5a"/></linearGradient></defs>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="${stroke}"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${f >= 1 ? "#62e0b6" : "url(#rg)"}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-f)}"/></svg>`; }
+
+/* ───────── views ───────── */
+let tab = "week";
+const NAV = [["week","This week"],["quests","Quests"],["future","Future me"],["map","Map"]];
+function renderNav(){ const n = document.getElementById("nav");
+  if(!S.ready){ n.style.display = "none"; return; } n.style.display = "";
+  n.innerHTML = NAV.map(([k,l]) => `<button class="${tab === k ? "on" : ""}" data-tab="${k}" ${tab === k ? 'aria-current="page"' : ""}>${I[k]}${l}</button>`).join(""); }
+function topBar(){ const l = lvlOf(S.xp), a = xpAt(l), b = xpAt(l+1);
+  return `<header class="top"><div class="logo" aria-hidden="true"></div><div class="grow"><b>${esc(S.hero ? S.hero.name : "")}</b>
+    <div class="lv"><i>LV ${l}</i>${esc(titleOf(l))} · ${S.xp - a}/${b - a} XP</div><div class="xpbar"><u style="width:${Math.round((S.xp - a)/(b - a)*100)}%"></u></div></div>
+    <button class="icb" data-act="settings" aria-label="Settings">${I.gear}</button></header>`; }
+function render(){
+  const app = document.getElementById("app");
+  if(!S.ready){ app.innerHTML = onboarding(); renderNav(); bindOb(); return; }
+  const v = {week:weekView, quests:questsView, future:futureView, map:mapView}[tab] || weekView;
+  try{ app.innerHTML = topBar() + v(); }
+  catch(err){ app.innerHTML = `<div class="card empty" style="margin-top:30px"><div class="e">🧰</div><b style="color:var(--ink)">This screen couldn't load</b><br>Your data is still saved. Back it up, then try another tab.<br><br>
+    <button class="btn sm" data-act="settings">Open Settings</button></div>`; }
+  renderNav();
+}
+
+/* This week */
+function freshReason(){ const t = today(), d = parse(t), r = [];
+  if(t === weekKey(t)) r.push("a new week"); if(d.getDate() === 1) r.push("a new month"); if(t.slice(5) === "01-01") r.push("a new year");
+  if(S.settings.bday && t.slice(5) === S.settings.bday) r.push("your birthday");
+  return r; }
+function sprintDone(){ return S.sprint.start && weekNo(curWeek()) > 12; }
+function weekView(){
+  const k = curWeek(), n = weekNo(k), qs = activeQ(), tgt = weekTarget(), done = weekDone(k), w = peek(k);
+  if(!S.sprint.start || n < 1) return waitView();
+  if(n > 12) return sprintEndView();
+  const vis = Object.entries(S.vision).filter(([,v]) => v && v.trim()); const pick = vis.length ? vis[(n - 1) % vis.length] : null;
+  const fr = freshReason(), t = today(), y = +t.slice(0,4), sj = secondFridayJan(y), qd = Math.abs(daysBetween(t, sj)) <= 2 && t.slice(5,7) === "01";
+  const prevK = addDays(k, -7), prevEmpty = weekNo(prevK) >= 1 && !shownUp(prevK) && !shownUp(k);
+  return `
+  <section class="card hero"><div class="row" style="align-items:flex-start"><div class="grow">
+    <div class="lbl">Week ${n} of 12${S.sprint.n > 1 ? ` · sprint ${S.sprint.n}` : ""}</div>
+    <div class="big" style="margin-top:6px">${weekRange(k)}</div>
+    <div class="muted" style="margin-top:4px">${tgt ? `${done} of ${tgt} actions this week` : "Add an if-then plan to a quest"}</div></div>
+    <div class="ring">${ring(tgt ? done/tgt : 0)}<div class="c">${tgt ? Math.round(done/tgt*100) : 0}%<small>this week</small></div></div></div>
+    ${pick ? `<div class="fut"><span>${areaOf(pick[0])[1]} Future you, 5 years from now</span>${esc(pick[1])}</div>` : ""}</section>
+  ${qd ? `<section class="card banner sun"><div class="e">🛡️</div><div><b>${t === sj ? "Today is" : t < sj ? "Friday is" : "This week had"} "Quitter's Day"</b><p class="note">It's around when lots of people drop their resolutions. You're still here. One small tick today keeps it that way.</p></div></section>` : ""}
+  ${fr.length && !qd ? `<section class="card banner sky"><div class="e">🌅</div><div><b>Fresh start: it's ${fr.join(" and ")}</b><p class="note">A good day to start again, whatever last week looked like.</p></div></section>` : ""}
+  ${prevEmpty ? `<section class="card banner sky"><div class="e">🌱</div><div><b>Last week was empty. That's fine.</b><p class="note">Nothing is lost. Start this week small: tick just one thing.</p>
+    <button class="btn sm ghost" data-act="fresh" style="margin-top:10px">Make this week easier</button></div></section>` : ""}
+  ${qs.length ? qs.map(questCard).join("") : `<div class="card empty"><div class="e">🧭</div>No active quests.<br><br><button class="btn sm" data-act="addQuest">${I.plus} Add a quest</button></div>`}
+  ${checkCard(k, w)}
+  <div style="text-align:center;margin-top:6px"><button class="link" data-act="fresh">Rough week? Start fresh</button></div>`;
+}
+function questCard(q){ const k = curWeek(), w = peek(k), a = areaOf(q.area);
+  return `<section class="card q"><div class="q-top"><div class="q-e">${a[1]}</div><div class="grow"><b>${esc(q.title)}</b>
+    ${q.target ? `<small>12-week target: ${esc(q.target)}</small>` : ""}</div></div>
+    ${q.plans.length ? q.plans.map(p => { const c = Math.min(p.per, +w.ticks[p.id] || 0), full = c >= p.per;
+      return `<div class="plan"><div class="t"><em>When</em> <b>${esc(p.when)}</b><br><em>I will</em> <b>${esc(p.then)}</b>
+        <div class="dots" aria-label="${c} of ${p.per} this week">${Array.from({length:p.per}, (_,i) => `<i class="${i < c ? "on" : ""}"></i>`).join("")}</div></div>
+        ${c > 0 ? `<button class="undo" data-act="untick" data-q="${q.id}" data-p="${p.id}" aria-label="Undo one">↺</button>` : ""}
+        <button class="tick${full ? " done" : ""}" data-act="tick" data-q="${q.id}" data-p="${p.id}" aria-label="${full ? "Done for this week" : "Mark done"}">${full ? "✓" : "+1"}</button></div>`; }).join("")
+      : `<p class="note" style="margin-top:10px">No if-then plan yet. <button class="link" data-act="editQuest" data-id="${q.id}">Add one</button></p>`}
+  </section>`; }
+function checkCard(k, w){
+  if(w.check) return `<section class="card"><div class="row"><div class="emo">📝</div><div class="grow"><b>Check-in done</b><small class="muted" style="display:block;font-size:13px">${esc(feelLabel(w.check.feel))}</small></div>
+    <button class="btn sm ghost" data-act="checkin">Edit</button></div>
+    ${w.check.next ? `<p class="note" style="margin-top:10px"><b style="color:var(--ink)">Next week:</b> ${esc(w.check.next)}</p>` : ""}</section>`;
+  return `<section class="card"><div class="row"><div class="emo">📝</div><div class="grow"><b>Weekly check-in</b><small class="muted" style="display:block;font-size:13px">2 minutes · +20 XP</small></div>
+    <button class="btn sm" data-act="checkin">Start</button></div></section>`; }
+const FEELS = [["great","🙌","Great week"],["ok","🙂","Okay week"],["hard","😮‍💨","Hard week"],["off","🛌","Off week"]];
+const feelLabel = f => { const x = FEELS.find(y => y[0] === f); return x ? `${x[1]} ${x[2]}` : ""; };
+function waitView(){ const k = curWeek();
+  return `<section class="card hero"><div class="lbl">Your sprint</div><div class="big" style="margin-top:6px">Starts ${fmt(S.sprint.start,{weekday:"long",day:"numeric",month:"short"})}</div>
+    <p class="muted" style="margin-top:6px">${daysBetween(today(), S.sprint.start)} days to go. Your quests are ready. Want to start now instead?</p>
+    <div class="actions"><button class="btn" data-act="startNow">Start this week</button></div></section>
+    ${activeQ().map(q => `<div class="item" style="margin-bottom:10px"><div class="emo">${areaOf(q.area)[1]}</div><div class="grow"><b>${esc(q.title)}</b><small>${q.plans.length} if-then plan${q.plans.length === 1 ? "" : "s"}</small></div></div>`).join("")}`; }
+function sprintEndView(){ const st = S.sprint.start, ks = Array.from({length:12}, (_,i) => addDays(st, i*7));
+  const up = ks.filter(shownUp).length, ticks = sum(ks.map(k => sum(Object.values(peek(k).ticks)))), ch = ks.filter(k => peek(k).check).length;
+  return `<section class="card hero"><div class="lbl">Sprint ${S.sprint.n} complete</div><div class="big gold" style="margin-top:6px">${up ? "12 weeks done" : "A new start"}</div>
+    <p class="muted" style="margin-top:6px">${up ? `You showed up in ${up} of 12 weeks. That's what counts.` : "This one didn't get going, and that's okay. The next 12 weeks start whenever you're ready."}</p>
+    <div class="stats"><div class="stat"><small>Weeks shown up</small><b>${up}</b></div><div class="stat"><small>Actions</small><b>${ticks}</b></div><div class="stat"><small>Check-ins</small><b>${ch}</b></div></div>
+    <div class="sprint">${ks.map((k,i) => `<i class="${strong(k) ? "strong" : shownUp(k) ? "up" : ""}">${i+1}</i>`).join("")}</div></section>
+    <section class="card"><b>What next?</b><p class="note" style="margin-top:6px">Mark any quest you finished as complete in Quests, adjust the rest, then start your next 12 weeks.</p>
+    <div class="actions"><button class="btn ghost" data-tab="quests">Review quests</button><button class="btn" data-act="newSprint">Start next 12 weeks</button></div></section>`; }
+
+/* Quests */
+function questsView(){ const act = S.quests.filter(q => q.status !== "done"), done = S.quests.filter(q => q.status === "done");
+  return `<section class="card hero"><div class="row"><div class="grow"><div class="lbl">This year's quests</div><div class="big" style="margin-top:6px">${activeQ().length} <span class="muted" style="font-size:18px;font-weight:700">of 3 active</span></div>
+    <div class="muted" style="margin-top:4px">Fewer goals, done properly, beat a long list.</div></div>
+    <button class="btn" data-act="addQuest" ${activeQ().length >= 3 ? "disabled" : ""}>${I.plus} Quest</button></div></section>
+  ${act.length ? act.map(q => { const a = areaOf(q.area), ks = S.sprint.start ? Array.from({length:12}, (_,i) => addDays(S.sprint.start, i*7)) : [];
+    const hits = ks.filter(k => q.plans.some(p => (+peek(k).ticks[p.id] || 0) > 0)).length;
+    return `<section class="card q"><div class="q-top"><div class="q-e">${a[1]}</div><div class="grow"><b>${esc(q.title)}</b><small>${esc(a[2])}${q.status === "paused" ? " · paused" : ""}</small></div>
+      <button class="x" data-act="editQuest" data-id="${q.id}" aria-label="Edit ${esc(q.title)}">✎</button></div>
+      ${q.why ? `<p class="note" style="margin-top:10px"><b style="color:var(--ink)">Why:</b> ${esc(q.why)}</p>` : ""}
+      ${q.target ? `<p class="note" style="margin-top:6px"><b style="color:var(--ink)">12-week target:</b> ${esc(q.target)}</p>` : ""}
+      <p class="note" style="margin-top:6px">${q.plans.length} if-then plan${q.plans.length === 1 ? "" : "s"} · worked on in ${hits} of ${Math.max(0, Math.min(12, weekNo(curWeek())))} weeks</p>
+      <div class="actions" style="margin-top:12px">${q.status === "paused" ? `<button class="btn sm ghost" data-act="resumeQ" data-id="${q.id}">Resume</button>` : `<button class="btn sm ghost" data-act="pauseQ" data-id="${q.id}">Pause</button>`}
+        <button class="btn sm mint" data-act="doneQ" data-id="${q.id}">Complete</button></div></section>`; }).join("")
+    : `<div class="card empty"><div class="e">🧭</div>No quests yet. Pick up to 3 things to start doing this year.</div>`}
+  ${done.length ? `<div class="h"><h2>Completed</h2></div><div class="list">${done.map(q => `<div class="item"><div class="emo">🏆</div><div class="grow"><b>${esc(q.title)}</b><small>Completed ${q.doneOn ? fmt(q.doneOn,{day:"numeric",month:"short",year:"numeric"}) : ""}</small></div>
+    <button class="btn sm ghost" data-act="reopenQ" data-id="${q.id}">Reopen</button></div>`).join("")}</div>` : ""}`; }
+
+/* Future me */
+function futureView(){ const ry = reviewYear(), rv = S.review[ry] || S.review[String(+ry - 1)], t = today();
+  const lt = [...S.letters].sort((a,b) => a.unlock < b.unlock ? -1 : 1);
+  return `<section class="card hero"><div class="lbl">Who I'm becoming</div>
+    <div style="font-size:21px;font-weight:800;margin-top:8px;line-height:1.3">${S.who ? esc(S.who) : `<span class="dim">In 5 years, I'm someone who…</span>`}</div>
+    ${S.word ? `<div style="margin-top:12px"><span class="chip sun">Word of the year: ${esc(S.word)}</span></div>` : ""}
+    <div class="actions"><button class="btn sm ghost" data-act="editVision">Edit Future Me</button></div></section>
+  <div class="h"><h2>In 5 years</h2><button data-act="editVision">Edit</button></div>
+  <div class="areas">${AREAS.filter(a => S.vision[a[0]]).map(a => `<div class="area"><div class="e">${a[1]}</div><b>${a[2]}</b><p>${esc(S.vision[a[0]])}</p></div>`).join("") ||
+    `<div class="card empty" style="grid-column:1/-1;margin:0"><div class="e">🔭</div>Describe your life 5 years from now, one area at a time.</div>`}</div>
+  <div class="h"><h2>Letters to future you</h2><button data-act="addLetter">+ Write</button></div>
+  ${lt.length ? `<div class="list">${lt.map(l => { const ready = !l.opened && l.unlock <= t;
+    return `<div class="letter${ready ? " ready" : ""}"><div class="seal">${l.opened ? "💌" : ready ? "✨" : "🔒"}</div><div class="grow"><b style="display:block">${l.opened ? "Opened" : ready ? "Ready to open" : "Sealed"}</b>
+      <small class="muted" style="font-size:13px">Written ${fmt(l.written)} · ${l.opened ? "opened " + fmt(l.opened) : "opens " + fmt(l.unlock,{day:"numeric",month:"short",year:"numeric"})}</small></div>
+      ${ready || l.opened ? `<button class="btn sm${ready ? "" : " ghost"}" data-act="openLetter" data-id="${l.id}">${ready ? "Open" : "Read"}</button>` : `<span class="chip">${daysBetween(t, l.unlock)}d</span>`}</div>`; }).join("")}</div>`
+    : `<div class="card empty"><div class="e">✉️</div>Write a note to yourself and seal it until a date you choose.</div>`}
+  <div class="h"><h2>Look back</h2><button data-act="review">${rv ? "Edit" : "Start"}</button></div>
+  ${rv ? `<section class="card"><div class="lbl">${esc(rv.year || ry)}</div>
+    ${(rv.wins || []).filter(Boolean).length ? `<p style="margin-top:8px"><b>Wins:</b> ${(rv.wins || []).filter(Boolean).map(esc).join(" · ")}</p>` : ""}
+    ${rv.lesson ? `<p class="note" style="margin-top:6px"><b style="color:var(--ink)">Lesson:</b> ${esc(rv.lesson)}</p>` : ""}
+    ${rv.drop ? `<p class="note" style="margin-top:6px"><b style="color:var(--ink)">Leaving behind:</b> ${esc(rv.drop)}</p>` : ""}</section>`
+    : `<div class="card empty"><div class="e">🪞</div>Three wins, one lesson, one thing to leave behind. Five minutes.</div>`}`; }
+
+/* Map */
+function mapView(){ const k = curWeek(), y = +today().slice(0,4), ys = weekKey(iso(new Date(y,0,1)));
+  const yearWeeks = []; for(let d = ys; +d.slice(0,4) <= y && yearWeeks.length < 53; d = addDays(d,7)) yearWeeks.push(d);
+  const freshSet = new Set(S.restarts.map(r => weekKey(r.date)));
+  const st = S.sprint.start, ks = st ? Array.from({length:12}, (_,i) => addDays(st, i*7)) : [];
+  const up = shownWeeks().length, got = BADGES.filter(b => S.badges[b[0]]).length;
+  return `<section class="card hero"><div class="lbl">Sprint ${S.sprint.n} · 12 weeks</div>
+    <div class="big" style="margin-top:6px">${st ? `${ks.filter(shownUp).length} <span class="muted" style="font-size:18px;font-weight:700">of 12 weeks shown up</span>` : "Not started"}</div>
+    ${st ? `<div class="sprint">${ks.map((x,i) => `<i class="${strong(x) ? "strong" : shownUp(x) ? "up" : ""}${x === k ? " now" : ""}">${i+1}</i>`).join("")}</div>` : ""}
+    <div class="stats"><div class="stat"><small>Weeks shown up</small><b>${up}</b></div><div class="stat"><small>Actions</small><b>${totalTicks()}</b></div><div class="stat"><small>Comebacks</small><b>${S.restarts.length}</b></div></div></section>
+  <div class="h"><h2>${y} at a glance</h2></div>
+  <section class="card"><div class="year">${yearWeeks.map(x => `<i class="${x > k ? "future" : strong(x) ? "strong" : shownUp(x) ? "up" : ""}${freshSet.has(x) ? " fresh" : ""}${x === k ? " now" : ""}" title="${fmt(x)}"></i>`).join("")}</div>
+    <div class="legend"><span><i style="background:rgba(98,224,182,.4)"></i>Showed up</span><span><i style="background:#ffb867"></i>Every plan done</span><span><i style="box-shadow:inset 0 0 0 2px var(--sky)"></i>Fresh start</span></div>
+    <p class="note" style="margin-top:10px">Empty weeks are just empty. Nothing is taken away.</p></section>
+  <div class="h"><h2>Badges</h2><span class="muted" style="font-size:14px">${got} of ${BADGES.length}</span></div>
+  <div class="badges">${BADGES.map(b => `<div class="badge${S.badges[b[0]] ? "" : " off"}"><div class="e">${b[1]}</div><b>${b[2]}</b><small>${S.badges[b[0]] ? "Earned " + fmt(S.badges[b[0]]) : b[3]}</small></div>`).join("")}</div>`; }
+
+/* ───────── sheets ───────── */
+function sheet(html, mount){ closeSheet(); const bg = document.createElement("div"); bg.className = "sheet-bg"; bg.id = "sheet";
+  bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`; bg.addEventListener("click", e => { if(e.target === bg) closeSheet(); });
+  document.body.appendChild(bg); mount && mount(bg); return bg; }
+function closeSheet(){ const s = document.getElementById("sheet"); if(s) s.remove(); }
+const val = (r, s) => { const e = r.querySelector(s); return e ? e.value.trim() : ""; };
+const AVOID = /\b(stop|quit|quitting|no more|don'?t|do not|avoid|less|cut out|cut down|give up|never|without)\b/i;
+const avoidTip = t => AVOID.test(t) ? `<div class="tip"><b>Tip:</b> goals about <i>starting</i> something tend to stick better than goals about stopping. Try turning it around: "Stop takeaways" → "Cook at home 4 nights a week".</div>` : "";
+function questForm(q){ const e = !!q; q = q || {title:"", area:"health", why:"", target:"", plans:[]};
+  let area = q.area; const plans = q.plans.map(p => ({...p}));
+  sheet(`<h3>${e ? "Edit quest" : "New quest"}</h3><p class="sub">Something to <b>start</b> doing this year.</p>
+    <label class="f" for="qt">Quest</label><input class="in" id="qt" maxlength="60" value="${esc(q.title)}" placeholder="Walk more, read every night, save for a deposit">
+    <div id="tipBox">${avoidTip(q.title)}</div>
+    <label class="f">Life area</label><div class="cats" id="ac">${AREAS.map(a => `<button class="cat${a[0] === area ? " on" : ""}" data-a="${a[0]}">${a[1]} ${a[2]}</button>`).join("")}</div>
+    <label class="f" for="qw">Why it matters to you</label><input class="in" id="qw" maxlength="90" value="${esc(q.why)}" placeholder="So I have energy for my kids">
+    <label class="f" for="qg">12-week target (optional)</label><input class="in" id="qg" maxlength="80" value="${esc(q.target)}" placeholder="Walk 3 times a week, every week">
+    <label class="f">If-then plans</label><div id="pl"></div>
+    <button class="btn sm ghost full" id="addP" style="margin-top:10px">${I.plus} Add an if-then plan</button>
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+    const drawP = () => { root.querySelector("#pl").innerHTML = plans.length ? plans.map((p,i) => `<div class="card" style="padding:14px;margin-bottom:10px">
+        <label class="f" style="margin-top:0">When…</label><input class="in" data-i="${i}" data-k="when" maxlength="60" value="${esc(p.when)}" placeholder="I get home from work">
+        <label class="f">I will…</label><input class="in" data-i="${i}" data-k="then" maxlength="60" value="${esc(p.then)}" placeholder="put my trainers on and walk 20 minutes">
+        <div class="row" style="margin-top:12px"><span class="grow note">Times per week</span><div class="count"><button data-m="${i}" aria-label="Fewer">−</button><b>${p.per}</b><button data-pl="${i}" aria-label="More">+</button></div>
+        <button class="x" data-rm="${i}" aria-label="Remove plan">✕</button></div></div>`).join("")
+        : `<p class="note">Plans like "When I get home, I will walk 20 minutes" make a goal much more likely to happen.</p>`;
+      root.querySelectorAll("#pl input").forEach(inp => inp.oninput = () => { plans[+inp.dataset.i][inp.dataset.k] = inp.value; });
+      root.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { const p = plans[+b.dataset.m]; p.per = Math.max(1, p.per - 1); drawP(); });
+      root.querySelectorAll("[data-pl]").forEach(b => b.onclick = () => { const p = plans[+b.dataset.pl]; p.per = Math.min(7, p.per + 1); drawP(); });
+      root.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { plans.splice(+b.dataset.rm, 1); drawP(); }); };
+    drawP();
+    root.querySelector("#qt").oninput = ev => { root.querySelector("#tipBox").innerHTML = avoidTip(ev.target.value); };
+    root.querySelectorAll("#ac .cat").forEach(b => b.onclick = () => { area = b.dataset.a; root.querySelectorAll("#ac .cat").forEach(x => x.classList.toggle("on", x === b)); });
+    root.querySelector("#addP").onclick = () => { if(plans.length >= 3) return toast("Three plans per quest is plenty"); plans.push({id:uid(), when:"", then:"", per:3}); drawP(); };
+    root.querySelector("#ok").onclick = () => { const title = clampTxt(val(root,"#qt"), 60); if(!title) return toast("Give your quest a name");
+      const ps = plans.map(p => ({id:p.id || uid(), when:clampTxt(p.when, 60), then:clampTxt(p.then, 60), per:p.per})).filter(p => p.when && p.then);
+      if(plans.some(p => (p.when.trim() || p.then.trim()) && !(p.when.trim() && p.then.trim()))) return toast("Fill in both parts of each plan, or remove it");
+      const o = {title, area, why:clampTxt(val(root,"#qw"), 90), target:clampTxt(val(root,"#qg"), 80), plans:ps};
+      if(e) Object.assign(q, o); else { if(activeQ().length >= 3) return toast("Three active quests at most. Pause or complete one first."); S.quests.push({id:uid(), status:"active", created:today(), ...o}); }
+      if(sum(S.quests.map(x => x.plans.length)) >= 3) award("planner"); save(); closeSheet(); render(); };
+    if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete "${q.title}"? Its ticks stay in your map.`)) return; S.quests = S.quests.filter(x => x.id !== q.id); save(); closeSheet(); render(); };
+  }); }
+function checkinForm(){ const k = curWeek(), w = wk(k), c = w.check || {feel:"", good:"", hard:"", next:""}; let feel = c.feel;
+  sheet(`<h3>Weekly check-in</h3><p class="sub">Two minutes. Honest answers, no grades.</p>
+    <label class="f">How was this week?</label><div class="cats" id="fc">${FEELS.map(f => `<button class="cat${f[0] === feel ? " on" : ""}" data-f="${f[0]}">${f[1]} ${f[2]}</button>`).join("")}</div>
+    <label class="f" for="cg">What went well?</label><input class="in" id="cg" maxlength="120" value="${esc(c.good)}" placeholder="Walked 3 evenings">
+    <label class="f" for="ch">What got in the way?</label><input class="in" id="ch" maxlength="120" value="${esc(c.hard)}" placeholder="Late shifts on Thursday">
+    <label class="f" for="cn">One thing for next week</label><input class="in" id="cn" maxlength="120" value="${esc(c.next)}" placeholder="Walk at lunch on shift days">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`, root => {
+    root.querySelectorAll("#fc .cat").forEach(b => b.onclick = () => { feel = b.dataset.f; root.querySelectorAll("#fc .cat").forEach(x => x.classList.toggle("on", x === b)); });
+    root.querySelector("#ok").onclick = () => { if(!feel) return toast("Pick how the week was");
+      const first = !w.check; w.check = {feel, good:clampTxt(val(root,"#cg"),120), hard:clampTxt(val(root,"#ch"),120), next:clampTxt(val(root,"#cn"),120), at:today()};
+      save(); closeSheet(); render();
+      if(first && !w.checkXp){ w.checkXp = true; save(); gain(20, "Weekly check-in"); award("checkin1"); if(checkins() >= 4) award("checkin4"); if(shownWeeks().length >= 4) award("weeks4"); } };
+  }); }
+function freshForm(){ const k = curWeek(), prevK = addDays(k, -7), prevEmpty = weekNo(prevK) >= 1 && !shownUp(prevK);
+  const qs = activeQ(), all = qs.flatMap(q => q.plans.map(p => ({q, p, per:p.per})));
+  sheet(`<h3>Start fresh</h3><p class="sub">Rough weeks happen to everyone. Nothing you've done is lost. Let's make this week doable.</p>
+    ${all.length ? `<label class="f">Make plans smaller this week (optional)</label><div class="list">${all.map((x,i) => `<div class="item"><div class="grow"><b>${esc(x.p.then)}</b><small>${esc(x.q.title)}</small></div>
+      <div class="count"><button data-m="${i}" aria-label="Fewer">−</button><b id="pc${i}">${x.per}</b><button data-pl="${i}" aria-label="More">+</button></div></div>`).join("")}</div>
+      <p class="note" style="margin-top:8px">Times per week. You can raise them again any time in Quests.</p>` : ""}
+    <label class="f" for="fn">What got in the way? (optional)</label><input class="in" id="fn" maxlength="120" placeholder="Ill for a few days">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Start fresh</button></div>`, root => {
+    root.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { const x = all[+b.dataset.m]; x.per = Math.max(1, x.per - 1); root.querySelector("#pc"+b.dataset.m).textContent = x.per; });
+    root.querySelectorAll("[data-pl]").forEach(b => b.onclick = () => { const x = all[+b.dataset.pl]; x.per = Math.min(7, x.per + 1); root.querySelector("#pc"+b.dataset.pl).textContent = x.per; });
+    root.querySelector("#ok").onclick = () => { all.forEach(x => { x.p.per = x.per; }); if(!peek(k).fresh) S.restarts.push({date:today(), note:clampTxt(val(root,"#fn"),120)}); wk(k).fresh = true; save(); closeSheet(); render();
+      if(prevEmpty && !peek(k).comebackXp){ wk(k).comebackXp = true; save(); gain(15, "Comeback. Welcome back"); award("comeback"); } else toast("Fresh start. One small step at a time."); };
+  }); }
+function visionForm(){ const v = {...S.vision}; let sel = AREAS.filter(a => v[a[0]]).map(a => a[0]); if(!sel.length) sel = ["money","health","people"];
+  sheet(`<h3>Future Me</h3><p class="sub">Picture yourself 5 years from now. Write it as if it's already true.</p>
+    <label class="f" for="vw">In 5 years, I'm someone who…</label><input class="in" id="vw" maxlength="120" value="${esc(S.who)}" placeholder="keeps promises to myself and has room to breathe">
+    <label class="f">Pick the areas that matter (up to 5 at a time, from 8)</label><div class="cats" id="vc">${AREAS.map(a => `<button class="cat${sel.includes(a[0]) ? " on" : ""}" data-a="${a[0]}">${a[1]} ${a[2]}</button>`).join("")}</div>
+    <div id="vf"></div>
+    <label class="f" for="vo">One word for this year (optional)</label><input class="in" id="vo" maxlength="24" value="${esc(S.word)}" placeholder="Steady">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`, root => {
+    const drawF = () => { root.querySelectorAll("#vf textarea").forEach(t => v[t.dataset.a] = t.value);
+      root.querySelector("#vf").innerHTML = sel.map(k => { const a = areaOf(k); return `<label class="f" for="va${k}">${a[1]} ${a[2]} in 5 years</label><textarea class="in" id="va${k}" data-a="${k}" maxlength="160" placeholder="${esc(PH[k] || "")}">${esc(v[k] || "")}</textarea>`; }).join(""); };
+    drawF();
+    root.querySelectorAll("#vc .cat").forEach(b => b.onclick = () => { const k = b.dataset.a;
+      root.querySelectorAll("#vf textarea").forEach(t => v[t.dataset.a] = t.value);
+      if(sel.includes(k)) sel = sel.filter(x => x !== k); else { if(sel.length >= 5) return toast("Five areas is plenty"); sel.push(k); }
+      b.classList.toggle("on", sel.includes(k)); drawF(); });
+    root.querySelector("#ok").onclick = () => { root.querySelectorAll("#vf textarea").forEach(t => v[t.dataset.a] = t.value);
+      const out = {}; sel.forEach(k => { const t = clampTxt(v[k], 160); if(t) out[k] = t; });
+      S.vision = out; S.who = clampTxt(val(root,"#vw"), 120); S.word = clampTxt(val(root,"#vo"), 24); save(); closeSheet(); render();
+      if(Object.keys(out).length && !S.flags.visionXp){ S.flags.visionXp = true; save(); gain(25, "Future Me written"); award("future"); } };
+  }); }
+const PH = {money:"Debt-free, with three months of savings", health:"Walking every day and sleeping well", work:"Doing work I'm proud of, with a qualification", people:"Close to my family and a few good friends",
+  mind:"Calmer, reading every week", faith:"Praying regularly and giving back", home:"A tidy home I love coming back to", fun:"Travelling once a year"};
+function reviewForm(){ const y = reviewYear(), r = S.review[y] || {wins:["","",""], lesson:"", drop:""};
+  sheet(`<h3>Look back on ${y}</h3><p class="sub">Notice what went right before planning what's next.</p>
+    ${[0,1,2].map(i => `<label class="f" for="rw${i}">Win ${i+1}</label><input class="in" id="rw${i}" maxlength="80" value="${esc((r.wins || [])[i] || "")}" placeholder="${["Started a new job","Paid off a card","Learned to cook properly"][i]}">`).join("")}
+    <label class="f" for="rl">One lesson</label><input class="in" id="rl" maxlength="120" value="${esc(r.lesson)}" placeholder="I do better with a plan for busy weeks">
+    <label class="f" for="rd">One thing to leave behind</label><input class="in" id="rd" maxlength="120" value="${esc(r.drop)}" placeholder="Saying yes to everything">
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`, root => {
+    root.querySelector("#ok").onclick = () => { const o = {year:y, wins:[0,1,2].map(i => clampTxt(val(root,"#rw"+i),80)), lesson:clampTxt(val(root,"#rl"),120), drop:clampTxt(val(root,"#rd"),120)};
+      if(!o.wins.some(Boolean) && !o.lesson && !o.drop) return toast("Write at least one thing");
+      S.review[y] = o; save(); closeSheet(); render(); if(!S.flags["rv"+y]){ S.flags["rv"+y] = true; save(); gain(25, "Look back done"); award("lookback"); } };
+  }); }
+function letterForm(){ const t = today(), y = +t.slice(0,4);
+  const opts = [["3m","In 3 months",addDays(t,91)],["eoy","End of this year",`${y}-12-31`],["1y","In 1 year",addDays(t,365)],["5y","In 5 years",(() => { const d = parse(t), e = new Date(y + 5, d.getMonth() + 1, 0).getDate(); return iso(new Date(y + 5, d.getMonth(), Math.min(d.getDate(), e))); })()]].filter(o => o[2] > t);
+  let pick = opts.find(o => o[0] === "1y") ? "1y" : opts[0][0];
+  sheet(`<h3>Letter to future you</h3><p class="sub">Write to the person reading this later. It stays sealed until the date you pick.</p>
+    <textarea class="in" id="lt" maxlength="2000" style="min-height:160px" placeholder="Dear future me, right now I'm…"></textarea>
+    <label class="f">Open it</label><div class="cats" id="lo">${opts.map(o => `<button class="cat${o[0] === pick ? " on" : ""}" data-o="${o[0]}">${o[1]}</button>`).join("")}</div>
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Seal it</button></div>`, root => {
+    root.querySelectorAll("#lo .cat").forEach(b => b.onclick = () => { pick = b.dataset.o; root.querySelectorAll("#lo .cat").forEach(x => x.classList.toggle("on", x === b)); });
+    root.querySelector("#ok").onclick = () => { const txt = clampTxt(root.querySelector("#lt").value, 2000); if(txt.length < 10) return toast("Write a little more first");
+      const o = opts.find(x => x[0] === pick); S.letters.push({id:uid(), text:txt, written:t, unlock:o[2], opened:""}); save(); closeSheet(); render();
+      if(capOk("letter",1)){ gain(10, "Letter sealed"); award("letter_sealed"); } else toast("Sealed until " + fmt(o[2],{day:"numeric",month:"short",year:"numeric"})); };
+  }); }
+function openLetter(l){ if(!l) return; const first = !l.opened; if(l.unlock > today()) return;
+  if(first){ l.opened = today(); save(); }
+  sheet(`<h3>${first ? "A letter from past you" : "Your letter"}</h3><p class="sub">Written ${fmt(l.written,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</p>
+    <div class="card" style="white-space:pre-wrap;line-height:1.55">${esc(l.text)}</div>
+    <div class="actions"><button class="btn" data-close>Close</button></div>`);
+  if(first){ gain(15, "Letter opened"); award("letter_open"); render(); } }
+function settingsForm(){ const s = S.settings;
+  sheet(`<h3>Settings</h3><p class="sub">Your data stays on this device. Back it up now and then.</p>
+    <label class="f" for="sn">Your name</label><input class="in" id="sn" maxlength="30" value="${esc(S.hero.name)}">
+    <div class="two"><div><label class="f" for="sw">Week starts</label><select class="in" id="sw"><option value="1">Monday</option><option value="0" ${s.ws === 0 ? "selected" : ""}>Sunday</option></select></div>
+      <div><label class="f" for="sb">Birthday (optional)</label><input class="in" id="sb" type="date" value="${s.bday ? "2000-" + s.bday : ""}"></div></div>
+    <p class="note" style="margin-top:6px">Your birthday is only used to show a fresh-start reminder. The year isn't stored.</p>
+    <label class="f" for="ss">Sprint started on</label><input class="in" id="ss" type="date" value="${S.sprint.start}">
+    <div class="actions"><button class="btn full" id="ok">Save changes</button></div>
+    <label class="f" style="margin-top:24px">Backup</label>
+    <div class="two"><button class="btn ghost" id="ex">⬇️ Back up</button><button class="btn ghost" id="im">⬆️ Restore</button></div>
+    <p class="note" style="margin-top:8px">The backup is a small file. Keep it in your email or cloud drive, or use it to move to a new phone.</p>
+    <label class="f" style="margin-top:24px">Other</label>
+    <div class="two"><button class="btn ghost" id="demo">🧪 Sample data</button><button class="btn red" id="reset">Erase everything</button></div>`, root => {
+    root.querySelector("#ok").onclick = () => { S.hero.name = clampTxt(val(root,"#sn"),30) || S.hero.name; const nws = +val(root,"#sw");
+      const b = val(root,"#sb"); S.settings.bday = b ? b.slice(5) : "";
+      const ss = val(root,"#ss"), ss0 = S.sprint.start; if(nws !== s.ws){ S.settings.ws = nws; remapWeeks(); }
+      if(ss && ss !== ss0) S.sprint.start = weekKey(ss); save(); closeSheet(); render(); toast("Saved"); };
+    root.querySelector("#ex").onclick = exportData; root.querySelector("#im").onclick = () => document.getElementById("importFile").click();
+    root.querySelector("#demo").onclick = () => { if(!confirm("Replace everything with sample data? Back up first if you want to keep yours.")) return; demo(); closeSheet(); tab = "week"; render(); };
+    root.querySelector("#reset").onclick = () => { if(!confirm("Erase everything on this device? This can't be undone.")) return; if(!confirm("Really erase? Last chance.")) return;
+      try{ [KEY, RESCUE, RESCUE + ".prev"].forEach(x => localStorage.removeItem(x)); }catch(e){} S = blank(); normalize(); save(); closeSheet(); tab = "week"; render(); };
+  }); }
+function remapWeeks(){ const nw = {}; Object.entries(S.weeks).forEach(([k, w]) => { const nk = weekKey(addDays(k,3)); const t = nw[nk] || (nw[nk] = {ticks:{}});
+    Object.entries(w.ticks || {}).forEach(([p,c]) => t.ticks[p] = (t.ticks[p] || 0) + c); ["check","checkXp","fresh","comebackXp"].forEach(x => { if(w[x] && !t[x]) t[x] = w[x]; }); Object.entries(w.paid || {}).forEach(([p,c]) => { (t.paid || (t.paid = {}))[p] = (t.paid[p] || 0) + c; }); });
+  S.weeks = nw; if(S.sprint.start) S.sprint.start = weekKey(addDays(S.sprint.start,3)); }
+function exportData(){ const blob = new Blob([JSON.stringify(S, null, 1)], {type:"application/json"}), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `reset-quest-backup-${today()}.json`; document.body.appendChild(a); a.click(); a.remove(); toast("Backup saved"); }
+document.getElementById("importFile").onchange = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader();
+  r.onload = () => { try{ const d = JSON.parse(r.result); if(!isObj(d) || d.v !== 1 || !("quests" in d)) throw 0;
+    if(S.ready && !confirm("Replace what's on this phone with this backup?")) return; S = Object.assign(blank(), d); normalize(); save(); closeSheet(); tab = "week"; render(); toast("Backup restored"); }
+    catch(err){ toast("That file isn't a Reset Quest backup"); } }; r.readAsText(f); e.target.value = ""; };
+
+/* ───────── onboarding ritual ───────── */
+const OBN = 5;
+function stepsBar(i){ return `<div class="steps" aria-label="Step ${i} of ${OBN}">${Array.from({length:OBN}, (_,j) => `<i class="${j < i ? "on" : ""}"></i>`).join("")}</div>`; }
+function onboarding(){ const s = S.step;
+  if(s === 0) return `<div class="ob"><div class="sunart" aria-hidden="true"></div><h1>Reset<br><span class="gold">Quest</span></h1>
+    <p class="sub">A fresh start you can actually keep. Picture who you'll be in 5 years, pick 3 quests, and take it one week at a time.</p>
+    <div class="cats" style="margin:10px 0 4px"><span class="chip sun">🔭 Future Me in 5 years</span><span class="chip sun">🧭 3 quests</span><span class="chip sun">🗓️ 12-week sprints</span></div>
+    <label class="f" for="nm">What should we call you?</label><input class="in" id="nm" maxlength="30" placeholder="Your name" value="${esc(S.hero ? S.hero.name : "")}">
+    <div class="actions"><button class="btn ghost" data-ob="demo">Try sample data</button><button class="btn" data-ob="next0">Begin</button></div>
+    <p class="note" style="margin-top:14px;text-align:center">Takes about 10 minutes. Everything stays on your phone.</p>
+    <div style="text-align:center;margin-top:6px"><button class="link" data-ob="restore">New phone? Restore a backup</button></div></div>`;
+  if(s === 1){ const y = reviewYear(), r = S.review[y] || {wins:[]};
+    return `<div class="ob">${stepsBar(1)}<h2>Look back on ${y}</h2><p class="sub">Start with what went right. Skip this if you'd rather.</p>
+    ${[0,1,2].map(i => `<label class="f" for="rw${i}">Win ${i+1}</label><input class="in" id="rw${i}" maxlength="80" value="${esc((r.wins||[])[i] || "")}" placeholder="${["Started a new job","Paid off a card","Learned to cook properly"][i]}">`).join("")}
+    <label class="f" for="rl">One lesson</label><input class="in" id="rl" maxlength="120" value="${esc(r.lesson || "")}" placeholder="I do better with a plan for busy weeks">
+    <label class="f" for="rd">One thing to leave behind</label><input class="in" id="rd" maxlength="120" value="${esc(r.drop || "")}" placeholder="Saying yes to everything">
+    <div class="actions"><button class="btn ghost" data-ob="skip1">Skip</button><button class="btn" data-ob="next1">Next</button></div></div>`; }
+  if(s === 2) return `<div class="ob">${stepsBar(2)}<h2>Meet Future You</h2><p class="sub">Five years from now. Write it as if it's already true. Short is fine.</p>
+    <label class="f" for="vw">In 5 years, I'm someone who…</label><input class="in" id="vw" maxlength="120" value="${esc(S.who)}" placeholder="keeps promises to myself and has room to breathe">
+    ${["money","health","people"].map(k => { const a = areaOf(k); return `<label class="f" for="va${k}">${a[1]} ${a[2]} in 5 years</label><textarea class="in" id="va${k}" maxlength="160" placeholder="${esc(PH[k])}">${esc(S.vision[k] || "")}</textarea>`; }).join("")}
+    <p class="note" style="margin-top:8px">You can add other areas (work, mind, faith, home, fun) later in Future me.</p>
+    <div class="actions"><button class="btn ghost" data-ob="back">Back</button><button class="btn" data-ob="next2">Next</button></div></div>`;
+  if(s === 3) return `<div class="ob">${stepsBar(3)}<h2>Pick up to 3 quests</h2><p class="sub">Things to <b>start</b> doing this year that move you toward Future You. Fewer is better.</p>
+    <div class="list" style="margin-top:8px">${activeQ().map(q => `<div class="item"><div class="emo">${areaOf(q.area)[1]}</div><div class="grow"><b>${esc(q.title)}</b><small>${q.plans.length} if-then plan${q.plans.length === 1 ? "" : "s"}</small></div>
+      <button class="x" data-act="editQuest" data-id="${q.id}" aria-label="Edit">✎</button></div>`).join("")}</div>
+    ${activeQ().length < 3 ? `<button class="btn ghost full" data-act="addQuest" style="margin-top:12px">${I.plus} Add a quest</button>` : ""}
+    <div class="tip" style="margin-top:14px"><b>Each quest needs an if-then plan:</b> "When I get home from work, I will walk for 20 minutes." Pick a moment that already happens in your day.</div>
+    <div class="actions"><button class="btn ghost" data-ob="back">Back</button><button class="btn" data-ob="next3" ${activeQ().length ? "" : "disabled"}>Next</button></div></div>`;
+  const k = curWeek(), nk = addDays(k, 7), d = parse(today()), fm = iso(new Date(d.getFullYear(), d.getMonth()+1, 1)), fmk = weekKey(fm);
+  const ny = iso(new Date(d.getFullYear()+1, 0, 1));
+  const opts = [["now", "This week", k], ["next", "Next " + (S.settings.ws ? "Monday" : "Sunday"), nk], ["month", "The week of " + fmt(fm,{day:"numeric",month:"long"}), fmk]];
+  if(d.getMonth() >= 10) opts.push(["ny", "New Year's week", weekKey(ny)]);
+  return `<div class="ob">${stepsBar(4)}<h2>When do your 12 weeks start?</h2><p class="sub">Fresh starts feel strongest on a new week, a new month or the new year. Pick one.</p>
+    <div class="list" style="margin-top:8px">${opts.map((o,i) => `<button class="item" data-start="${o[2]}" style="text-align:left;width:100%"><div class="emo">${["🌤️","📅","🗓️","🎆"][i]}</div><div class="grow"><b>${o[1]}</b><small>Starts ${fmt(o[2],{weekday:"short",day:"numeric",month:"short"})}</small></div></button>`).join("")}</div>
+    <div class="actions"><button class="btn ghost" data-ob="back">Back</button></div></div>`; }
+function bindOb(){ const app = document.getElementById("app");
+  app.querySelectorAll("[data-ob]").forEach(b => b.onclick = () => { const a = b.dataset.ob;
+    if(a === "demo"){ demo(); tab = "week"; render(); return; }
+    if(a === "restore"){ document.getElementById("importFile").click(); return; }
+    if(a === "back"){ S.step = Math.max(0, S.step - 1); save(); render(); scrollTo(0,0); return; }
+    if(a === "next0"){ const n = clampTxt(val(app,"#nm"),30); if(!n) return toast("Add your name (or a nickname)"); S.hero = {name:n, created:today()}; S.step = 1; }
+    if(a === "skip1") S.step = 2;
+    if(a === "next1"){ const y = reviewYear();
+      const o = {year:y, wins:[0,1,2].map(i => clampTxt(val(app,"#rw"+i),80)), lesson:clampTxt(val(app,"#rl"),120), drop:clampTxt(val(app,"#rd"),120)};
+      if(o.wins.some(Boolean) || o.lesson || o.drop){ S.review[y] = o; if(!S.flags["rv"+y]){ S.flags["rv"+y] = true; S.xp += 25; S.badges.lookback = today(); } } S.step = 2; }
+    if(a === "next2"){ S.who = clampTxt(val(app,"#vw"),120); ["money","health","people"].forEach(k => { const t = clampTxt(val(app,"#va"+k),160); if(t) S.vision[k] = t; else delete S.vision[k]; });
+      if(Object.keys(S.vision).length && !S.flags.visionXp){ S.flags.visionXp = true; S.xp += 25; S.badges.future = today(); } S.step = 3; }
+    if(a === "next3"){ if(!activeQ().length) return; if(activeQ().some(q => !q.plans.length) && !confirm("Some quests have no if-then plan yet. Plans make a big difference. Continue anyway?")) return; S.step = 4; }
+    save(); render(); scrollTo(0,0); });
+  app.querySelectorAll("[data-start]").forEach(b => b.onclick = () => { S.sprint = {start:b.dataset.start, n:1, history:[]}; S.ready = true; S.step = 5; save(); tab = "week"; render(); scrollTo(0,0);
+    toast("Your reset has begun. One week at a time."); });
+}
+
+/* ───────── sample data ───────── */
+function demo(){ const t = today(); S = blank(); normalize(); const k = curWeek(), st = addDays(k, -35);
+  S.hero = {name:"Sam", created:addDays(t,-40)}; S.ready = true; S.step = 5; S.settings.ws = 1;
+  S.who = "keeps promises to myself, has savings in the bank and energy for the people I love";
+  S.vision = {money:"Debt-free, with three months of savings and a deposit started", health:"Walking every day, cooking most nights, sleeping by 11",
+    people:"Sunday dinners with family and a few close friends I actually see", work:"Qualified and doing work I'm proud of"};
+  S.word = "Steady"; const ry = reviewYear();
+  S.review[ry] = {year:ry, wins:["Started a new job","Paid off a credit card","Learned to cook properly"], lesson:"I do better with a plan for busy weeks", drop:"Saying yes to everything"};
+  S.quests = [
+    {id:"q1", title:"Walk more", area:"health", why:"So I have energy after work", target:"Walk 3 times a week, every week", status:"active", created:st,
+      plans:[{id:"p1", when:"I get home from work", then:"put my trainers on and walk 20 minutes", per:3}]},
+    {id:"q2", title:"Read before bed", area:"mind", why:"Less phone, better sleep", target:"Finish 4 books", status:"active", created:st,
+      plans:[{id:"p2", when:"I get into bed", then:"read 10 pages before my phone", per:5}]},
+    {id:"q3", title:"Save for a deposit", area:"money", why:"A home of our own", target:"Save £1,200 in 12 weeks", status:"active", created:st,
+      plans:[{id:"p3", when:"payday lands", then:"move £100 to savings first", per:1}, {id:"p4", when:"I want to order a takeaway", then:"cook something quick instead", per:2}]}];
+  const W = [[3,5,1,2,"great"],[2,4,1,1,"ok"],[0,0,0,0,""],[2,3,1,1,"hard"],[3,5,1,2,"great"],[2,3,0,1,""]];
+  W.forEach((r,i) => { const wk2 = addDays(st, i*7); const w = S.weeks[wk2] = {ticks:{}}; ["p1","p2","p3","p4"].forEach((p,j) => { if(r[j]) w.ticks[p] = r[j]; });
+    if(r[4]) { w.check = {feel:r[4], good:["Walked every evening I planned","Read most nights","",'Cooked twice instead of ordering',"Hit every plan"][i] || "", hard:["","Late shifts","","Ill for two days",""][i] || "", next:["Keep it going","Walk at lunch on shift days","","Start small again","Same again"][i] || "", at:addDays(wk2,6)}; w.checkXp = true; } });
+  S.weeks[addDays(st,21)].fresh = true; S.weeks[addDays(st,21)].comebackXp = true; S.restarts = [{date:addDays(st,21), note:"Ill for a few days"}];
+  S.sprint = {start:st, n:1, history:[]};
+  S.letters = [{id:"l1", text:"Dear future me,\n\nRight now I'm tired but hopeful. I want you to remember that you started small and kept going.\n\nBe proud of the weeks you showed up.", written:addDays(t,-40), unlock:addDays(t,-1), opened:""},
+    {id:"l2", text:"Did you keep walking? I hope so.", written:addDays(t,-30), unlock:addDays(t, 300), opened:""}];
+  S.xp = 610; ["first_step","future","lookback","planner","checkin1","checkin4","weeks4","comeback","letter_sealed","full_week"].forEach((b,i) => S.badges[b] = addDays(st, i*3));
+  save(); }
+
+/* ───────── events ───────── */
+document.addEventListener("click", e => {
+  const tb = e.target.closest("[data-tab]"); if(tb){ tab = tb.dataset.tab; closeSheet(); render(); scrollTo({top:0, behavior:"smooth"}); return; }
+  if(e.target.closest("[data-close]")){ closeSheet(); return; }
+  const a = e.target.closest("[data-act]"); if(!a) return; const act = a.dataset.act, id = a.dataset.id;
+  if(act === "tick") tick(a.dataset.q, a.dataset.p, 1);
+  else if(act === "untick") tick(a.dataset.q, a.dataset.p, -1);
+  else if(act === "addQuest") questForm();
+  else if(act === "editQuest") questForm(S.quests.find(q => q.id === id));
+  else if(act === "checkin") checkinForm();
+  else if(act === "fresh") freshForm();
+  else if(act === "editVision") visionForm();
+  else if(act === "review") reviewForm();
+  else if(act === "addLetter") letterForm();
+  else if(act === "openLetter") openLetter(S.letters.find(l => l.id === id));
+  else if(act === "settings") settingsForm();
+  else if(act === "startNow"){ S.sprint.start = curWeek(); save(); render(); }
+  else if(act === "newSprint"){ const ks = Array.from({length:12}, (_,i) => addDays(S.sprint.start, i*7)); S.sprint.history.push({start:S.sprint.start, n:S.sprint.n}); if(ks.filter(shownUp).length >= 4) award("sprint"); S.sprint = {start:curWeek(), n:S.sprint.n + 1, history:S.sprint.history}; save(); render(); toast("New sprint. Week 1 starts now."); }
+  else if(act === "pauseQ" || act === "resumeQ"){ const q = S.quests.find(x => x.id === id); if(!q) return;
+    if(act === "resumeQ" && activeQ().length >= 3) return toast("Three active quests at most. Pause or complete one first.");
+    q.status = act === "pauseQ" ? "paused" : "active"; save(); render(); }
+  else if(act === "doneQ"){ const q = S.quests.find(x => x.id === id); if(!q || !confirm(`Mark "${q.title}" as complete?`)) return; q.status = "done"; q.doneOn = today(); save(); render();
+    const worked = Object.values(S.weeks).filter(w => q.plans.some(p => (+(w.ticks || {})[p.id] || 0) > 0)).length >= 2;
+    if(!q.xpDone && worked){ q.xpDone = true; save(); gain(100, "Quest complete"); award("quest_done"); } else if(!worked) toast("Completed. Quest XP is for quests you worked on in 2 or more weeks."); }
+  else if(act === "reopenQ"){ const q = S.quests.find(x => x.id === id); if(!q) return; if(activeQ().length >= 3) return toast("Three active quests at most. Pause or complete one first.");
+    q.status = "active"; delete q.doneOn; save(); render(); }
+  else if(act === "rescueDl"){ let raw = RESCUED; try{ raw = raw || localStorage.getItem(RESCUE); }catch(_){} if(!raw) return;
+    const b = new Blob([raw], {type:"text/plain"}), l = document.createElement("a"); l.href = URL.createObjectURL(b); l.download = `reset-quest-recovered-${today()}.txt`; document.body.appendChild(l); l.click(); l.remove(); }
+});
+document.addEventListener("visibilitychange", () => { if(!document.hidden && S.ready && !document.getElementById("sheet")) render(); });
+function rescueBanner(){ const el = document.createElement("div"); el.className = "rescue-bar"; el.setAttribute("role","alert");
+  el.innerHTML = `<b>We couldn't read your saved data</b>A copy has been kept safe on this device, so it isn't lost. If you have a backup file, restore it in Settings.
+    <div class="rb"><button data-act="rescueDl">Download the copy</button><button class="p" id="rbOk">Got it</button></div>`;
+  el.querySelector("#rbOk").onclick = () => el.remove(); document.body.appendChild(el); }
+load(); render(); if(RESCUED !== null) rescueBanner();
+/* atmosphere: slow dust specks drifting in the sunlight, and a little parallax on scroll. Off with Reduce Motion, paused when hidden */
+(function(){ const rm = matchMedia("(prefers-reduced-motion: reduce)"); if(rm.matches) return;
+  const cv = document.getElementById("dust"), cx = cv.getContext("2d"); let W = 0, H = 0, dpr = Math.min(2, devicePixelRatio || 1), run = true, last = 0;
+  const P = Array.from({length:28}, () => ({x:Math.random(), y:Math.random()*.6, r:.6 + Math.random()*1.4, vx:-(.004 + Math.random()*.008), vy:.003 + Math.random()*.006, a:.15 + Math.random()*.35, t:Math.random()*6}));
+  const size = () => { W = innerWidth; H = innerHeight; cv.width = W*dpr; cv.height = H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); };
+  size(); addEventListener("resize", size);
+  let raf = 0;
+  function frame(ts){ raf = 0; if(!run) return; const dt = Math.min(50, ts - (last || ts)) / 1000; last = ts; cx.clearRect(0,0,W,H);
+    P.forEach(p => { p.x += p.vx*dt; p.y += p.vy*dt; p.t += dt;
+      if(p.x < .2 || p.y > .75){ p.x = .6 + Math.random()*.5; p.y = -.02; }
+      const fade = Math.max(0, 1 - Math.hypot(1 - p.x, p.y) * 1.1), tw = .6 + .4*Math.sin(p.t*1.3);
+      cx.beginPath(); cx.arc(p.x*W, p.y*H, p.r, 0, 6.283); cx.fillStyle = `rgba(255,226,180,${(p.a*fade*tw).toFixed(3)})`; cx.fill(); });
+    raf = requestAnimationFrame(frame); }
+  raf = requestAnimationFrame(frame);
+  document.addEventListener("visibilitychange", () => { run = !document.hidden;
+    if(!run){ if(raf){ cancelAnimationFrame(raf); raf = 0; } } else if(!raf){ last = 0; raf = requestAnimationFrame(frame); } });
+  let tk = false; addEventListener("scroll", () => { if(tk) return; tk = true; requestAnimationFrame(() => { document.documentElement.style.setProperty("--sy", Math.min(1200, scrollY)); tk = false; }); }, {passive:true});
+})();
+</script>
+<style>
+.pwa-card{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:420px;box-sizing:border-box;
+ z-index:2147483000;background:#fff;color:#1b1b2b;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.28);padding:16px;
+ font:14px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-align:left}
+.pwa-card *{box-sizing:border-box}
+.pwa-row{display:flex;gap:12px;align-items:flex-start}
+.pwa-icon{width:36px;height:36px;border-radius:9px;flex:none}
+.pwa-title{font-weight:700;font-size:15px;margin:0 0 4px;color:#1b1b2b}
+.pwa-text{margin:0;color:#1b1b2b}
+.pwa-share{display:inline-block;vertical-align:-4px;margin:0 2px}
+.pwa-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.pwa-btn{appearance:none;border:0;border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;background:#ececf2;color:#1b1b2b;cursor:pointer}
+.pwa-btn.pwa-primary{background:#1b1b2b;color:#fff}
+</style><script>
+(function(){
+  var FOLDER = "reset-79466577", NAME = "Reset Quest", KEY = "pwa.card." + FOLDER, DAY = 864e5;
+  var ua = navigator.userAgent || "";
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+  }
+  var installed = false;
+  try { installed = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true; } catch(e) {}
+  if (installed) return;
+  var isIOS = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  if (!isIOS && !isAndroid) return;
+  var pwaDeferred = null, pwaCard = null, pwaShown = false;
+  function pwaGet(){ try { return localStorage.getItem(KEY); } catch(e) { return null; } }
+  function pwaSet(v){ try { localStorage.setItem(KEY, v); } catch(e) {} }
+  function pwaHide(){ if (pwaCard && pwaCard.parentNode) pwaCard.parentNode.removeChild(pwaCard); pwaCard = null; }
+  function pwaDone(){ pwaSet("done"); pwaHide(); }
+  function pwaLater(){ pwaSet(String(Date.now())); pwaHide(); }
+  function pwaEl(tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; }
+  function pwaBtn(label, cls, fn){ var b = pwaEl("button", "pwa-btn" + (cls ? " " + cls : ""), label); b.type = "button"; b.addEventListener("click", fn); return b; }
+  var SHARE = '<svg class="pwa-share" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b6ef3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Share"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg>';
+  function pwaRender(){
+    pwaHide();
+    var card = pwaEl("div", "pwa-card"); card.setAttribute("role", "dialog"); card.setAttribute("aria-label", "Add " + NAME + " to your home screen");
+    var row = pwaEl("div", "pwa-row"), img = pwaEl("img", "pwa-icon"); img.src = "icon-180.png"; img.alt = "";
+    var box = pwaEl("div"); box.appendChild(pwaEl("p", "pwa-title", "Add " + NAME + " to your home screen"));
+    var t = pwaEl("p", "pwa-text"), btns = pwaEl("div", "pwa-btns");
+    if (isIOS) {
+      if (/CriOS|FxiOS|EdgiOS/.test(ua)) t.textContent = "Open this link in Safari, then tap Share and Add to Home Screen.";
+      else t.innerHTML = 'Tap the Share button ' + SHARE + ', then Add to Home Screen. It opens like an app and works offline.';
+    } else if (pwaDeferred) {
+      t.textContent = "Install it to open like an app, even with no internet.";
+      btns.appendChild(pwaBtn("Install app", "pwa-primary", function(){
+        var ev = pwaDeferred; pwaDeferred = null;
+        try { ev.prompt(); ev.userChoice.then(function(c){ if (c && c.outcome === "accepted") pwaDone(); else pwaRender(); }); } catch(e) { pwaRender(); }
+      }));
+    } else {
+      t.textContent = "Tap the ⋮ menu, then Install app or Add to Home screen.";
+    }
+    box.appendChild(t); row.appendChild(img); row.appendChild(box); card.appendChild(row);
+    btns.appendChild(pwaBtn("Later", "", pwaLater)); btns.appendChild(pwaBtn("Got it", isAndroid && pwaDeferred ? "" : "pwa-primary", pwaDone));
+    card.appendChild(btns); document.body.appendChild(card); pwaCard = card;
+  }
+  window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); pwaDeferred = e; if (pwaShown && pwaCard) pwaRender(); });
+  window.addEventListener("appinstalled", pwaDone);
+  var v = pwaGet();
+  if (v === "done") return;
+  if (v && Date.now() - Number(v) < 3 * DAY) return;
+  setTimeout(function(){ if (pwaGet() === "done") return; pwaShown = true; pwaRender(); }, 2500);
+})();
+</script></body>
+</html>
