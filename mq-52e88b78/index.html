@@ -337,6 +337,62 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .pick.on{border-color:var(--gold);background:rgba(255,201,74,.1)}
 .taxc{padding:9px 12px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:14px}
 .taxc.on{background:rgba(255,107,122,.18);border-color:var(--coral);color:#ffd0d5}
+/* Nov 2026 update: 44px taps everywhere, loot bag, net worth, freedom journey, goals and routine */
+.btn.sm{min-height:44px}.x{width:44px;height:44px}.cat{min-height:44px}
+.seg3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg3 button{padding:6px 4px;font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.15;min-height:52px}
+.seg3 button span{font-size:18px;line-height:1}
+.letgo-now{flex:none;white-space:nowrap;padding:9px 11px}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
+.confetti i{position:absolute;top:0;display:block}
+.kept{text-align:center;padding:6px 0 4px}
+.kept-amt{font-size:52px;font-weight:900;line-height:1.05;margin:8px 0 6px;letter-spacing:-.02em;overflow-wrap:anywhere}
+.kept-bag{display:flex;align-items:center;justify-content:center;gap:12px;margin:14px auto 4px;background:rgba(0,0,0,.2);border-radius:18px;padding:10px 16px;width:max-content;max-width:100%;text-align:left}
+.kept-bag b{font-size:22px;display:block}.kept-bag small{color:var(--mut);font-size:13px}
+.kept-link{display:block;margin:6px auto 0;min-height:44px;padding:0 12px}
+.bag{flex:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.bars{padding:10px 14px}
+.bar-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:30px;font-size:14px}
+.bar-row .bl{color:var(--mut);font-weight:600}
+.bt{height:10px;border-radius:6px;background:rgba(0,0,0,.3);overflow:hidden}
+.bt i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#ffd76a,#4be3a5)}
+.bt i.neg{background:linear-gradient(90deg,#ff8f9a,#f0566a)}
+.bv{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.bv small{color:var(--mut);font-weight:600}
+.bar-row.zero .bv,.bar-row.zero .bl{color:var(--dim)}
+.yr-pick{display:flex;gap:4px}.yr-pick button{min-width:52px;border-radius:10px;color:var(--mut)}.yr-pick button.on{color:var(--gold);background:var(--card2)}
+.escape{position:relative;height:22px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);margin:22px 0 4px}
+.escape>i{position:absolute;left:0;top:0;bottom:0;border-radius:12px;background:linear-gradient(90deg,#9b7bff,#5ec8ff 50%,#4be3a5);box-shadow:0 0 14px rgba(94,200,255,.45);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.escape .mk{position:absolute;top:4px;bottom:4px;width:2px;background:rgba(255,255,255,.22);transform:translateX(-1px)}
+.escape .mk.on{background:rgba(255,255,255,.75)}
+.escape .runner{position:absolute;top:-17px;font-size:22px;transform:translateX(-50%) scaleX(-1);transition:left 1s cubic-bezier(.2,.8,.2,1)}
+.esc-scale{display:flex;justify-content:space-between;font-size:12px;color:var(--dim)}
+.esc-pct{font-size:34px;font-weight:900;line-height:1}
+.mg-list{display:flex;flex-direction:column;gap:10px}.mg{padding:14px;margin:0}.mg b{display:block;font-weight:700;line-height:1.3}
+.mg-why{display:block;color:var(--mut);font-size:13px;margin-top:3px;font-style:italic}.mg.done{opacity:.7}.mg.done b{text-decoration:line-through;color:var(--mut)}
+.mg-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap}.mg-foot .pill{font-size:13px}.nw-link.off .amt{text-decoration:line-through;color:var(--dim)}
+.step-n{width:30px;height:30px;border-radius:50%;background:var(--gold);color:#3a2300;font-weight:900;display:grid;place-items:center;flex:none}
+.rt-card{padding:12px 14px}
+.rt-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:14px}
+.rt-list{display:flex;flex-direction:column;gap:4px}
+.rt{display:flex;align-items:center;gap:12px;min-height:54px}
+.rt .grow{min-width:0;flex:1}
+.rt b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt-sub{display:flex;align-items:center;gap:8px;min-width:0}
+.rt-sub small{color:var(--mut);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rt.on b{color:var(--mut);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.3)}
+.tick{width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:rgba(0,0,0,.2);flex:none;font-size:22px;font-weight:900;color:#073a26;display:grid;place-items:center}
+.rt.on .tick{background:linear-gradient(180deg,#7ff0c3,#2fcf8d);border-color:transparent}
+.dots-h{display:flex;gap:3px;flex:none}.dots-h i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.14)}.dots-h i.on{background:var(--mint)}
+@media (prefers-reduced-motion:reduce){.escape>i,.escape .runner{transition:none}}
+/* 44px taps and 12px text on small phones (Nov 2026 check) */
+nav button{font-size:12px}.target,.floor.next .tag,.gate .you small,.ava-pick .ph,.al-pill,.defs small,.bv small{font-size:12px}
+.h button{min-width:44px}.sub-acts .x{width:44px;height:44px}.cat{min-width:44px}
+nav .nl-s{display:none}
+.ns-head button{min-width:44px;min-height:44px}
+.al-head .link,.tl{display:inline-flex;align-items:center;min-height:44px;margin:-13px 0;vertical-align:middle}
+@media(max-width:400px){nav .nl-l{display:none}nav .nl-s{display:inline}}
+@media(max-width:380px){nav{width:calc(100% - 16px);grid-template-columns:1fr 1fr 54px 1fr 1fr 1fr 1fr}nav .fab span{width:54px;height:54px}}
 @media(max-width:380px){.big{font-size:44px}.ring{width:100px;height:100px}.stats{gap:6px}.stat{padding:9px}}
 </style>
 </head>
@@ -354,7 +410,8 @@ const blank = () => ({v:1, hero:null, cur:"USD", pay:{freq:"monthly", amount:0, 
   bills:[], billPaid:{}, spends:[], incomes:[], debts:[], debtLog:[], goals:[], goalLog:[], impulses:[],
   xp:0, streak:{last:"", n:0, best:0}, badges:{}, checkins:{}, noSpend:{}, savedByWaiting:0,
   settings:{strategy:"snowball", extra:0}, lastPeriodStart:"", allowances:[],
-  subs:[], caps:{}, ybills:[], cutBills:[], payPlan:{bonus:0, over:{}, moves:{}, jobs:{}}, side:{goal:0, hit:""}, sales:[], owed:[], adhd:[]});
+  subs:[], caps:{}, ybills:[], cutBills:[], payPlan:{bonus:0, over:{}, moves:{}, jobs:{}}, side:{goal:0, hit:""}, sales:[], owed:[], adhd:[],
+  nw:{assets:[], liabs:[], useDebts:true, useVault:true, hist:{}, xp:{}}, free:{costs:[], streams:[], hit:{}}, mgoals:[], routine:[], rlog:{}});
 let S, RESCUED = null;
 /* old saves and old backups do not have the newer lists, so make sure they exist */
 function normalize(){
@@ -379,6 +436,28 @@ function normalize(){
   if(!S.settings || typeof S.settings !== "object") S.settings = {strategy:"snowball", extra:0};
   if(S.settings.strategy !== "avalanche") S.settings.strategy = "snowball";
   if(!(S.settings.extra >= 0)) S.settings.extra = 0;
+  /* Nov 2026 update: let-go dates for the loot bag, net worth, freedom journey, money goals and routine */
+  if(!Array.isArray(S.impulses)) S.impulses = [];
+  S.impulses = S.impulses.filter(x => isObj(x));
+  S.impulses.forEach(x => { x.price = +x.price || 0; x.hours = +x.hours > 0 ? +x.hours : 24; if(!(+x.added > 0)) x.added = Date.now(); x.name = String(x.name || "Something");
+    if(!["waiting","skipped","bought"].includes(x.status)) x.status = "waiting";
+    if(x.status !== "waiting" && !isD(x.doneOn)) x.doneOn = iso(new Date(Math.min(Date.now(), x.added + x.hours*36e5)));
+    if(x.status === "waiting"){ delete x.doneOn; delete x.xp; } });
+  const items = (a, extra) => (Array.isArray(a) ? a : []).filter(x => isObj(x) && typeof x.id === "string").map(x => ({...x, name:String(x.name || "Item"), amt:Math.max(0, +x.amt || 0), ...(extra ? extra(x) : {})}));
+  const fq = x => ({freq: ["weekly","monthly","yearly"].includes(x.freq) ? x.freq : "monthly"});
+  if(!isObj(S.nw)) S.nw = {};
+  S.nw.assets = items(S.nw.assets); S.nw.liabs = items(S.nw.liabs);
+  if(typeof S.nw.useDebts !== "boolean") S.nw.useDebts = true; if(typeof S.nw.useVault !== "boolean") S.nw.useVault = true;
+  ["hist","xp"].forEach(k => { if(!isObj(S.nw[k])) S.nw[k] = {}; Object.keys(S.nw[k]).forEach(m => { if(!/^\d{4}-\d{2}$/.test(m) || !isFinite(+S.nw[k][m])) delete S.nw[k][m]; }); });
+  if(!isObj(S.free)) S.free = {};
+  S.free.costs = items(S.free.costs, fq); S.free.streams = items(S.free.streams, fq);
+  if(!isObj(S.free.hit)) S.free.hit = {};
+  S.mgoals = (Array.isArray(S.mgoals) ? S.mgoals : []).filter(g => isObj(g) && typeof g.id === "string").map(g => ({...g, name:String(g.name || "Money goal"),
+    emoji:String(g.emoji || "🎯"), by:isD(g.by) ? g.by : "", why:String(g.why || ""), done:isD(g.done) ? g.done : "", xp:isD(g.done) ? (+g.xp || 0) : 0}));
+  S.routine = (Array.isArray(S.routine) ? S.routine : []).filter(r => isObj(r) && typeof r.id === "string").map(r => ({...r, name:String(r.name || "Money habit"),
+    freq:["daily","weekly","monthly"].includes(r.freq) ? r.freq : "daily", goalId:typeof r.goalId === "string" ? r.goalId : ""}));
+  if(!isObj(S.rlog)) S.rlog = {};
+  Object.keys(S.rlog).forEach(k => { const e = S.rlog[k]; if(!isObj(e) || !isD(e.d)) delete S.rlog[k]; else e.xp = Math.max(0, +e.xp || 0); });
 }
 /* if the saved text cannot be read, keep a copy of it before starting fresh, so the next save cannot wipe it */
 function load(){
@@ -499,7 +578,12 @@ const BADGES = [
   ["billbuster","🧾","Bill Buster","Cut a bill you do not need"],
   ["bonusboss","🎯","Bonus Boss","Put a bonus paycheck to work"],
   ["sidehustle","💼","Side Hustler","Log side income or a sale"],
-  ["payback","🤝","Paid Back","Get paid back in full"]];
+  ["payback","🤝","Paid Back","Get paid back in full"],
+  ["lootbag","🎒","Full Loot Bag","Fill your first loot bag"],
+  ["networth","📈","Big Picture","Map out your net worth"],
+  ["escape25","🚪","Escape Plan","Cover a quarter of your living costs outside your 9-5"],
+  ["routine20","🧭","Creature of Habit","Tick off 20 money routine habits"]];
+function takeXP(n){ if(!(n > 0)) return; S.xp = Math.max(0, S.xp - n); save(); renderTop(); }
 function gain(n, why){
   const before = lvlOf(S.xp); S.xp += n; const after = lvlOf(S.xp); save();
   toast(`<em>+${n} XP</em> ${esc(why)}`, "✨"); coins(Math.min(14, 4 + Math.round(n/10)));
@@ -615,7 +699,7 @@ let tab = "home";
 const NAV = [["home","Home"],["spend","Spending"],["fab",""],["quests","Bills"],["subs","Subs"],["boss","Bosses"],["vault","Vault"]];
 function renderNav(){ document.getElementById("nav").innerHTML = NAV.map(([k,l]) => k === "fab"
   ? `<button class="fab" data-act="addSpend" aria-label="Log a spend"><span>${I.plus}</span></button>`
-  : `<button class="${tab===k?"on":""}" data-tab="${k}"${k==="subs"?' aria-label="Subscriptions"':""}>${I[k]}${l}</button>`).join(""); }
+  : `<button class="${tab===k?"on":""}" data-tab="${k}"${k==="subs"?' aria-label="Subscriptions"':""}>${I[k]}${k==="spend" ? `<span class="nl-l">${l}</span><span class="nl-s">Spend</span>` : l}</button>`).join(""); }
 function renderTop(){ const el = document.getElementById("top"); if(!el || !S.hero) return;
   const l = lvlOf(S.xp), a = xpAt(l), b = xpAt(l+1);
   el.innerHTML = `<div class="ava${S.hero.avatar === "photo" && S.hero.photo ? " photo" : ""}">${avatar(S.hero.avatar, S.hero.skin, S.hero.photo)}</div>
@@ -671,7 +755,7 @@ function home(){
     </div>
     <div class="row" style="margin-top:12px">
       <div class="emo">🌙</div>
-      <div class="grow"><b><button class="link" data-tab="spend" style="font-size:inherit;font-weight:700;text-align:left">No-spend day</button></b><div class="muted" style="font-size:14px">${Object.keys(S.noSpend).length} so far · <button class="link" data-tab="spend" style="font-size:inherit">Calendar ›</button></div></div>
+      <div class="grow"><b><button class="link tl" data-tab="spend" style="font-size:inherit;font-weight:700;text-align:left">No-spend day</button></b><div class="muted" style="font-size:14px">${Object.keys(S.noSpend).length} so far · <button class="link tl" data-tab="spend" style="font-size:inherit">Calendar ›</button></div></div>
       <button class="btn sm ghost" data-act="nospend" ${(spentToday || S.noSpend[t])?"disabled":""}>${S.noSpend[t]?"Claimed":spentToday?"Not today":"+25 XP"}</button>
     </div>
   </section>
@@ -684,7 +768,8 @@ function home(){
   <div class="card"><div class="row"><div class="grow"><b>${money(totalDebt,0)}</b> <span class="muted">left of ${money(startDebt,0)}</span>
     <div class="hp"><i style="width:${startDebt ? totalDebt/startDebt*100 : 0}%"></i></div>
     <small class="muted">${S.debts.filter(d=>d.bal<=0).length} of ${S.debts.length} bosses defeated</small></div></div></div>` : ""}
-  ${waiting.length ? `<div class="h"><h2>Impulse jail</h2><button data-tab="vault">Visit</button></div>
+  ${routineHome()}
+  ${waiting.length ? `<div class="h"><h2>Impulse jail</h2><button data-act="vgo" data-v="treasure">Visit</button></div>
     <div class="jail">${waiting.slice(0,2).map(jailCell).join("")}</div>` : ""}
   ${ringGradient()}`;
 }
@@ -908,14 +993,15 @@ function boss(){
    : `<div class="card empty" style="margin-top:14px"><div class="e">🐉</div>Every debt becomes a boss with an HP bar.<br>Each payment is a hit. Watch them shrink.</div>`}`;
 }
 
+function fmtLeft(ms){ ms = Math.max(0, ms); if(ms >= 48*36e5) return `${Math.floor(ms/864e5)}d ${Math.floor(ms%864e5/36e5)}h`;
+  return `${Math.floor(ms/36e5)}h ${pad(Math.floor(ms%36e5/6e4))}m`; }
 function jailCell(x){ const rel = x.added + x.hours*36e5, left = rel - Date.now(), free = left <= 0;
-  const h = Math.floor(left/36e5), m = Math.floor(left%36e5/6e4);
   return `<div class="cell ${free?"free":""}"><div class="emo">${free?"🔓":"🔒"}</div><div class="grow"><b>${esc(x.name)}</b>
-    <small class="muted">${money(x.price)} · ${free ? "Cooling-off done. Still want it?" : "released in"}</small>
-    ${free ? "" : `<div class="timer" data-rel="${rel}">${h}h ${pad(m)}m</div>`}</div>
-    ${free ? `<div style="display:flex;flex-direction:column;gap:6px"><button class="btn sm mint" data-act="letgo" data-id="${x.id}">Let go</button>
+    <small class="muted">${money(x.price)} · ${free ? "Cooling-off done. Still want it?" : (x.hours >= 336 ? "14-day cool-down · " : "") + "released in"}</small>
+    ${free ? "" : `<div class="timer" data-rel="${rel}">${fmtLeft(left)}</div>`}</div>
+    ${free ? `<div style="display:flex;flex-direction:column;gap:6px"><button class="btn sm mint" data-act="letgo" data-id="${x.id}">Let it go</button>
        <button class="btn sm ghost" data-act="buyit" data-id="${x.id}">Buy</button></div>`
-     : `<button class="x" data-act="letgo" data-id="${x.id}" title="Let it go now">✓</button>`}</div>`; }
+     : `<button class="btn sm mint letgo-now" data-act="letgo" data-id="${x.id}" aria-label="Let ${esc(x.name)} go now">🕊️ Let it go</button>`}</div>`; }
 function vaultTreasure(){
   const saved = sum(S.goals.map(g=>g.saved)); const w = S.impulses.filter(x=>x.status==="waiting");
   const hist = S.impulses.filter(x=>x.status!=="waiting").slice(-6).reverse();
@@ -931,14 +1017,14 @@ function vaultTreasure(){
       <button class="x" data-act="editGoal" data-id="${g.id}">✎</button></div></div>`; }).join("")}</div>`
    : `<div class="card empty"><div class="e">💎</div>Emergency fund, a holiday, a new laptop.<br>Each goal sets a little aside from every paycheck.</div>`}
   <div class="h"><h2>Impulse jail</h2><button data-act="addImpulse">Lock something up</button></div>
-  <p class="note" style="margin:-4px 6px 12px">Want something right now? Put it in jail. When the timer ends you decide with a calm head. Letting it go earns XP and the money stays yours.</p>
+  <p class="note" style="margin:-4px 6px 12px">Want something right now? Put it in jail. When the timer ends you decide with a calm head. Changed your mind sooner? Tap Let it go any time. The money goes in your loot bag and stays yours.</p>
   ${w.length ? `<div class="jail">${w.map(jailCell).join("")}</div>` : `<div class="card empty"><div class="e">🔒</div>The cells are empty.</div>`}
   ${hist.length ? `<div class="h"><h2>Released</h2></div><div class="list">${hist.map(x => `<div class="item"><div class="emo">${x.status==="skipped"?"🕊️":"🛍️"}</div>
     <div class="grow"><b>${esc(x.name)}</b><small>${x.status==="skipped"?"Let go":"Bought"}</small></div><span class="amt ${x.status==="skipped"?"pos":""}">${money(x.price)}</span></div>`).join("")}</div>` : ""}
   ${ringGradient()}`;
 }
 
-function vault(){ return segVault() + (vaultView === "side" ? sideView() : vaultTreasure()); }
+function vault(){ const V = {side:sideView, loot:lootView, worth:nwView, free:freeView, plan:planView}[vaultView] || vaultTreasure; return segVault() + V(); }
 
 /* ───────────────────────── forms ───────────────────────── */
 function spendForm(preTax){
@@ -1051,10 +1137,13 @@ function impulseForm(){
   sheet(`<h3>🔒 Lock it up</h3><p class="sub">Name the thing you want. You can still buy it later, just not right now.</p>
     <label class="f">What is it?</label><input class="in" id="n" placeholder="Those headphones">
     <div class="two"><div><label class="f">Price</label><input class="in" id="p" inputmode="decimal" placeholder="0.00"></div>
-      <div><label class="f">Sentence</label><select class="in" id="h"><option value="24">24 hours</option><option value="48">2 days</option><option value="72">3 days</option><option value="168">1 week</option><option value="720">30 days</option></select></div></div>
+      <div><label class="f">Sentence</label><select class="in" id="h"><option value="24">24 hours</option><option value="48">2 days</option><option value="72">3 days</option><option value="168">1 week</option><option value="336">14 days</option><option value="720">30 days</option></select></div></div>
+    <p class="note">Big buy? Try the 14-day cool-down. You can let it go before the time is up.</p>
     <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Lock it up</button></div>`, root => {
       root.querySelector("#ok").onclick = () => { const n = val(root,"#n"), p = num(val(root,"#p")); if(!n || p <= 0) return toast("Name it and add the price","✍️");
-        S.impulses.push({id:uid(), name:n, price:p, added:Date.now(), hours:+val(root,"#h"), status:"waiting"}); save(); closeSheet(); tab = "vault"; render(); gain(10, "Impulse jailed"); };
+        const t = today(), paid = S.impulses.filter(i => i.lockXp > 0 && iso(new Date(i.added)) === t).length, xp = paid < 3 ? 10 : 0;
+        S.impulses.push({id:uid(), name:n, price:p, added:Date.now(), hours:+val(root,"#h"), status:"waiting", lockXp:xp}); save(); closeSheet(); tab = "vault"; vaultView = "treasure"; render();
+        if(xp) gain(xp, "Impulse jailed"); else toast("Locked up. Jail XP is maxed for today.","🔒"); };
     });
 }
 function victory(d, g){
@@ -1062,7 +1151,7 @@ function victory(d, g){
     <p class="muted" style="font-size:17px">${d ? `${esc(d.name)} is paid off. ${money(d.start,0)} gone for good.` : `${esc(g.name)} is fully funded at ${money(g.target,0)}.`}</p>
     <div class="actions"><button class="btn full" data-close>Onwards</button></div></div>`);
   gain(d ? 250 : 150, d ? "Boss defeated" : "Goal complete"); }
-function levelUp(l){ coins(24); sheet(`<div class="levelup"><div class="muted" style="font-weight:700;letter-spacing:.14em">LEVEL UP</div>
+function levelUp(l){ if(document.querySelector("#sheet .kept")) return setTimeout(() => levelUp(l), 1200); coins(24); sheet(`<div class="levelup"><div class="muted" style="font-weight:700;letter-spacing:.14em">LEVEL UP</div>
   <div class="n gold">${l}</div><div class="title-art" style="font-size:30px">${titleOf(l)}</div><p class="muted">Every log, every bill, every strike counts.</p>
   <div class="actions"><button class="btn full" data-close>Keep playing</button></div></div>`); }
 function badgesView(){
@@ -1446,7 +1535,8 @@ const monthKey = () => today().slice(0,7);
 const sideEarned = () => round2(sum(S.incomes.filter(x => x.date.slice(0,7) === monthKey() && (x.kind === "side" || x.kind === "sale")).map(x=>x.amt)));
 const ago = d => { const n = daysBetween(d, today()); return n <= 0 ? "today" : n === 1 ? "yesterday" : n + " days ago"; };
 let vaultView = "treasure";
-const segVault = () => `<div class="seg segtop"><button class="${vaultView==="treasure"?"on":""}" data-act="vview" data-v="treasure">💎 Treasure</button><button class="${vaultView==="side"?"on":""}" data-act="vview" data-v="side">💼 Side money</button></div>`;
+const VSEG = [["treasure","💎","Treasure"],["loot","🎒","Loot bag"],["side","💼","Side money"],["worth","📈","Net worth"],["free","🏃","Freedom"],["plan","🧭","Goals"]];
+const segVault = () => `<div class="seg segtop seg3" role="tablist">${VSEG.map(([k,e,l]) => `<button class="${vaultView===k?"on":""}" data-act="vview" data-v="${k}" role="tab" aria-selected="${vaultView===k}"><span aria-hidden="true">${e}</span>${l}</button>`).join("")}</div>`;
 function sideGoalHit(){ const k = monthKey(); if(S.side.goal > 0 && sideEarned() >= S.side.goal && S.side.hit !== k){ S.side.hit = k; save(); setTimeout(()=>{ coins(18); gain(50, "Side money goal hit"); }, 500); } }
 function sideView(){
   const got = sideEarned(), goal = S.side.goal, f = goal > 0 ? got/goal : 0;
@@ -1566,6 +1656,298 @@ function moreActs(act, id, a){
   else return false;
   return true; }
 
+/* ───────────────────────── Nov 2026 update (Jasmine's ideas) ─────────────────────────
+   14-day cool-down, Let it go with confetti, loot bag, net worth, journey to financial freedom,
+   money goals and a money routine. XP is saved on the thing that earned it, so undo takes it back
+   and redoing pays nothing extra. */
+const isDay = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+const reduceMotion = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
+const cash = n => money(n, Math.abs(n) >= 1000 || Number.isInteger(+n) ? 0 : undefined);
+const MON3 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const opt = (list, cur) => list.map(([v,e,l]) => `<button type="button" class="cat ${v===cur?"on":""}" data-c="${v}">${e} ${l}</button>`).join("");
+function pickCats(root, sel, set){ root.querySelectorAll(sel + " .cat").forEach(b => b.onclick = () => { set(b.dataset.c); root.querySelectorAll(sel + " .cat").forEach(x=>x.classList.toggle("on", x===b)); }); }
+function confetti(n){ if(reduceMotion()) return; n = n || 160;
+  const cols = ["#ffc94a","#4be3a5","#ff6b7a","#9b7bff","#5ec8ff","#ff9f43","#fff1b8","#f06bd6"];
+  const box = document.createElement("div"); box.className = "confetti"; box.setAttribute("aria-hidden","true"); document.body.appendChild(box);
+  for(let i=0;i<n;i++){ const p = document.createElement("i"), w = 6 + Math.random()*7, tall = Math.random() < .55;
+    p.style.cssText = `left:${Math.random()*100}%;width:${w}px;height:${tall ? w*1.7 : w*.7}px;background:${cols[i%cols.length]};border-radius:${Math.random()<.3?"50%":"2px"}`;
+    box.appendChild(p);
+    const dx = (Math.random()-.5)*180, rot = (Math.random()-.5)*1200;
+    p.animate([{transform:"translate(0,-30px) rotate(0deg)", opacity:1},{transform:`translate(${dx*.6}px,${innerHeight*.5}px) rotate(${rot/2}deg)`, opacity:1, offset:.55},
+      {transform:`translate(${dx}px,${innerHeight+40}px) rotate(${rot}deg)`, opacity:.9}], {duration:2000 + Math.random()*1800, delay:Math.random()*600, easing:"cubic-bezier(.3,.5,.5,1)", fill:"both"}); }
+  setTimeout(() => box.remove(), 4600); }
+
+/* ── Impulse jail: let it go ── */
+const LETGO_XP = 30, LETGO_CAP = 5;
+function letGo(id){ const x = S.impulses.find(i=>i.id===id); if(!x || x.status !== "waiting") return;
+  const t = today(), early = x.added + x.hours*36e5 > Date.now();
+  const paid = S.impulses.filter(i => i.status === "skipped" && i.doneOn === t && i.xp > 0).length;
+  const before = lootStats().filled;
+  x.status = "skipped"; x.doneOn = t; x.early = early; x.xp = paid < LETGO_CAP ? LETGO_XP : 0;
+  S.savedByWaiting = round2(S.savedByWaiting + x.price); save(); render();
+  keptSheet(x); confetti(); coins(16);
+  if(x.xp) gain(x.xp, `Let go of ${x.name}`);
+  award("jail1"); if(S.impulses.filter(i=>i.status==="skipped").length >= 10) award("jail10");
+  const lb = lootStats(); if(lb.filled > before){ award("lootbag"); setTimeout(() => toast(`Loot bag ${lb.filled} is full! A bigger bag is ready.`,"🎒"), 1400); } }
+function undoLetGo(id){ const x = S.impulses.find(i=>i.id===id); if(!x || x.status !== "skipped") return;
+  const back = +x.xp || 0; x.status = "waiting"; delete x.doneOn; delete x.early; delete x.xp;
+  S.savedByWaiting = round2(Math.max(0, S.savedByWaiting - x.price)); save(); closeSheet(); render(); takeXP(back);
+  toast("Back in jail. The timer carries on.","🔒"); }
+function keptSheet(x){ const lb = lootStats();
+  sheet(`<div class="kept"><div class="lbl">You let it go</div>
+    <div class="kept-amt gold">Kept ${cash(x.price)}</div>
+    <p class="muted">${esc(x.name)} stays in the shop. The money stays with you.</p>
+    <div class="kept-bag">${bagArt(lb.frac, 92)}<div><b>${cash(lb.month)}</b><small>in your loot bag this month</small></div></div>
+    <div class="actions"><button class="btn ghost" data-act="undoLetgo" data-id="${x.id}">Undo</button><button class="btn mint" data-close>Yay 🎉</button></div>
+    <button class="link kept-link" data-act="vgo" data-v="loot">Open my loot bag ›</button></div>`); }
+
+/* ── Loot bag ── */
+const BAGS = [100,250,500,1000,2500,5000,10000,25000,50000,100000];
+const BAGMUL = {INR:80, PKR:250, NGN:1500, PHP:50, ZAR:15, MYR:4, AED:4, SAR:4};
+let lootYear = "";
+function lootStats(){ const t = today(), ym = t.slice(0,7), yr = t.slice(0,4), mul = BAGMUL[S.cur] || 1;
+  const all = S.impulses.filter(x => x.status === "skipped" && isDay(x.doneOn));
+  const tot = round2(sum(all.map(x=>x.price)));
+  const inM = all.filter(x => x.doneOn.slice(0,7) === ym), inY = all.filter(x => x.doneOn.slice(0,4) === yr);
+  let filled = 0; while(filled < BAGS.length && tot >= BAGS[filled]*mul) filled++;
+  const top = filled >= BAGS.length, size = BAGS[Math.min(filled, BAGS.length-1)]*mul, prev = filled && !top ? BAGS[filled-1]*mul : 0;
+  return {all, tot, month:round2(sum(inM.map(x=>x.price))), year:round2(sum(inY.map(x=>x.price))), monthN:inM.length, yearN:inY.length,
+    filled, size, frac: top ? 1 : (tot - prev)/(size - prev), toFill: top ? 0 : round2(size - tot)}; }
+function bagArt(frac, size){ frac = Math.max(0, Math.min(1, frac)); const top = 34, bot = 92, y = bot - (bot - top)*frac, id = "bg" + Math.random().toString(36).slice(2,7);
+  return `<svg class="bag" width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true"><defs>
+    <clipPath id="${id}"><path d="M30 30q-16 20-14 40 2 22 34 22t34-22q2-20-14-40z"/></clipPath>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".5" stop-color="#ffc94a"/><stop offset="1" stop-color="#d98a1c"/></linearGradient></defs>
+    <path d="M30 30q-16 20-14 40 2 22 34 22t34-22q2-20-14-40z" fill="#6b4a2b"/>
+    <g clip-path="url(#${id})"><rect class="bag-fill" x="0" y="${y}" width="100" height="${100 - y}" fill="url(#${id}g)"/>
+      ${frac > 0 && frac < 1 ? `<path d="M0 ${y} q12 -4 25 0 t25 0 t25 0 t25 0" stroke="#fff6c9" stroke-width="2" fill="none" opacity=".8"/>` : ""}
+      ${frac > .05 ? [[34,86],[50,88],[66,85],[42,78],[58,79]].filter(([,cy]) => cy > y + 4).map(([cx,cy]) => `<circle cx="${cx}" cy="${cy}" r="5" fill="#ffe38a" stroke="#c07a12" stroke-width="1.5"/>`).join("") : ""}</g>
+    <path d="M30 30q-16 20-14 40 2 22 34 22t34-22q2-20-14-40z" fill="none" stroke="#3b2612" stroke-width="2.5"/>
+    <path d="M33 30q17 7 34 0l-5-12q-12 5-24 0z" fill="#8a6038" stroke="#3b2612" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M36 30q14 5 28 0" stroke="#ff6b7a" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`; }
+function lootView(){ const lb = lootStats(), t = today(), yr = t.slice(0,4);
+  const years = [...new Set([yr, ...lb.all.map(x=>x.doneOn.slice(0,4))])].sort().reverse();
+  const yv = years.includes(lootYear) ? lootYear : yr;
+  const inYear = lb.all.filter(x => x.doneOn.slice(0,4) === yv);
+  const lastM = yv === yr ? +t.slice(5,7) : 12;
+  const months = Array.from({length:lastM}, (_,i) => { const k = yv + "-" + pad(i+1), xs = inYear.filter(x=>x.doneOn.slice(0,7)===k); return {i, k, amt:round2(sum(xs.map(x=>x.price))), n:xs.length}; }).reverse();
+  const maxM = Math.max(1, ...months.map(m=>m.amt));
+  const recentL = [...lb.all].sort((a,b) => a.doneOn < b.doneOn ? 1 : a.doneOn > b.doneOn ? -1 : 0).slice(0,8);
+  return `<section class="card hero" style="padding:18px"><div class="row" style="align-items:center">${bagArt(lb.frac, 104)}
+    <div class="grow"><div class="lbl">Loot bag</div><div style="font-size:32px;font-weight:800;margin-top:2px" class="gold">${cash(lb.tot)}</div>
+    <div class="muted" style="font-size:14px">kept by letting ${lb.all.length} ${lb.all.length === 1 ? "thing" : "things"} go</div>
+    <div class="pill" style="margin-top:8px">🎒 Bag ${lb.filled + (lb.frac >= 1 ? 0 : 1)} · ${Math.floor(lb.frac*100)}% full</div></div></div>
+    <p class="note" style="margin-top:12px">${lb.toFill > 0 ? `${cash(lb.toFill)} more fills this bag. Every let-go drops in.` : "Every bag is full. Legendary self-control."}</p>
+    <div class="stats"><div class="stat"><small>This month</small><b class="pos">${cash(lb.month)}</b></div><div class="stat"><small>This year</small><b class="pos">${cash(lb.year)}</b></div>
+      <div class="stat"><small>Let go</small><b>${lb.yearN} this yr</b></div></div></section>
+  ${lb.all.length ? `<div class="h"><h2>By month · ${yv}</h2>${years.length > 1 ? `<span class="yr-pick">${years.map(y => `<button class="${y===yv?"on":""}" data-act="lootYear" data-v="${y}">${y}</button>`).join("")}</span>` : ""}</div>
+    <section class="card bars">${months.map(m => `<div class="bar-row ${m.amt ? "" : "zero"}"><span class="bl">${MON3[m.i]}</span><span class="bt"><i style="width:${m.amt/maxM*100}%"></i></span>
+      <span class="bv">${m.amt ? cash(m.amt) : "–"}${m.n ? `<small> · ${m.n}</small>` : ""}</span></div>`).join("")}</section>
+    <div class="h"><h2>By year</h2></div>
+    <div class="list">${years.map(y => { const xs = lb.all.filter(x=>x.doneOn.slice(0,4)===y); return `<div class="item"><div class="emo">🎒</div><div class="grow"><b>${y}</b><small>${xs.length} let go</small></div><span class="amt pos">${cash(sum(xs.map(x=>x.price)))}</span></div>`; }).join("")}</div>
+    <div class="h"><h2>Recent let-gos</h2><button data-act="addImpulse">Lock something up</button></div>
+    <div class="list">${recentL.map(x => `<div class="item"><div class="emo">🕊️</div><div class="grow"><b>${esc(x.name)}</b><small>${fmtDate(x.doneOn,{day:"numeric",month:"short",year:"numeric"})}${x.early ? " · before the timer" : ""}</small></div><span class="amt pos">+${cash(x.price)}</span></div>`).join("")}</div>`
+  : `<div class="card empty"><div class="e">🎒</div>Your loot bag is empty for now. Lock an impulse buy in jail, then tap Let it go. The price drops in here and the bag fills up.<br><br><button class="btn" data-act="addImpulse">🔒 Lock something up</button></div>`}`; }
+
+/* ── Net worth ── */
+const NWK = [["bank","🏦","Bank account"],["cash","💵","Cash"],["savings","🐷","Savings"],["invest","📈","Investments"],["pension","🧓","Pension"],["property","🏠","Home or land"],["vehicle","🚗","Vehicle"],["other","✨","Other"]];
+const NLK = [["mortgage","🏠","Mortgage"],["student","🎓","Student loan"],["loan","🏦","Loan"],["card","💳","Card"],["family","🤝","Owed to family"],["other","✨","Other"]];
+const kindOf = (list, k) => list.find(x=>x[0]===k) || list[list.length-1];
+function nwCalc(){ const vault = round2(sum(S.goals.map(g=>g.saved))), bosses = round2(sum(S.debts.map(d=>Math.max(0, d.bal))));
+  const own = round2(sum(S.nw.assets.map(x=>x.amt)) + (S.nw.useVault ? vault : 0)), owe = round2(sum(S.nw.liabs.map(x=>x.amt)) + (S.nw.useDebts ? bosses : 0));
+  return {vault, bosses, own, owe, net:round2(own - owe)}; }
+const nwStarted = () => S.nw.assets.length + S.nw.liabs.length > 0;
+function nwSnap(){ if(!nwStarted()) return; const k = monthKey(), n = nwCalc().net; if(S.nw.hist[k] !== n){ S.nw.hist[k] = n; save(); } }
+function nwTouched(){ nwSnap(); if(S.nw.assets.length) award("networth"); const k = monthKey();
+  if(nwStarted() && !S.nw.xp[k]){ S.nw.xp[k] = 15; save(); gain(15, "Net worth updated this month"); } }
+function nwView(){ nwSnap(); const c = nwCalc(), k = monthKey();
+  const past = Object.keys(S.nw.hist).filter(m => m < k).sort(), prevK = past[past.length-1], diff = prevK !== undefined ? round2(c.net - S.nw.hist[prevK]) : null;
+  const hist = Object.keys(S.nw.hist).sort().slice(-6), maxH = Math.max(1, ...hist.map(m => Math.abs(S.nw.hist[m])));
+  const row = (x, list, kind) => { const kk = kindOf(list, x.kind); return `<div class="item"><div class="emo">${kk[1]}</div><div class="grow"><b>${esc(x.name)}</b><small>${kk[2]}</small></div>
+    <span class="amt ${kind === "liab" ? "neg" : ""}">${cash(x.amt)}</span><button class="x" data-act="nwEdit" data-v="${kind}" data-id="${x.id}" aria-label="Edit ${esc(x.name)}">✎</button></div>`; };
+  const link = (on, e, name, amt, what, neg) => `<div class="card mg nw-link ${on ? "" : "off"}"><div class="row"><div class="emo">${e}</div><div class="grow"><b>${name}</b><small class="mg-why" style="font-style:normal">Linked to your ${what}</small></div>
+    <span class="amt ${neg && on ? "neg" : ""}">${cash(amt)}</span></div>
+    <div class="mg-foot"><span class="pill">${on ? "✅ Counted" : "➖ Left out"}</span><button class="btn sm ghost" data-act="nwToggle" data-v="${neg ? "debts" : "vault"}" aria-pressed="${on}">${on ? "Leave out" : "Count it"}</button></div></div>`;
+  return `<section class="card hero" style="padding:18px"><div class="lbl">Net worth</div>
+    <div style="font-size:36px;font-weight:800;margin-top:4px" class="${c.net < 0 ? "neg" : "gold"}">${nwStarted() || c.vault || c.bosses ? cash(c.net) : cash(0)}</div>
+    <div class="muted" style="font-size:14px">What you own minus what you owe${diff !== null ? ` · <b class="${diff >= 0 ? "pos" : "neg"}">${diff >= 0 ? "▲" : "▼"} ${cash(Math.abs(diff))}</b> since ${MON3[+prevK.slice(5,7)-1]}` : ""}</div>
+    <div class="stats two"><div class="stat"><small>I own</small><b class="pos">${cash(c.own)}</b></div><div class="stat"><small>I owe</small><b class="neg">${cash(c.owe)}</b></div></div></section>
+  ${!nwStarted() ? `<div class="card empty" style="padding:18px"><div class="e">📈</div>Add what you own (bank, savings, pension, car) and what you owe. Your bosses and treasure are already counted. Update it once a month and watch the line move.</div>` : ""}
+  <div class="h"><h2>What I own</h2><button data-act="nwAdd" data-v="asset">+ Add</button></div>
+  <div class="list">${S.goals.length ? link(S.nw.useVault, "💎", "Treasure vault", c.vault, "savings goals", false) : ""}${S.nw.assets.map(x => row(x, NWK, "asset")).join("")}</div>
+  <div class="h"><h2>What I owe</h2><button data-act="nwAdd" data-v="liab">+ Add</button></div>
+  <div class="list">${S.debts.length ? link(S.nw.useDebts, "🐉", "Debt bosses", c.bosses, "Bosses tab", true) : ""}${S.nw.liabs.map(x => row(x, NLK, "liab")).join("")}
+    ${!S.debts.length && !S.nw.liabs.length ? `<div class="card empty" style="padding:16px;margin:0">Nothing owed. Add a mortgage or loan here if you have one.</div>` : ""}</div>
+  ${hist.length ? `<div class="h"><h2>Month by month</h2></div><section class="card bars">${hist.map(m => { const v = S.nw.hist[m];
+    return `<div class="bar-row"><span class="bl">${MON3[+m.slice(5,7)-1]}</span><span class="bt"><i class="${v < 0 ? "neg" : ""}" style="width:${Math.abs(v)/maxH*100}%"></i></span><span class="bv ${v < 0 ? "neg" : ""}">${cash(v)}</span></div>`; }).join("")}</section>` : ""}
+  <p class="note" style="margin:12px 6px 0">Use your best guess for things like a car or a home. The app keeps one number for each month, so you can see the trend.</p>`; }
+function nwForm(kind, x){ const e = !!x, list = kind === "liab" ? NLK : NWK; let k = e ? x.kind : list[0][0];
+  sheet(`<h3>${e ? "Edit" : kind === "liab" ? "Something I owe" : "Something I own"}</h3><p class="sub">${kind === "liab" ? "Debts that are not bosses yet, like a mortgage or student loan." : "Money and things of value. Your treasure vault is counted for you."}</p>
+    <label class="f">Type</label><div class="cats" id="nk">${opt(list, k)}</div>
+    <label class="f">Name</label><input class="in" id="n" maxlength="40" value="${e ? esc(x.name) : ""}" placeholder="${kind === "liab" ? "Mortgage" : "Current account"}">
+    <label class="f">${kind === "liab" ? "Amount owed now" : "Value now"}</label><input class="in" id="a" inputmode="decimal" value="${e ? x.amt : ""}" placeholder="0.00">
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      pickCats(root, "#nk", v => { k = v; const n = root.querySelector("#n"); if(!n.value) n.placeholder = kindOf(list, v)[2]; });
+      const arr = kind === "liab" ? S.nw.liabs : S.nw.assets;
+      root.querySelector("#ok").onclick = () => { const a = num(val(root,"#a")), n = val(root,"#n") || kindOf(list, k)[2]; if(a < 0 || val(root,"#a") === "") return root.querySelector("#a").focus();
+        if(e) Object.assign(x, {name:n, amt:a, kind:k}); else arr.push({id:uid(), name:n, amt:a, kind:k}); save(); closeSheet(); render(); nwTouched(); };
+      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete ${x.name}?`)) return; const i = arr.indexOf(x); if(i >= 0) arr.splice(i, 1); save(); closeSheet(); render(); nwSnap(); }; }); }
+
+/* ── Journey to financial freedom ── */
+const FQ = [["weekly","📅","Weekly"],["monthly","🗓️","Monthly"],["yearly","📆","Yearly"]];
+const perMonth = x => x.freq === "weekly" ? x.amt*52/12 : x.freq === "yearly" ? x.amt/12 : x.amt;
+const STK = [["side","💼","Side hustle"],["shop","🛍️","Online shop"],["rent","🏠","Rental"],["invest","📈","Dividends"],["interest","🏦","Interest"],["create","🎥","Content"],["other","✨","Other"]];
+const MILES = [[10,10],[25,25],[50,50],[75,75],[100,150]];
+function freeCalc(){ const costs = round2(sum(S.free.costs.map(perMonth))), inc = round2(sum(S.free.streams.map(perMonth)));
+  const pct = costs > 0 ? Math.min(100, inc/costs*100) : 0, shown = Math.floor(pct);
+  return {costs, inc, pct, shown, left:100 - shown, need:Math.max(0, round2(costs - inc))}; }
+function freeCheck(){ const f = freeCalc(); if(f.costs <= 0) return;
+  MILES.forEach(([m, xp], i) => { if(f.pct >= m && !S.free.hit[m]){ S.free.hit[m] = today(); save();
+    setTimeout(() => { if(m === 100){ confetti(); coins(28); } gain(xp, m === 100 ? "Rat race escaped" : `${m}% of the way out of the rat race`); }, 400 + i*500);
+    if(m >= 25) award("escape25"); } }); }
+function sideAvg(){ const from = addDays(today(), -90); return round2(sum(S.incomes.filter(x => x.date >= from && (x.kind === "side" || x.kind === "sale")).map(x=>x.amt))/3); }
+function freeView(){ const f = freeCalc(), avg = sideAvg(), hasSide = S.free.streams.some(s => s.kind === "side");
+  const line = (x, list, kind) => { const kk = kindOf(list, x.kind || "other"); return `<div class="item"><div class="emo">${kind === "cost" ? "🧾" : kk[1]}</div><div class="grow"><b>${esc(x.name)}</b>
+    <small>${cash(x.amt)} ${x.freq}${x.freq !== "monthly" ? ` · ${cash(round2(perMonth(x)))} a month` : ""}</small></div><span class="amt ${kind === "cost" ? "" : "pos"}">${cash(round2(perMonth(x)))}</span>
+    <button class="x" data-act="freeEdit" data-v="${kind}" data-id="${x.id}" aria-label="Edit ${esc(x.name)}">✎</button></div>`; };
+  const canFill = S.bills.length + S.ybills.length + subLive().length + S.allowances.length > 0;
+  return `<section class="card hero escape-card" style="padding:18px"><div class="lbl">Journey to financial freedom</div>
+    <div class="row" style="margin-top:6px;align-items:flex-end"><div class="grow"><b style="font-size:20px">Rat race escape</b></div><div class="esc-pct ${f.shown >= 100 ? "pos" : "gold"}">${f.shown}%</div></div>
+    <div class="escape" role="progressbar" aria-label="Rat race escape" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${f.shown}">
+      <i style="width:${f.pct}%"></i>${[25,50,75].map(m => `<b class="mk ${f.pct >= m ? "on" : ""}" style="left:${m}%"></b>`).join("")}
+      <span class="runner" style="left:${Math.min(96, Math.max(4, f.pct))}%">${f.shown >= 100 ? "🏝️" : "🏃"}</span></div>
+    <div class="esc-scale"><span>0%</span><span>25</span><span>50</span><span>75</span><span>100%</span></div>
+    <p class="muted" style="font-size:14px;margin-top:10px">${f.costs <= 0 ? "Step 1: add your living costs below. Step 2: add money that comes in outside your 9-5. The bar fills as that money covers your costs."
+      : f.shown >= 100 ? `Your income outside your 9-5 (${cash(f.inc)} a month) covers all your living costs. You are out of the rat race. 🎉`
+      : `Income outside your 9‑5 covers <b style="color:var(--ink)">${f.shown}%</b> of your living costs. <b class="gold">${f.left}% still needed</b>, that is ${cash(f.need)} more a month.`}</p>
+    <div class="stats two"><div class="stat"><small>Living costs a month</small><b>${cash(f.costs)}</b></div><div class="stat"><small>Outside your 9‑5</small><b class="pos">${cash(f.inc)}</b></div></div></section>
+  <div class="h"><h2>1 · Living costs</h2><button data-act="freeAdd" data-v="cost">+ Add</button></div>
+  ${S.free.costs.length ? `<div class="list">${S.free.costs.map(x => line(x, STK, "cost")).join("")}</div><p class="note" style="margin:8px 6px 0">Total: <b style="color:var(--ink)">${cash(f.costs)}</b> a month.</p>`
+    : `<div class="card empty" style="padding:18px"><div class="e">🧾</div>Rent, food, bills, transport. Everything it costs to live for a month.${canFill ? `<br><br><button class="btn sm" data-act="freeFill">Fill in from my bills</button>` : ""}</div>`}
+  ${S.free.costs.length && canFill ? `<button class="btn sm ghost" style="margin:10px 4px 0" data-act="freeFill">+ Add any bills I have not listed</button>` : ""}
+  <div class="h"><h2>2 · Income outside your 9‑5</h2><button data-act="freeAdd" data-v="stream">+ Add</button></div>
+  ${avg > 0 && !hasSide ? `<div class="card" style="padding:14px"><div class="row"><div class="emo">💼</div><div class="grow"><b>Your side money</b><small class="muted" style="display:block;font-size:13px">About ${cash(avg)} a month over the last 3 months</small></div>
+    <button class="btn sm mint" data-act="freeSide">Add it</button></div></div>` : ""}
+  ${S.free.streams.length ? `<div class="list">${S.free.streams.map(x => line(x, STK, "stream")).join("")}</div>`
+    : `<div class="card empty" style="padding:18px"><div class="e">🌱</div>Side hustles, an online shop, rent from a room, dividends, interest. Money that comes in without your day job.</div>`}
+  <p class="note" style="margin:12px 6px 0">Your 9-5 pay is left out on purpose. This shows how close other income is to paying for your life. It is a planning tool, not financial advice.</p>`; }
+function freeForm(kind, x){ const e = !!x, isC = kind === "cost"; let fr = e ? x.freq : "monthly", k = e ? (x.kind || "side") : "side";
+  sheet(`<h3>${e ? "Edit" : isC ? "Living cost" : "Income stream"}</h3><p class="sub">${isC ? "Something you pay to live: rent, food, bills, travel." : "Money that comes in outside your 9-5 job."}</p>
+    ${isC ? "" : `<label class="f">Type</label><div class="cats" id="sk">${opt(STK, k)}</div>`}
+    <label class="f">Name</label><input class="in" id="n" maxlength="40" value="${e ? esc(x.name) : ""}" placeholder="${isC ? "Rent" : "Etsy shop"}">
+    <label class="f">Amount</label><input class="in" id="a" inputmode="decimal" value="${e ? x.amt : ""}" placeholder="0.00">
+    <label class="f">How often</label><div class="cats" id="fq">${opt(FQ, fr)}</div>
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      pickCats(root, "#fq", v => fr = v); if(!isC) pickCats(root, "#sk", v => k = v);
+      const arr = isC ? S.free.costs : S.free.streams;
+      root.querySelector("#ok").onclick = () => { const a = num(val(root,"#a")), n = val(root,"#n"); if(!n || a <= 0) return toast("Add a name and an amount","✍️");
+        const o = {name:n, amt:a, freq:fr}; if(!isC) o.kind = k; if(e) Object.assign(x, o); else arr.push({id:uid(), ...o}); save(); closeSheet(); render(); freeCheck(); };
+      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete ${x.name}?`)) return; const i = arr.indexOf(x); if(i >= 0) arr.splice(i, 1); save(); closeSheet(); render(); }; }); }
+function freeFill(){ const have = new Set(S.free.costs.map(c => c.name.trim().toLowerCase())), add = [];
+  const put = (name, amt, freq) => { const key = String(name).trim().toLowerCase(); if(!(amt > 0) || have.has(key)) return; have.add(key); add.push({id:uid(), name:String(name), amt:round2(amt), freq}); };
+  S.bills.forEach(b => put(b.name, b.amt, "monthly")); S.ybills.forEach(b => put(b.name, b.amt, "yearly"));
+  subLive().forEach(s => put(s.name, s.amt, s.cycle === "yearly" ? "yearly" : "monthly"));
+  const perPay = {weekly:52/12, biweekly:26/12, fourweekly:13/12, monthly:1}[S.pay.freq] || 1;
+  S.allowances.forEach(a => put(allowName(a.cat), a.amt*perPay, "monthly"));
+  if(!add.length) return toast("All your bills are already listed","✅");
+  S.free.costs.push(...add); save(); render(); freeCheck(); toast(`Added ${add.length} from your bills, subscriptions and essentials`,"🧾"); }
+
+/* ── Money goals, then a money routine ── */
+const RFQ = [["daily","☀️","Every day"],["weekly","📅","Every week"],["monthly","🗓️","Every month"]];
+const RXP = {daily:3, weekly:8, monthly:15}, RCAP = 40, GOAL_XP = 40;
+const GEMO = ["🎯","🛟","💳","🏃","🏡","✈️","🎓","💍","🚗","🌱","🕋","👶","🛍️","💼"];
+function weekStart(s){ const d = parse(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return iso(d); }
+const rKey = (r, d) => { d = d || today(); return r.freq === "daily" ? d : r.freq === "weekly" ? "w" + weekStart(d) : "m" + d.slice(0,7); };
+const rDone = (r, d) => !!S.rlog[r.id + "|" + rKey(r, d)];
+function rHist(r){ const t = today(), n = r.freq === "daily" ? 7 : r.freq === "weekly" ? 4 : 3, out = [];
+  for(let i = n-1; i >= 0; i--){ const d = r.freq === "daily" ? addDays(t, -i) : r.freq === "weekly" ? addDays(t, -7*i) : addMonths(t.slice(0,7) + "-01", -i, 1); out.push(rDone(r, d)); }
+  return out; }
+function rTick(id){ const r = S.routine.find(x=>x.id===id); if(!r) return; const k = r.id + "|" + rKey(r), t = today();
+  if(S.rlog[k]){ const back = +S.rlog[k].xp || 0; delete S.rlog[k]; save(); render(); takeXP(back); return; }
+  const used = sum(Object.values(S.rlog).filter(e => e.d === t).map(e => +e.xp || 0)), xp = Math.max(0, Math.min(RXP[r.freq], RCAP - used));
+  S.rlog[k] = {d:t, xp}; save(); render(); if(xp) gain(xp, r.name); else toast("Ticked. Routine XP is maxed for today.","🧭");
+  if(Object.keys(S.rlog).length >= 20) award("routine20");
+  const due = S.routine; if(due.length > 1 && due.every(x => rDone(x))) setTimeout(() => { coins(20); toast("Whole money routine done. Nice work!","🧭"); }, 700); }
+function goalDone(id){ const g = S.mgoals.find(x=>x.id===id); if(!g) return; const t = today();
+  if(g.done){ const back = g.xp; g.done = ""; g.xp = 0; save(); render(); takeXP(back); return; }
+  const paid = S.mgoals.filter(x => x.done === t && x.xp > 0).length; g.done = t; g.xp = paid < 3 ? GOAL_XP : 0; save(); render();
+  confetti(90); if(g.xp) gain(g.xp, `Goal reached: ${g.name}`); else toast("Goal reached!","🏁"); }
+function routineDueNow(){ return S.routine.filter(r => !rDone(r)); }
+function routineHome(){ if(!S.routine.length) return ""; const due = routineDueNow(), done = S.routine.length - due.length;
+  return `<div class="h"><h2>Money routine</h2><button data-act="vgo" data-v="plan">Open</button></div>
+  <section class="card" style="padding:14px 16px">${due.length ? `<div class="muted" style="font-size:14px;margin-bottom:8px">${done} of ${S.routine.length} done · ${due.length} to go</div>
+    <div class="rt-list">${due.slice(0,4).map(r => rRow(r)).join("")}</div>${due.length > 4 ? `<button class="link" data-act="vgo" data-v="plan" style="min-height:44px">${due.length - 4} more ›</button>` : ""}`
+    : `<div class="row"><div class="emo">🧭</div><div class="grow"><b>Routine all done</b><small class="muted" style="display:block;font-size:13px">Every habit is ticked for now. See you next time.</small></div></div>`}</section>`; }
+function rRow(r, edit){ const on = rDone(r), g = S.mgoals.find(x=>x.id===r.goalId), h = rHist(r);
+  return `<div class="rt ${on ? "on" : ""}"><button class="tick" data-act="rTick" data-id="${r.id}" aria-pressed="${on}" aria-label="${on ? "Untick" : "Tick"} ${esc(r.name)}">${on ? "✓" : ""}</button>
+    <div class="grow"><b>${esc(r.name)}</b><div class="rt-sub"><small>${g ? esc(g.emoji) + " " + esc(g.name) : kindOf(RFQ, r.freq)[2]}</small>
+      <span class="dots-h" aria-hidden="true">${h.map(x => `<i class="${x ? "on" : ""}"></i>`).join("")}</span></div></div>
+    ${edit ? `<button class="x" data-act="rtEdit" data-id="${r.id}" aria-label="Edit ${esc(r.name)}">✎</button>` : ""}</div>`; }
+function planView(){ const open = S.mgoals.filter(g=>!g.done), done = S.mgoals.filter(g=>g.done);
+  const gRow = g => `<div class="card mg ${g.done ? "done" : ""}"><div class="row" style="align-items:flex-start"><div class="emo">${esc(g.emoji)}</div>
+    <div class="grow"><b>${esc(g.name)}</b>${g.why ? `<small class="mg-why">“${esc(g.why)}”</small>` : ""}</div>
+    <button class="x" data-act="mgEdit" data-id="${g.id}" aria-label="Edit ${esc(g.name)}">✎</button></div>
+    <div class="mg-foot"><span class="pill">${g.done ? "🏁 Reached " + fmtDate(g.done) : g.by ? "📅 By " + fmtDate(g.by, {day:"numeric", month:"short", year:"numeric"}) : "📅 No date yet"}</span>
+    <button class="btn sm ${g.done ? "ghost" : "mint"}" data-act="mgDone" data-id="${g.id}" aria-label="${g.done ? "Mark not done" : "Mark done"}: ${esc(g.name)}">${g.done ? "Undo" : "🏁 Done"}</button></div></div>`;
+  return `<section class="card hero" style="padding:18px"><div class="lbl">Money goals, then a money routine</div>
+    <div class="row" style="margin-top:8px"><div class="step-n">1</div><div class="grow"><b>Decide what you want your money to do</b><small class="muted" style="display:block;font-size:13px">Big or small. Add a date and your reason why.</small></div></div>
+    <div class="row" style="margin-top:10px"><div class="step-n">2</div><div class="grow"><b>Build small habits that get you there</b><small class="muted" style="display:block;font-size:13px">Daily, weekly and monthly ticks. Each one earns XP.</small></div></div></section>
+  <div class="h"><h2>1 · Money goals</h2><button data-act="mgAdd">+ Goal</button></div>
+  ${open.length || done.length ? `<div class="mg-list">${open.map(gRow).join("")}${done.map(gRow).join("")}</div>`
+    : `<div class="card empty" style="padding:18px"><div class="e">🎯</div>Pay off a card, build a 3-month safety net, stop impulse shopping, cover rent with side income.<br><br><button class="btn" data-act="mgAdd">${I.plus} Add a money goal</button></div>`}
+  <div class="h"><h2>2 · Money routine</h2><button data-act="rtAdd">+ Habit</button></div>
+  ${S.routine.length ? RFQ.map(([f,,label]) => { const rs = S.routine.filter(r => r.freq === f); if(!rs.length) return "";
+      return `<section class="card rt-card"><div class="rt-head"><b>${label}</b><span class="muted">${rs.filter(r=>rDone(r)).length}/${rs.length}</span></div>
+      <div class="rt-list">${rs.map(r => rRow(r, true)).join("")}</div></section>`; }).join("")
+      + `<p class="note" style="margin:4px 6px 0">Daily +${RXP.daily}, weekly +${RXP.weekly}, monthly +${RXP.monthly} XP, up to ${RCAP} routine XP a day. Untick and the XP goes back.</p>`
+    : `<div class="card empty" style="padding:18px"><div class="e">🧭</div>A routine is a few small money habits you repeat. Start with ours and change it, or make your own.<br><br>
+       <div class="two"><button class="btn" data-act="rtStarter">Starter routine</button><button class="btn ghost" data-act="rtAdd">My own</button></div></div>`}`; }
+function mgForm(g){ const e = !!g; let em = e ? g.emoji : "🎯";
+  sheet(`<h3>${e ? "Edit goal" : "New money goal"}</h3><p class="sub">What do you want your money to do for you?</p>
+    <label class="f">Goal</label><input class="in" id="n" maxlength="60" value="${e ? esc(g.name) : ""}" placeholder="Pay off my credit card">
+    <label class="f">Icon</label><div class="cats" id="ge">${GEMO.map(x => `<button type="button" class="cat ${x===em?"on":""}" data-c="${x}" aria-label="${x}">${x}</button>`).join("")}</div>
+    <div class="two"><div><label class="f">By when (optional)</label><input class="in" id="b" type="date" value="${e ? g.by : ""}"></div><div></div></div>
+    <label class="f">Why it matters (optional)</label><input class="in" id="w" maxlength="70" value="${e ? esc(g.why) : ""}" placeholder="So I can breathe at the end of the month">
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      pickCats(root, "#ge", v => em = v);
+      root.querySelector("#ok").onclick = () => { const n = val(root,"#n"); if(!n) return root.querySelector("#n").focus();
+        const o = {name:n, emoji:em, by:val(root,"#b"), why:val(root,"#w")}; if(e) Object.assign(g, o); else S.mgoals.push({id:uid(), done:"", xp:0, ...o}); save(); closeSheet(); render(); };
+      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete the goal "${g.name}"?`)) return; const back = g.xp || 0;
+        S.mgoals = S.mgoals.filter(x=>x.id!==g.id); S.routine.forEach(r => { if(r.goalId === g.id) r.goalId = ""; }); save(); closeSheet(); render(); takeXP(back); }; }); }
+function rtForm(r){ const e = !!r; let fr = e ? r.freq : "weekly";
+  sheet(`<h3>${e ? "Edit habit" : "New money habit"}</h3><p class="sub">Something small you can tick off.</p>
+    <label class="f">Habit</label><input class="in" id="n" maxlength="50" value="${e ? esc(r.name) : ""}" placeholder="Check my bank balance">
+    <label class="f">How often</label><div class="cats" id="rf">${opt(RFQ, fr)}</div>
+    <label class="f">Helps with (optional)</label><select class="in" id="g"><option value="">No goal</option>${S.mgoals.filter(g=>!g.done || (e && g.id===r.goalId)).map(g => `<option value="${g.id}" ${e && g.id===r.goalId ? "selected" : ""}>${esc(g.emoji)} ${esc(g.name)}</option>`).join("")}</select>
+    <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      pickCats(root, "#rf", v => fr = v);
+      root.querySelector("#ok").onclick = () => { const n = val(root,"#n"); if(!n) return root.querySelector("#n").focus();
+        const o = {name:n, freq:fr, goalId:val(root,"#g")}; if(e) Object.assign(r, o); else S.routine.push({id:uid(), ...o}); save(); closeSheet(); render(); };
+      if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete the habit "${r.name}"? The XP it earned goes back.`)) return;
+        let back = 0; Object.keys(S.rlog).forEach(k => { if(k.startsWith(r.id + "|")){ back += +S.rlog[k].xp || 0; delete S.rlog[k]; } });
+        S.routine = S.routine.filter(x=>x.id!==r.id); save(); closeSheet(); render(); takeXP(back); }; }); }
+function rtStarter(){
+  [["Log today's spending","daily"],["Check my bank balance","weekly"],["Plan next week's food","weekly"],["Visit the impulse jail","weekly"],
+   ["Update my net worth","monthly"],["Review my subscriptions","monthly"],["Pay my savings first on payday","monthly"]]
+   .forEach(([name, freq]) => S.routine.push({id:uid(), name, freq, goalId:""}));
+  save(); render(); toast("Starter routine added. Change any habit with ✎","🧭"); }
+
+function questActs(act, id, a){ const v = a.dataset.v;
+  if(act === "undoLetgo") undoLetGo(id);
+  else if(act === "vgo"){ closeSheet(); tab = "vault"; vaultView = v; render(); scrollTo({top:0, behavior:"smooth"}); }
+  else if(act === "lootYear"){ lootYear = v; render(); }
+  else if(act === "nwAdd") nwForm(v);
+  else if(act === "nwEdit") nwForm(v, (v === "liab" ? S.nw.liabs : S.nw.assets).find(x=>x.id===id));
+  else if(act === "nwToggle"){ if(v === "debts") S.nw.useDebts = !S.nw.useDebts; else S.nw.useVault = !S.nw.useVault; save(); render(); }
+  else if(act === "freeAdd") freeForm(v);
+  else if(act === "freeEdit") freeForm(v, (v === "cost" ? S.free.costs : S.free.streams).find(x=>x.id===id));
+  else if(act === "freeFill") freeFill();
+  else if(act === "freeSide"){ const avg = sideAvg(); if(avg > 0){ S.free.streams.push({id:uid(), name:"Side money", amt:avg, freq:"monthly", kind:"side"}); save(); render(); freeCheck(); } }
+  else if(act === "mgAdd") mgForm(); else if(act === "mgEdit") mgForm(S.mgoals.find(g=>g.id===id)); else if(act === "mgDone") goalDone(id);
+  else if(act === "rtAdd") rtForm(); else if(act === "rtEdit") rtForm(S.routine.find(r=>r.id===id)); else if(act === "rTick") rTick(id);
+  else if(act === "rtStarter") rtStarter();
+  else return false;
+  return true; }
+
 /* ───────────────────────── sample data ───────────────────────── */
 function demo(){
   const t = today(), D = n => addDays(t, n);
@@ -1595,10 +1977,38 @@ function demo(){
   S.side = {goal:300, hit:""};
   S.impulses = [{id:"i1",name:"Noise-cancelling headphones",price:129,added:Date.now()-6*36e5,hours:24,status:"waiting"},
     {id:"i2",name:"Mechanical keyboard",price:89,added:Date.now()-50*36e5,hours:48,status:"waiting"},
-    {id:"i3",name:"Third water bottle",price:32,added:Date.now()-90*36e5,hours:24,status:"skipped"}];
-  S.savedByWaiting = 32; S.xp = 1460; S.streak = {last:D(-1), n:6, best:11};
+    {id:"i3",name:"Third water bottle",price:32,added:Date.now()-90*36e5,hours:24,status:"skipped",doneOn:D(-2),xp:30},
+    {id:"i10",name:"New sofa",price:640,added:Date.now()-3*864e5,hours:336,status:"waiting"}];
+  /* past let-gos for the loot bag, across months and into last year */
+  [["Designer trainers",95,-9,true],["Phone case",18,-24,false],["Smart watch",199,-41,true],["Candle set",28,-68,false],["Gaming headset",65,-97,true],
+   ["Second jacket",54,-130,false],["Air fryer",79,-338,true],["Concert merch",40,-360,false]]
+   .forEach(([name,price,d,early],i) => S.impulses.push({id:"p"+i, name, price, added:Date.now()+d*864e5-30*36e5, hours:early ? 168 : 24, status:"skipped", doneOn:D(d), early, xp:30}));
+  S.impulses.push({id:"p9", name:"Winter boots", price:60, added:Date.now()-26*864e5, hours:48, status:"bought", doneOn:D(-24)});
+  S.savedByWaiting = round2(sum(S.impulses.filter(x=>x.status==="skipped").map(x=>x.price)));
+  /* net worth: treasure and bosses are counted automatically */
+  const M = n => addMonths(t.slice(0,7) + "-01", n, 1).slice(0,7);
+  S.nw = {assets:[{id:"w1",name:"Current account",amt:1240,kind:"bank"},{id:"w2",name:"Cash",amt:60,kind:"cash"},{id:"w3",name:"Work pension",amt:8400,kind:"pension"},{id:"w4",name:"Car",amt:6500,kind:"vehicle"}],
+    liabs:[{id:"v1",name:"Owed to Mum",amt:400,kind:"family"}], useDebts:true, useVault:true,
+    hist:{[M(-5)]:5280, [M(-4)]:5610, [M(-3)]:6020, [M(-2)]:6390, [M(-1)]:6810}, xp:{[M(-1)]:15, [M(-2)]:15}};
+  /* journey to financial freedom */
+  S.free = {costs:[{id:"f1",name:"Rent",amt:1150,freq:"monthly"},{id:"f2",name:"Food shopping",amt:75,freq:"weekly"},{id:"f3",name:"Bills (phone, internet)",amt:82,freq:"monthly"},
+      {id:"f4",name:"Car insurance",amt:96,freq:"monthly"},{id:"f5",name:"Fuel",amt:120,freq:"monthly"},{id:"f6",name:"Car tax",amt:180,freq:"yearly"}],
+    streams:[{id:"e1",name:"Dog walking",amt:35,freq:"weekly",kind:"side"},{id:"e2",name:"Online shop",amt:180,freq:"monthly",kind:"shop"},
+      {id:"e3",name:"Savings interest",amt:6,freq:"monthly",kind:"interest"},{id:"e4",name:"Dividends",amt:120,freq:"yearly",kind:"invest"}], hit:{10:D(-30)}};
+  /* money goals, then a money routine */
+  S.mgoals = [{id:"m1",name:"3-month safety net",emoji:"🛟",by:D(210),why:"So a broken boiler is not a crisis",done:"",xp:0},
+    {id:"m2",name:"Pay off the credit card",emoji:"💳",by:D(300),why:"Stop paying 24.9%",done:"",xp:0},
+    {id:"m3",name:"Cover rent with side income",emoji:"🏃",by:D(720),why:"Freedom to choose my hours",done:"",xp:0},
+    {id:"m4",name:"Stop late-night online shopping",emoji:"🛍️",by:"",why:"",done:D(-10),xp:40}];
+  S.routine = [{id:"r1",name:"Log today's spending",freq:"daily",goalId:""},{id:"r2",name:"Check my bank balance",freq:"weekly",goalId:"m1"},
+    {id:"r3",name:"Visit the impulse jail",freq:"weekly",goalId:"m4"},{id:"r4",name:"Extra payment to the card",freq:"monthly",goalId:"m2"},
+    {id:"r5",name:"Update my net worth",freq:"monthly",goalId:""},{id:"r6",name:"Post 3 new items in my shop",freq:"weekly",goalId:"m3"}];
+  S.rlog = {};
+  const tickR = (r, d) => { const rr = S.routine.find(x=>x.id===r); S.rlog[r + "|" + rKey(rr, d)] = {d, xp:RXP[rr.freq]}; };
+  [-1,-2,-3,-5,-6].forEach(n => tickR("r1", D(n))); [-7,-14,-21].forEach(n => tickR("r2", D(n))); tickR("r2", t); [-7,-14].forEach(n => tickR("r3", D(n)));
+  tickR("r4", t); tickR("r6", D(-7)); tickR("r6", D(-14)); S.xp = 1460; S.streak = {last:D(-1), n:6, best:11};
   for(let i=1;i<=6;i++) S.checkins[D(-i)] = true; S.noSpend = {[D(-4)]:true, [D(-7)]:true, [D(-11)]:true};
-  ["first_step","checkin3","streak7","bill5","first_blood","boss_down","loot","goal","jail1","nospend"].forEach((b,i)=> S.badges[b] = D(-30+i*3));
+  ["first_step","checkin3","streak7","bill5","first_blood","boss_down","loot","goal","jail1","nospend","lootbag","networth"].forEach((b,i)=> S.badges[b] = D(-36+i*3));
   S.allowances = [{id:"a1",cat:"groceries",amt:150},{id:"a2",cat:"transport",amt:60}];
   S.subs = [["Streaming",12.99,"monthly",3,"streaming"],["Music",10.99,"monthly",9,"music"],["Cloud storage",29.99,"yearly",44,"storage"],["Gym app",4.99,"monthly",18,"fitness"],["News site",96,"yearly",130,"news"]]
     .map(([name,amt,cycle,n,cat],i) => ({id:"u"+i, name, amt, cycle, next:D(n), day:parse(D(n)).getDate(), cat, status:"active", created:D(-60), reviewed:"", sample:true}));
@@ -1616,7 +2026,7 @@ document.addEventListener("click", e => {
   const tb = e.target.closest("[data-tab]"); if(tb){ tab = tb.dataset.tab; closeSheet(); render(); scrollTo({top:0,behavior:"smooth"}); return; }
   if(e.target.closest("[data-close]")){ closeSheet(); return; }
   const a = e.target.closest("[data-act]"); if(!a) return; const id = a.dataset.id, act = a.dataset.act, t = today();
-  if(newActs(act, id, a) || moreActs(act, id, a)){}
+  if(newActs(act, id, a) || moreActs(act, id, a) || questActs(act, id, a)){}
   else if(act === "addSpend") spendForm();
   else if(act === "addIncome"){ closeSheet(); incomeForm(); }
   else if(act === "addBill") billForm(); else if(act === "editBill") billForm(findBill(id));
@@ -1640,9 +2050,8 @@ document.addEventListener("click", e => {
   else if(act === "addGoal") goalForm(); else if(act === "editGoal") goalForm(S.goals.find(g=>g.id===id));
   else if(act === "deposit") depositForm(S.goals.find(g=>g.id===id));
   else if(act === "addImpulse") impulseForm();
-  else if(act === "letgo"){ const x = S.impulses.find(i=>i.id===id); x.status = "skipped"; S.savedByWaiting += x.price; save(); render();
-    gain(30, `Let go of ${x.name}`); award("jail1"); if(S.impulses.filter(i=>i.status==="skipped").length >= 10) award("jail10"); }
-  else if(act === "buyit"){ const x = S.impulses.find(i=>i.id===id); x.status = "bought";
+  else if(act === "letgo") letGo(id);
+  else if(act === "buyit"){ const x = S.impulses.find(i=>i.id===id); if(!x || x.status !== "waiting") return; x.status = "bought"; x.doneOn = t;
     S.spends.push({id:uid(), amt:x.price, cat:"shopping", note:x.name, date:t, t:Date.now()}); if(S.noSpend[t]) delete S.noSpend[t]; save(); render(); toast("Bought after a cool-off. That is a planned purchase.","🛍️"); }
   else if(act === "nsPrev"){ nsMonth = addMonths((nsMonth || t.slice(0,7)) + "-01", -1, 1).slice(0,7); render(); }
   else if(act === "nsNext"){ const m = addMonths((nsMonth || t.slice(0,7)) + "-01", 1, 1).slice(0,7); nsMonth = m >= t.slice(0,7) ? "" : m; render(); }
@@ -1650,7 +2059,7 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("change", e => { if(e.target.id === "extra"){ S.settings.extra = num(e.target.value); save(); render(); } });
 setInterval(() => { document.querySelectorAll(".timer[data-rel]").forEach(el => { const left = +el.dataset.rel - Date.now();
-  if(left <= 0){ render(); return; } el.textContent = `${Math.floor(left/36e5)}h ${pad(Math.floor(left%36e5/6e4))}m`; }); }, 30000);
+  if(left <= 0){ render(); return; } el.textContent = fmtLeft(left); }); }, 30000);
 document.addEventListener("visibilitychange", () => { if(!document.hidden && S.hero) render(); });
 
 load(); render(); if(RESCUED !== null) rescueBanner();
