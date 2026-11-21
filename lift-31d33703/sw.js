@@ -1,5 +1,5 @@
 // Lift Quest service worker. Change the end of V on every update.
-const V = "lift-31d33703-f49048891d";
+const V = "lift-31d33703-565d51a320";
 const PREFIX = "lift-31d33703-";
 const CORE = ["./", "./index.html", "./manifest.json", "./icon-180.png", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 self.addEventListener("install", e => {

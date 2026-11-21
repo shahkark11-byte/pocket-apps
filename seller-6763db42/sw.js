@@ -1,5 +1,5 @@
 // Seller Quest offline cache. Change the end of V on every update.
-const V = "seller-6763db42-251f8a8ad4";
+const V = "seller-6763db42-1931ea3edb";
 const PREFIX = "seller-6763db42-";
 const CORE = ["./", "./index.html", "./manifest.json", "./icon-180.png", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 self.addEventListener("install", e => {

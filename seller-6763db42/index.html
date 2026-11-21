@@ -148,10 +148,260 @@ nav button.on{color:var(--gold3)}
 <main id="app"></main>
 <nav id="nav" aria-label="Main"></nav>
 <input type="file" id="importFile" accept=".json,application/json" hidden>
+<script id="qfx-engine">
+/* Quest FX: sounds and seasonal themes, shared by every Quest app.
+   One source file. build.py copies it into each app between the qfx markers and replaces the old copy.
+   Sounds are made in code (no files), so it all works offline. Prefs are kept per app in localStorage[KEY + ".fx"]. */
+const QFX = (() => {
+  "use strict";
+  /* ───── sound engine ───── */
+  let ctx = null, out = null, lastPlay = -1e9;
+  function ac(){
+    if(ctx) return ctx;
+    try{ if(navigator.audioSession) navigator.audioSession.type = "ambient"; }catch(e){}
+    const A = window.AudioContext || window.webkitAudioContext; if(!A) return null;
+    try{ ctx = new A(); }catch(e){ return null; }
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+    out = ctx.createGain(); out.gain.value = .5; out.connect(comp); comp.connect(ctx.destination);
+    return ctx;
+  }
+  function env(g, t, a, peak, d){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + a + d); }
+  function tone(f, o){ o = o || {}; const c = ctx, t = c.currentTime + (o.at || 0), a = o.a || .005, d = o.d || .2, osc = c.createOscillator(), g = c.createGain();
+    osc.type = o.type || "sine"; osc.frequency.setValueAtTime(f, t); if(o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + (o.glide || d));
+    if(o.vib){ const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = o.vib; lg.gain.value = o.vibAmt || f*.03; l.connect(lg); lg.connect(osc.frequency); l.start(t); l.stop(t + a + d + .05); }
+    env(g, t, a, o.g || .3, d); osc.connect(g); g.connect(out); osc.start(t); osc.stop(t + a + d + .05); }
+  let nbuf = null;
+  function noise(o){ o = o || {}; const c = ctx, t = c.currentTime + (o.at || 0), a = o.a || .003, d = o.d || .2;
+    if(!nbuf){ nbuf = c.createBuffer(1, c.sampleRate, c.sampleRate); const x = nbuf.getChannelData(0); for(let i = 0; i < x.length; i++) x[i] = Math.random()*2 - 1; }
+    const s = c.createBufferSource(); s.buffer = nbuf; s.loop = true; const f = c.createBiquadFilter(); f.type = o.type || "bandpass"; f.frequency.setValueAtTime(o.f || 2000, t);
+    if(o.to) f.frequency.exponentialRampToValueAtTime(o.to, t + d); f.Q.value = o.q || 1; const g = c.createGain(); env(g, t, a, o.g || .3, d);
+    s.connect(f); f.connect(g); g.connect(out); s.start(t); s.stop(t + a + d + .05); }
+  const metal = (base, o) => { o = o || {}; [1, 2.76, 5.4, 8.93].forEach((m, i) => tone(base*m, {at:o.at, g:(o.g || .18)/(i + 1), d:(o.d || .5)/(1 + i*.6)})); };
+  const chord = (fs, o) => { o = o || {}; fs.forEach((f, i) => tone(f, {at:(o.at || 0) + i*(o.step || 0), type:o.type || "triangle", g:o.g || .12, d:o.d || .5, a:o.a})); };
+  const bell = (f, o) => { o = o || {}; tone(f, {at:o.at, g:o.g || .14, d:o.d || 1.1}); tone(f*2.01, {at:o.at, g:(o.g || .14)*.4, d:(o.d || 1.1)*.6}); tone(f*3.02, {at:o.at, g:(o.g || .14)*.18, d:(o.d || 1.1)*.35}); };
+  const pluck = (f, o) => { o = o || {}; tone(f, {at:o.at, type:"triangle", g:o.g || .16, d:o.d || .28}); tone(f*2, {at:o.at, g:(o.g || .16)*.25, d:(o.d || .28)*.5}); };
+  const coin = (o) => { o = o || {}; const f = o.f || 1900; tone(f, {at:o.at, type:"square", g:(o.g || .05), d:.05}); tone(f*1.34, {at:(o.at || 0) + .06, type:"square", g:(o.g || .05), d:.22}); };
+  const B = {tone, noise, metal, chord, bell, pluck, coin};
+
+  /* default sounds; each app passes its own set, which wins */
+  const BASE = {
+    tap: b => { b.noise({f:2600, q:2, g:.05, d:.03}); b.tone(880, {d:.035, g:.03}); },
+    xp: b => b.chord([784, 1175], {step:.05, type:"sine", g:.1, d:.25}),
+    big: b => { b.chord([523, 659, 784, 1047], {step:.07, g:.11, d:.6}); b.noise({type:"highpass", f:7000, g:.04, d:.5, at:.25}); },
+    badge: b => { b.chord([1319, 1760, 2637], {step:.06, type:"sine", g:.07, d:.35}); b.metal(1046, {at:.18, g:.05, d:.7}); },
+    level: b => { b.chord([392, 523, 659, 784, 1047, 1319], {step:.065, g:.09, d:.45}); b.tone(1568, {at:.42, d:1, g:.06}); },
+    done: b => b.chord([659, 988], {step:.06, type:"sine", g:.1, d:.3}),
+    del: b => b.tone(240, {to:110, d:.16, g:.16, type:"triangle"}),
+    undo: b => b.tone(700, {to:420, d:.12, g:.08, type:"triangle"})
+  };
+  const FESTIVE = new Set(["xp", "big", "badge", "level", "done"]);
+  /* a little extra on rewards during an occasion */
+  const ACCENT = {
+    bells: b => { [0, .07, .14, .21].forEach(t => b.noise({type:"highpass", f:7200, q:1, g:.07, d:.06, at:.08 + t})); b.metal(2600, {at:.1, g:.05, d:.5}); },
+    firework: b => { b.noise({type:"lowpass", f:900, g:.14, d:.18, at:.05}); for(let i = 0; i < 6; i++) b.noise({type:"highpass", f:5000 + Math.random()*3000, g:.05, d:.04, at:.22 + i*.05 + Math.random()*.03}); },
+    spooky: b => b.tone(420, {to:210, d:.7, g:.06, vib:5, vibAmt:12, at:.08, a:.05}),
+    harp: b => [880, 1109, 1319, 1760].forEach((f, i) => b.pluck(f, {at:.08 + i*.05, g:.07})),
+    gong: b => b.metal(110, {at:.05, g:.14, d:1.4}),
+    lantern: b => [587, 622, 740, 784].forEach((f, i) => b.pluck(f*2, {at:.08 + i*.07, g:.06, d:.4})),
+    sparkle: b => [2093, 2637, 3136].forEach((f, i) => b.tone(f, {at:.08 + i*.05, g:.04, d:.25})),
+    chirp: b => { b.tone(3000, {to:4400, d:.07, g:.05, at:.08}); b.tone(3200, {to:4600, d:.07, g:.05, at:.2}); },
+    whistle: b => [1568, 1760, 1568, 1976].forEach((f, i) => b.tone(f, {at:.08 + i*.06, g:.05, d:.08})),
+    warm: b => b.chord([392, 494, 587], {at:.08, type:"sine", g:.05, d:.6})
+  };
+
+  /* ───── occasions ───── */
+  const D = (y, m, d) => new Date(y, m - 1, d);
+  const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const nthDow = (y, m, dow, n) => { const f = D(y, m, 1), first = 1 + (dow - f.getDay() + 7) % 7; return D(y, m, first + (n - 1)*7); };
+  const lastDow = (y, m, dow) => { const l = D(y, m + 1, 0); return D(y, m, l.getDate() - (l.getDay() - dow + 7) % 7); };
+  function easter(y){ const a = y % 19, b = Math.floor(y/100), c = y % 100, d = Math.floor(b/4), e = b % 4, f = Math.floor((b + 8)/25), g = Math.floor((b - f + 1)/3),
+    h = (19*a + b - d - g + 15) % 30, i = Math.floor(c/4), k = c % 4, l = (32 + 2*e + 2*i - h - k) % 7, m = Math.floor((a + 11*h + 22*l)/451),
+    mo = Math.floor((h + l - 7*m + 114)/31), da = (h + l - 7*m + 114) % 31 + 1; return D(y, mo, da); }
+  /* moving dates, checked against published calendars in Nov 2026. Lunar dates can shift a day by moon sighting,
+     so the windows are a little wide. Add new years here once a year. */
+  const T = {
+    ramadan: {2027:[2,8], 2028:[1,28], 2029:[1,16], 2030:[1,5], 2031:[12,16]},
+    ramadanB: {2030:[12,26]},
+    fitr: {2027:[3,9], 2028:[2,26], 2029:[2,14], 2030:[2,4], 2031:[1,24]},
+    adha: {2027:[5,16], 2028:[5,5], 2029:[4,24], 2030:[4,13], 2031:[4,2]},
+    diwali: {2026:[11,8], 2027:[10,29], 2028:[10,17], 2029:[11,5], 2030:[10,26], 2031:[11,14]},
+    holi: {2027:[3,22], 2028:[3,11], 2029:[3,1], 2030:[3,20], 2031:[3,9]},
+    lny: {2027:[2,6], 2028:[1,26], 2029:[2,13], 2030:[2,3], 2031:[1,23]},
+    hanukkah: {2026:[12,4], 2027:[12,24], 2028:[12,12], 2029:[12,1], 2030:[12,20], 2031:[12,9]}
+  };
+  const fromT = (k, y) => T[k][y] ? D(y, T[k][y][0], T[k][y][1]) : null;
+  const R = () => { try{ const l = (navigator.languages && navigator.languages[0]) || navigator.language || ""; const m = l.match(/[-_]([A-Za-z]{2})\b/); return m ? m[1].toUpperCase() : ""; }catch(e){ return ""; } };
+  /* order = priority when two occasions overlap (first wins) */
+  const OCC = [
+    {id:"newyear", name:"New Year", e:"✨", hi:"Happy New Year! 🎆", fx:["✨","✨","💫","⭐"], mv:"burst", glow:"255,215,110", acc:"firework",
+      win:y => [[D(y - 1, 12, 27), D(y, 1, 2)], [D(y, 12, 27), D(y + 1, 1, 2)]]},
+    {id:"valentine", name:"Valentine's Day", e:"💕", hi:"Happy Valentine's Day 💕", fx:["💕","❤️","💗","✨"], mv:"rise", glow:"255,120,160", acc:"harp",
+      win:y => [[D(y, 2, 10), D(y, 2, 14)]]},
+    {id:"stpatrick", name:"St Patrick's Day", e:"☘️", hi:"Happy St Patrick's Day ☘️", fx:["☘️","🍀","✨"], mv:"fall", glow:"90,200,120", acc:"whistle",
+      win:y => [[D(y, 3, 15), D(y, 3, 17)]]},
+    {id:"mothers", name:"Mother's Day", e:"💐", hi:"Happy Mother's Day 💐", fx:["💐","🌷","🌸","💕"], mv:"fall", glow:"255,150,190", acc:"harp",
+      win:y => { const d = ["GB","IE"].includes(R()) ? add(easter(y), -21) : nthDow(y, 5, 0, 2); return [[add(d, -2), d]]; }},
+    {id:"fathers", name:"Father's Day", e:"👔", hi:"Happy Father's Day ⭐", fx:["⭐","👔","🎉"], mv:"fall", glow:"110,170,255", acc:"warm",
+      win:y => { const d = ["AU","NZ"].includes(R()) ? nthDow(y, 9, 0, 1) : nthDow(y, 6, 0, 3); return [[add(d, -2), d]]; }},
+    {id:"july4", name:"4th of July", e:"✨", hi:"Happy 4th of July! 🎆", fx:["✨","⭐","💫"], mv:"burst", glow:"120,160,255", acc:"firework", only:["US"],
+      win:y => [[D(y, 7, 2), D(y, 7, 4)]]},
+    {id:"pkday", name:"Independence Day (Pakistan)", e:"🌙", hi:"Happy Independence Day 🌙⭐", fx:["🌙","⭐","✨"], mv:"burst", glow:"80,190,120", acc:"firework", only:["PK"],
+      win:y => [[D(y, 8, 12), D(y, 8, 14)]]},
+    {id:"inday", name:"Independence Day (India)", e:"✨", hi:"Happy Independence Day 🎆", fx:["✨","✨","🪁"], mv:"burst", glow:"255,170,90", acc:"firework", only:["IN"],
+      win:y => [[D(y, 8, 13), D(y, 8, 15)]]},
+    {id:"bonfire", name:"Bonfire Night", e:"💫", hi:"Happy Bonfire Night 🎇", fx:["💫","✨","🔥","✨"], mv:"burst", glow:"255,140,60", acc:"firework", only:["GB"],
+      win:y => [[D(y, 11, 3), D(y, 11, 5)]]},
+    {id:"thanksgiving", name:"Thanksgiving", e:"🍂", hi:"Happy Thanksgiving 🍂", fx:["🍂","🍁","🥧"], mv:"fall", glow:"230,140,60", acc:"warm", only:["US","CA"],
+      win:y => { const d = R() === "CA" ? nthDow(y, 10, 1, 2) : nthDow(y, 11, 4, 4); return [[add(d, -3), d]]; }},
+    {id:"holi", name:"Holi", e:"🎨", hi:"Happy Holi! 🎨", fx:["🟣","🟡","🟢","🔵","🩷"], mv:"burst", glow:"240,110,200", acc:"sparkle",
+      win:y => { const d = fromT("holi", y); return d ? [[add(d, -1), add(d, 1)]] : []; }},
+    {id:"diwali", name:"Diwali", e:"🪔", hi:"Happy Diwali 🪔", fx:["🪔","✨","💫"], mv:"float", glow:"255,190,80", acc:"sparkle",
+      win:y => { const d = fromT("diwali", y); return d ? [[add(d, -2), add(d, 2)]] : []; }},
+    {id:"lny", name:"Lunar New Year", e:"🧧", hi:"Happy Lunar New Year 🧧", fx:["🧧","🏮","✨","✨"], mv:"float", glow:"230,60,60", acc:"gong",
+      win:y => { const d = fromT("lny", y); return d ? [[add(d, -1), add(d, 6)]] : []; }},
+    {id:"easter", name:"Easter", e:"🐣", hi:"Happy Easter 🐣", fx:["🥚","🐣","🌷","🌼"], mv:"fall", glow:"170,220,120", acc:"chirp",
+      win:y => { const d = easter(y); return [[add(d, -3), add(d, 1)]]; }},
+    {id:"fitr", name:"Eid al-Fitr", e:"🌙", hi:"Eid Mubarak! 🌙", fx:["🌙","⭐","✨","🏮"], mv:"float", glow:"120,200,170", acc:"lantern",
+      win:y => { const d = fromT("fitr", y); return d ? [[d, add(d, 2)]] : []; }},
+    {id:"adha", name:"Eid al-Adha", e:"🌙", hi:"Eid Mubarak! 🌙", fx:["🌙","⭐","✨","🏮"], mv:"float", glow:"120,200,170", acc:"lantern",
+      win:y => { const d = fromT("adha", y); return d ? [[add(d, -1), add(d, 3)]] : []; }},
+    {id:"halloween", name:"Halloween", e:"🎃", hi:"Happy Halloween 🎃", fx:["🎃","🦇","🍂","👻"], mv:"float", glow:"255,130,40", acc:"spooky",
+      win:y => [[D(y, 10, 24), D(y, 10, 31)]]},
+    {id:"christmas", name:"Christmas", e:"🎄", hi:"Merry Christmas! 🎄", fx:["❄️","❄️","✨","❄️"], mv:"fall", glow:"120,200,255", acc:"bells",
+      win:y => [[D(y, 12, 1), D(y, 12, 26)]]},
+    {id:"hanukkah", name:"Hanukkah", e:"🕎", hi:"Happy Hanukkah 🕎", fx:["✨","⭐","🕯️"], mv:"float", glow:"110,160,255", acc:"sparkle",
+      win:y => { const d = fromT("hanukkah", y); return d ? [[d, add(d, 8)]] : []; }},
+    {id:"ramadan", name:"Ramadan", e:"🌙", hi:"Ramadan Mubarak 🌙", fx:["🌙","⭐","🏮","✨"], mv:"float", glow:"120,180,200", acc:"lantern",
+      win:y => { const out = []; ["ramadan", "ramadanB"].forEach(k => { const s = fromT(k, y); if(!s) return;
+        const nx = OCC_FITR_AFTER(s); out.push([s, add(nx, -1)]); }); return out; }}
+  ];
+  /* Ramadan runs until the day before the next Eid al-Fitr */
+  function OCC_FITR_AFTER(s){ for(let y = s.getFullYear(); y <= s.getFullYear() + 1; y++){ const f = fromT("fitr", y); if(f && f > s) return f; } return add(s, 30); }
+  const dayOf = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  function activeOn(date, prefs){ const t = dayOf(date), y = t.getFullYear(), reg = R();
+    for(const o of OCC){ if(prefs && prefs.off[o.id]) continue; if(o.only && !o.only.includes(reg)) continue;
+      for(const yy of [y - 1, y]) for(const [a, b] of o.win(yy)) if(t >= dayOf(a) && t <= dayOf(b)) return {o, start:dayOf(a), end:dayOf(b)}; }
+    return null; }
+  function nextOf(o, from){ const t = dayOf(from); for(let y = t.getFullYear() - 1; y <= t.getFullYear() + 2; y++){ const w = o.win(y).map(([a, b]) => [dayOf(a), dayOf(b)]).filter(([, b]) => b >= t).sort((p, q) => p[0] - q[0]); if(w.length) return w[0]; } return null; }
+
+  /* ───── prefs ───── */
+  let K = "", P = {sound:true, season:true, off:{}, seen:{}}, theme = BASE, cfg = {};
+  function loadP(){ try{ const p = JSON.parse(localStorage.getItem(K) || "null"); if(p && typeof p === "object"){
+      P.sound = p.sound !== false; P.season = p.season !== false; P.off = p.off && typeof p.off === "object" ? p.off : {}; P.seen = p.seen && typeof p.seen === "object" ? p.seen : {}; } }catch(e){} }
+  function saveP(){ try{ localStorage.setItem(K, JSON.stringify(P)); }catch(e){} }
+  const now = () => api._now ? new Date(api._now) : new Date();
+
+  /* ───── season layer ───── */
+  let cur = null;
+  function current(){ return P.season ? activeOn(now(), P) : null; }
+  function paint(){ const a = api._force ? {o:OCC.find(o => o.id === api._force)} : current(), id = a && a.o ? a.o.id : "";
+    if(id === (cur && cur.id) && document.getElementById("qfx-sky")) return;
+    cur = a && a.o ? a.o : null; const old = document.getElementById("qfx-sky"); if(old) old.remove();
+    document.documentElement.dataset.season = id; if(!cur) return;
+    const sky = document.createElement("div"); sky.id = "qfx-sky"; sky.setAttribute("aria-hidden", "true");
+    sky.style.setProperty("--qfx-glow", cur.glow);
+    { const n = 12; for(let i = 0; i < n; i++){ const s = document.createElement("i"); s.textContent = cur.fx[i % cur.fx.length];
+      s.className = "qfx-" + cur.mv; s.style.left = (4 + (i*83 % 92)) + "%"; s.style.fontSize = (11 + (i*7 % 8)) + "px";
+      s.style.animationDuration = (9 + (i*37 % 8)) + "s"; s.style.animationDelay = (-(i*29 % 14)) + "s"; if(cur.mv !== "fall" && cur.mv !== "rise") s.style.top = (6 + (i*47 % 80)) + "%";
+      sky.appendChild(s); } }
+    document.body.appendChild(sky);
+    const seenKey = cur.id + "-" + (a.start ? a.start.getFullYear() : now().getFullYear());
+    if(!api._force && !P.seen[seenKey]){ P.seen[seenKey] = 1; Object.keys(P.seen).forEach(k => { if(!k.endsWith(String(now().getFullYear())) && !k.endsWith(String(now().getFullYear() - 1))) delete P.seen[k]; }); saveP(); greet(cur); } }
+  function greet(o){ const old = document.getElementById("qfx-hi"); if(old) old.remove();
+    const h = document.createElement("div"); h.id = "qfx-hi"; h.setAttribute("role", "status");
+    h.innerHTML = `<span class="qfx-hi-e" aria-hidden="true">${o.e}</span><span class="qfx-hi-t"><b>${o.hi}</b><small>Your ${o.name} theme is on. Change it in Settings.</small></span><button type="button" class="qfx-hi-x" aria-label="Close">✕</button>`;
+    document.body.appendChild(h); h.querySelector("button").onclick = () => h.remove(); setTimeout(() => h.remove(), 8000); }
+
+  /* ───── settings sheet ───── */
+  const fmt = d => d.toLocaleDateString(undefined, {day:"numeric", month:"short"});
+  function list(){ const t = now(), reg = R(); return OCC.filter(o => !o.only || o.only.includes(reg)).map(o => ({o, w:nextOf(o, t)})).filter(x => x.w).sort((a, b) => a.w[0] - b.w[0]); }
+  function openSettings(){ close(); const a = current(), wrap = document.createElement("div"); wrap.id = "qfx-set";
+    const sw = (id, on, label, sub) => `<div class="qfx-row"><div class="qfx-tx"><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</div><button type="button" class="qfx-sw ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-qfx="${id}" aria-label="${label}"><i></i></button></div>`;
+    wrap.innerHTML = `<div class="qfx-panel" role="dialog" aria-modal="true" aria-label="Sounds and seasonal themes"><h3>Sounds and themes</h3>
+      ${sw("sound", P.sound, "Sounds", "Taps, rewards and celebrations. Your phone's silent switch still mutes them.")}
+      ${sw("season", P.season, "Seasonal themes", a ? `On now: ${a.o.e} ${a.o.name}` : "Decorations switch on by themselves on special days.")}
+      ${P.season ? `<div class="qfx-h">Occasions</div><div class="qfx-list">${list().map(({o, w}) => sw("occ:" + o.id, !P.off[o.id], `${o.e} ${o.name}`,
+        (+w[0] === +w[1] ? fmt(w[0]) : fmt(w[0]) + " to " + fmt(w[1])) + (a && a.o.id === o.id ? " · on now" : ""))).join("")}</div>
+        <p class="qfx-note">Some dates follow the moon and can move by a day where you live.</p>` : ""}
+      <button type="button" class="qfx-done" data-qfx="close">Done</button></div>`;
+    wrap.addEventListener("click", e => { if(e.target === wrap) close(); });
+    document.body.appendChild(wrap); const p = wrap.querySelector(".qfx-panel"); if(api._scroll) p.scrollTop = api._scroll; }
+  function close(){ const s = document.getElementById("qfx-set"); if(s){ api._scroll = 0; s.remove(); } }
+  function onSet(k){ if(k === "open"){ play("tap"); return openSettings(); } if(k === "close"){ play("tap"); return close(); }
+    if(k === "sound"){ P.sound = !P.sound; saveP(); if(P.sound) play("done"); }
+    else if(k === "season"){ P.season = !P.season; saveP(); paint(); }
+    else if(k.startsWith("occ:")){ const id = k.slice(4); if(P.off[id]) delete P.off[id]; else P.off[id] = 1; saveP(); paint(); }
+    else return;
+    if(k !== "sound") play("tap");
+    const p = document.querySelector("#qfx-set .qfx-panel"); api._scroll = p ? p.scrollTop : 0; openSettings(); }
+
+  /* ───── play ───── */
+  function play(name, opt){ opt = opt || {}; if(!opt.force && !P.sound) return; const r = theme[name] || BASE[name]; if(!r) return;
+    const c = ac(); if(!c) return; if(c.state === "suspended") c.resume().catch(() => {}); lastPlay = performance.now();
+    try{ r(B); if(cur && FESTIVE.has(name) && ACCENT[cur.acc]) ACCENT[cur.acc](B); }catch(e){} }
+
+  const CSS = `#qfx-sky{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden;background:radial-gradient(120% 30% at 50% -8%,rgba(var(--qfx-glow),.16),transparent 70%)}
+#qfx-sky i{position:absolute;font-style:normal;line-height:1;opacity:.45;will-change:transform}
+#qfx-sky .qfx-fall{top:-8%;animation:qfxFall linear infinite}#qfx-sky .qfx-rise{bottom:-8%;animation:qfxRise linear infinite}
+#qfx-sky .qfx-float{animation:qfxFloat ease-in-out infinite alternate;opacity:.4}#qfx-sky .qfx-burst{animation:qfxBurst ease-out infinite;opacity:0}
+@keyframes qfxFall{to{transform:translate(28px,115vh) rotate(200deg)}}@keyframes qfxRise{to{transform:translate(-20px,-115vh)}}
+@keyframes qfxFloat{from{transform:translate(0,0)}to{transform:translate(14px,-22px)}}
+@keyframes qfxBurst{0%{transform:scale(.3);opacity:0}12%{opacity:.5}40%{transform:scale(1.25);opacity:.4}60%,100%{transform:scale(1.4);opacity:0}}
+#qfx-hi{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);transform:translateX(-50%);width:min(420px,calc(100% - 24px));z-index:2147482000;
+ display:flex;align-items:center;gap:12px;padding:10px 8px 10px 14px;border-radius:18px;background:#1f1a33;color:#fff;box-shadow:0 12px 34px rgba(0,0,0,.35);font:14px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;animation:qfxIn .35s ease-out}
+#qfx-hi .qfx-hi-e{font-size:28px}#qfx-hi .qfx-hi-t{flex:1;min-width:0}#qfx-hi b{display:block;font-size:15px}#qfx-hi small{display:block;color:#cfc8e8;font-size:13px}
+#qfx-hi .qfx-hi-x{width:44px;height:44px;border:0;border-radius:12px;background:rgba(255,255,255,.1);color:#fff;font-size:16px;flex:none}
+@keyframes qfxIn{from{opacity:0;transform:translate(-50%,12px)}}
+.qfx-open{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;margin:14px 0 4px;padding:10px 14px;border-radius:14px;
+ border:1px solid rgba(127,127,127,.35);background:rgba(127,127,127,.12);color:inherit;font:inherit;font-weight:700;text-align:left;cursor:pointer}
+#qfx-set{position:fixed;inset:0;z-index:2147482500;background:rgba(10,6,24,.55);display:flex;align-items:flex-end;justify-content:center}
+#qfx-set .qfx-panel{width:min(560px,100%);max-height:88vh;overflow:auto;overflow-x:hidden;background:#1f1a33;color:#fff;border-radius:24px 24px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,0px) + 18px);
+ font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;box-sizing:border-box}
+@media(min-width:700px){#qfx-set{align-items:center}#qfx-set .qfx-panel{border-radius:24px}}
+#qfx-set h3{margin:0 0 10px;font-size:20px}#qfx-set .qfx-row{display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid rgba(255,255,255,.08)}
+#qfx-set .qfx-tx{flex:1;min-width:0}#qfx-set .qfx-tx b{display:block;font-weight:700}#qfx-set .qfx-tx small{display:block;color:#bdb5d9;font-size:13px}
+#qfx-set .qfx-sw{width:56px;height:44px;flex:none;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
+#qfx-set .qfx-sw i{display:block;width:48px;height:28px;border-radius:14px;background:#4a4363;position:relative;transition:background .2s}
+#qfx-set .qfx-sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+#qfx-set .qfx-sw.on i{background:#3fcf8e}#qfx-set .qfx-sw.on i::after{transform:translateX(20px)}
+#qfx-set .qfx-h{margin:16px 0 2px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#bdb5d9}
+#qfx-set .qfx-note{font-size:13px;color:#bdb5d9;margin:10px 0 0}
+#qfx-set .qfx-done{width:100%;min-height:48px;margin-top:16px;border:0;border-radius:14px;background:#ffc94a;color:#3a2300;font:inherit;font-weight:800;cursor:pointer}
+html.reduce #qfx-sky i{display:none}html.reduce #qfx-hi{animation:none}
+@media(prefers-reduced-motion:reduce){#qfx-sky i{display:none}#qfx-hi{animation:none}#qfx-set .qfx-sw i,#qfx-set .qfx-sw i::after{transition:none}}`;
+
+  /* ───── start ───── */
+  function init(c){ cfg = c || {}; K = (cfg.key || "app") + ".fx"; theme = Object.assign({}, BASE, cfg.sounds || {}); loadP();
+    const st = document.createElement("style"); st.id = "qfx-css"; st.textContent = CSS; document.head.appendChild(st);
+    ["pointerdown", "keydown"].forEach(ev => addEventListener(ev, () => { if(P.sound){ const x = ac(); if(x && x.state === "suspended") x.resume().catch(() => {}); } }, {passive:true, capture:true}));
+    document.addEventListener("click", e => { const q = e.target.closest("[data-qfx]"); if(q){ e.stopPropagation(); onSet(q.dataset.qfx); } }, true);
+    /* runs after the app's own click handlers: plays the app's action sound, or a soft tap */
+    addEventListener("click", e => { if(performance.now() - lastPlay < 60) return; const el = e.target.closest("button,a[href],[role=button],[role=tab],[role=switch],[data-act],[data-a],[data-tab],label,select");
+      if(!el || el.disabled) return; let n = "tap"; if(cfg.acts){ const k = el.dataset.act || el.dataset.a, m = k && cfg.acts[k]; if(m) n = typeof m === "function" ? (m(el) || "tap") : m; } play(n); });
+    const tick = () => paint(); if(document.body) tick(); else addEventListener("DOMContentLoaded", tick);
+    document.addEventListener("visibilitychange", () => { if(!document.hidden) paint(); }); setInterval(paint, 30*60*1000); }
+  const api = {init, play, button:() => `<button type="button" class="qfx-open" data-qfx="open">🎵 Sounds and seasonal themes <span aria-hidden="true">›</span></button>`,
+    open:openSettings, season:() => cur, occasions:OCC, activeOn:d => activeOn(d, null), nextOf, easter, paint, _now:null, _force:null, _scroll:0,
+    get prefs(){ return JSON.parse(JSON.stringify(P)); }};
+  return api;
+})();
+</script>
 <script>
 "use strict";
 /* ───────── data ───────── */
 const KEY = "sellerquest.v1", RESCUE = KEY + ".rescue";
+/* sounds: a shop counter (till keys, ka-ching, receipt printer, stamp) */
+QFX.init({key:KEY,
+  sounds:{
+    tap: b => { b.noise({f:3000, q:4, g:.05, d:.02}); b.tone(620, {type:"square", g:.012, d:.02}); },
+    sale: b => { b.noise({type:"lowpass", f:1100, g:.12, d:.1}); b.bell(2637, {g:.13, d:1.1, at:.07}); [0, .07, .15].forEach(t => b.coin({f:1800 + t*2000, g:.03, at:.12 + t})); },
+    cost: b => [0, .05, .1, .15, .2].forEach(t => b.noise({f:2600, q:3, g:.05, d:.03, at:t})),
+    xp: b => b.coin({f:2000, g:.05}),
+    done: b => { b.tone(150, {to:70, d:.08, g:.25}); b.bell(1760, {g:.09, d:.6, at:.04}); },
+    big: b => { b.tone(110, {to:55, d:.15, g:.4}); b.noise({type:"lowpass", f:800, g:.2, d:.1}); b.chord([523, 659, 784, 1047], {at:.15, step:.06, g:.1, d:.7}); },
+    del: b => { for(let i = 0; i < 5; i++) b.noise({f:1500 + Math.random()*2500, q:1.5, g:.06, d:.04, at:i*.035 + Math.random()*.02}); }
+  },
+  acts:{markPaid:"done"}});
 const FEES_CHECKED = "15 Nov 2026";
 const PRESETS = {
   UK:{cur:"£", ty:"04-06", fees:{eL:.16, eT:6.5, eP:4, eF:.20, eR:.48, eO:15, sP:2, sF:.25, oP:0, oF:0}},
@@ -258,7 +508,7 @@ const BADGES = [["first_sale","🛍️","First sale","Log your first sale"],["sa
   ["priced","🏷️","Priced right","Save a price from the pricing calculator"],["year","🗂️","Year in hand","Open your year report"]];
 function toast(html, ms){ document.querySelectorAll(".toast").forEach(e => e.remove()); const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role","status");
   t.innerHTML = html; document.body.appendChild(t); setTimeout(() => t.remove(), ms || 2600); }
-function award(id){ if(S.badges[id]) return; S.badges[id] = today(); save(); const b = BADGES.find(x => x[0] === id); if(b) setTimeout(() => toast(`${b[1]} Badge: <em>${esc(b[2])}</em>`, 3000), 900); }
+function award(id){ if(S.badges[id]) return; S.badges[id] = today(); save(); const b = BADGES.find(x => x[0] === id); if(b) setTimeout(() => { toast(`${b[1]} Badge: <em>${esc(b[2])}</em>`, 3000); QFX.play("badge"); }, 900); }
 let lastXP = null;
 function settleXP(why){
   const before = lastXP === null ? calcXP() : lastXP, now = calcXP(); lastXP = now;
@@ -266,7 +516,8 @@ function settleXP(why){
   if(S.costs.length) award("first_cost"); const cl = Object.keys(S.closed).length; if(cl) award("month1"); if(cl >= 3) award("month3");
   if(Object.keys(S.backups).length) award("backup1"); if(S.stock.length >= 5) award("stock5");
   if(S.settings.goal > 0){ const [a, b] = monthRange(ymNow()); if(totals(a, b).take >= S.settings.goal) award("goal"); }
-  if(now > before && why){ toast(`+${now - before} XP <em>${esc(why)}</em>`); if(lvlOf(now) > lvlOf(before)) setTimeout(() => toast(`Level ${lvlOf(now)}! You're a <em>${TITLES[Math.min(lvlOf(now), TITLES.length) - 1]}</em>`, 3200), 1400); }
+  if(now > before && why){ toast(`+${now - before} XP <em>${esc(why)}</em>`); if(why === "Backup made") QFX.play("xp");
+    if(lvlOf(now) > lvlOf(before)) setTimeout(() => { toast(`Level ${lvlOf(now)}! You're a <em>${TITLES[Math.min(lvlOf(now), TITLES.length) - 1]}</em>`, 3200); QFX.play("level"); }, 1400); }
   else if(why && now === before && /^(Sale|Cost) logged$/.test(why)) toast(`${why.split(" ")[0]} saved. That's today's XP for ${why.split(" ")[0].toLowerCase()}s, more tomorrow.`);
 }
 
@@ -482,7 +733,7 @@ function saleForm(x){
     const s = ev.target.closest("[data-s]"); if(s){ src = s.dataset.s; root.querySelectorAll("[data-s]").forEach(b => { b.classList.toggle("on", b === s); b.setAttribute("aria-pressed", b === s); }); upd(); return; }
     if(ev.target.closest("#foff")){ off = !off; upd(); return; }
     const pd = ev.target.closest("#fpaid"); if(pd){ paid = !paid; pd.setAttribute("aria-checked", !paid); } });
-  if(e) root.querySelector("#del").onclick = () => { if(!confirm("Delete this sale? Its XP is taken back.")) return; unlinkStock(x); S.sales = S.sales.filter(q => q.id !== x.id); save(); settleXP(""); closeSheet(); render(); toast("Sale deleted"); };
+  if(e) root.querySelector("#del").onclick = () => { if(!confirm("Delete this sale? Its XP is taken back.")) return; unlinkStock(x); S.sales = S.sales.filter(q => q.id !== x.id); save(); QFX.play("del"); settleXP(""); closeSheet(); render(); toast("Sale deleted"); };
   root.querySelector("#ok").onclick = () => {
     const item = val(root, "#fi").trim(), d = val(root, "#fd"), sid = fsel ? fsel.value : "";
     if(!item){ toast("What sold? Type the item"); root.querySelector("#fi").focus(); return; }
@@ -491,7 +742,7 @@ function saleForm(x){
     const data = {item:item.slice(0, 60), qty, price: Math.min(1e7, pnum(val(root, "#fp"))), ship: Math.min(1e6, pnum(val(root, "#fsh"))), post: Math.min(1e6, pnum(val(root, "#fpo"))), src, off: src === "etsy" && off,
       fee: ft === "" ? null : Math.min(1e7, pnum(ft)), refund: Math.min(1e7, pnum(val(root, "#fr"))), paid, date:d, sid};
     if(e){ unlinkStock(x); Object.assign(x, data); linkStock(x); } else { const n = Object.assign({id:uid(), t, took:0}, data); linkStock(n); S.sales.push(n); }
-    save(); settleXP(e ? "" : "Sale logged"); closeSheet(); render(); if(e) toast("Sale saved"); };
+    save(); QFX.play(e ? "done" : "sale"); settleXP(e ? "" : "Sale logged"); closeSheet(); render(); if(e) toast("Sale saved"); };
 }
 /* a sale linked to a stock item takes its quantity off, and gives it back if the sale is edited or deleted */
 function unlinkStock(x){ if(x.sid && x.took){ const i = S.stock.find(q => q.id === x.sid); if(i) i.qty += x.took; } x.took = 0; }
@@ -509,13 +760,13 @@ function costForm(c){
       : `<label class="f" for="ca">Amount</label><input class="in" id="ca" inputmode="decimal" value="${c.amt === "" ? "" : c.amt}" placeholder="0.00">`; };
   draw();
   root.addEventListener("click", ev => { const k = ev.target.closest("[data-k]"); if(k){ cat = k.dataset.k; root.querySelectorAll("[data-k]").forEach(b => { b.classList.toggle("on", b === k); b.setAttribute("aria-pressed", b === k); }); draw(); } });
-  if(e) root.querySelector("#del").onclick = () => { if(!confirm("Delete this cost? Its XP is taken back.")) return; S.costs = S.costs.filter(q => q.id !== c.id); save(); settleXP(""); closeSheet(); render(); toast("Cost deleted"); };
+  if(e) root.querySelector("#del").onclick = () => { if(!confirm("Delete this cost? Its XP is taken back.")) return; S.costs = S.costs.filter(q => q.id !== c.id); save(); QFX.play("del"); settleXP(""); closeSheet(); render(); toast("Cost deleted"); };
   root.querySelector("#ok").onclick = () => { const d = val(root, "#cd"); if(!isD(d) || d > t){ toast("Pick a day up to today"); return; }
     const miles = cat === "miles" ? Math.min(1e6, pnum(val(root, "#cm"))) : 0, amt = cat === "miles" ? r2(miles * S.settings.mile) : Math.min(1e7, pnum(val(root, "#ca")));
     if(cat === "miles" ? !(miles > 0) : !(amt > 0)){ toast(cat === "miles" ? "Add the miles" : "Add the amount"); return; }
     const data = {what: val(root, "#cw").trim().slice(0, 60), cat, amt, miles, date:d};
     if(e) Object.assign(c, data); else S.costs.push(Object.assign({id:uid(), t}, data));
-    save(); settleXP(e ? "" : "Cost logged"); closeSheet(); render(); if(e) toast("Cost saved"); };
+    save(); QFX.play(e ? "done" : "cost"); settleXP(e ? "" : "Cost logged"); closeSheet(); render(); if(e) toast("Cost saved"); };
 }
 function stockForm(x){
   const e = !!x; x = x || {name:"", qty:"", unit:"", low:""};
@@ -526,7 +777,7 @@ function stockForm(x){
       <div><label class="f" for="sl">Alert at</label><input class="in" id="sl" inputmode="numeric" value="${x.low || ""}" placeholder="0"></div></div>
     <p class="note">"Alert at" warns you on Home when it gets this low. Leave it empty for no alert.</p>
     <div class="actions">${e ? `<button class="btn ghost" id="del" style="color:var(--neg)">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`);
-  if(e) root.querySelector("#del").onclick = () => { if(!confirm("Delete this stock item? Sales stay, they just won't be linked to it.")) return;
+  if(e) root.querySelector("#del").onclick = () => { if(!confirm("Delete this stock item? Sales stay, they just won't be linked to it.")) return; QFX.play("del");
     S.sales.forEach(q => { if(q.sid === x.id){ q.sid = ""; q.took = 0; } }); S.stock = S.stock.filter(q => q.id !== x.id); save(); closeSheet(); render(); };
   root.querySelector("#ok").onclick = () => { const n = val(root, "#sn").trim(); if(!n){ toast("Give it a name"); return; }
     const data = {name:n.slice(0, 60), qty: Math.round(Math.min(1e6, pnum(val(root, "#sq")))), unit: Math.min(1e6, pnum(val(root, "#su"))), low: Math.round(Math.min(1e6, pnum(val(root, "#sl"))))};
@@ -575,6 +826,7 @@ function settingsForm(){
     <label class="f">Fee rates</label><p class="note" style="margin-top:0">Starting points, checked ${FEES_CHECKED}. Platforms change their fees, so check your own statements and update these.</p>
     <div class="two">${FEE_FIELDS.map(([k, l, ty]) => `<div><label class="f" for="fee_${k}">${l} ${ty === "pct" ? "%" : st.cur}</label><input class="in" id="fee_${k}" data-fee="${k}" inputmode="decimal" value="${st.fees[k]}"></div>`).join("")}</div>
     <button class="btn ghost full sm" style="margin-top:10px" id="xrf">Reset fees to ${st.country === "UK" ? "UK" : st.country === "US" ? "US" : "starting"} rates</button>
+    ${QFX.button()}
     <label class="f">Your data</label><p class="note" style="margin-top:0">Everything lives on this phone. Back up now and then, and before you change phones.</p>
     <div class="row" style="margin-top:10px;gap:8px"><button class="btn sm ghost grow" id="bk">Back up</button><button class="btn sm ghost grow" id="rs">Restore</button></div>
     ${S.sample ? `<button class="btn sm ghost full" style="margin-top:10px" id="rmSample">Remove sample data</button>` : ""}
@@ -629,7 +881,7 @@ document.addEventListener("click", e => {
   else if(act === "sq"){ const x = S.stock.find(q => q.id === id); if(x){ x.qty = Math.max(-1e6, Math.min(1e6, x.qty + +el.dataset.d)); save(); render(); } }
   else if(act === "markPaid"){ const x = S.sales.find(q => q.id === id); if(x){ x.paid = true; save(); render(); toast(`${esc(x.item)} marked as paid`); } }
   else if(act === "closeMonth"){ const m = el.dataset.m; if(S.closed[m] || m >= ymNow()) return; if(!confirm(`Close ${ymName(m, true)}? Do this once every sale and receipt for the month is in.`)) return;
-    S.closed[m] = today(); save(); settleXP(`${ymName(m, true)} closed`); render(); }
+    S.closed[m] = today(); save(); QFX.play("big"); settleXP(`${ymName(m, true)} closed`); render(); }
   else if(act === "report"){ repTy = null; reportSheet(); }
   else if(act === "csv") downloadCSV();
   else if(act === "csrc"){ calc.src = el.dataset.v; render(); }
