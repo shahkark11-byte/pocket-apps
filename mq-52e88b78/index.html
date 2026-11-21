@@ -389,6 +389,44 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .dots-h{display:flex;gap:3px;flex:none}.dots-h i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.14)}.dots-h i.on{background:var(--mint)}
 @media (prefers-reduced-motion:reduce){.escape>i,.escape .runner{transition:none}}
 @media(max-width:380px){.big{font-size:44px}.ring{width:100px;height:100px}.stats{gap:6px}.stat{padding:9px}}
+/* Nov 2026 update 2: paycheck plan, notes, savings challenges, pick a theme */
+.seg4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.seg4 button{padding:6px 2px;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.15;min-height:52px}
+.seg4 button span{font-size:18px;line-height:1}
+.pp-nav{display:flex;align-items:center;gap:6px}
+.pp-arr{width:48px;height:48px;flex:none;border-radius:14px;background:rgba(0,0,0,.25);border:1px solid var(--line);font-size:28px;font-weight:700;color:var(--ink);display:grid;place-items:center;line-height:1}
+.pp-arr:disabled{opacity:.35}
+.pp-dates{display:block;font-size:19px;margin:2px 0}
+.pp-head small{display:block;font-size:13px}
+.pp-today{display:flex;margin:10px auto 0}
+.pp-row{display:flex;align-items:center;gap:10px;padding:8px 0;min-height:44px;border-bottom:1px solid var(--line)}
+.pp-row:last-child{border-bottom:0}
+.pp-row b{display:block;font-size:15px}.pp-row small{display:block;font-size:13px;color:var(--mut)}
+.pp-e{font-size:22px;width:30px;text-align:center;flex:none}
+.pp-row .pc-amt{min-height:44px;padding:0 4px}
+.pp-line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.pp-line small{display:block;font-size:12px;color:var(--dim);font-weight:500}
+.pp-line.neg b{color:var(--coral)}
+.pp-line.tot{border-bottom:0;border-top:1px solid var(--line);font-size:16px;font-weight:800}
+.pp-line.tot b{color:var(--gold)}
+.pp-line.big{border-bottom:0;margin-top:4px;padding:12px;border-radius:14px;background:rgba(75,227,165,.12);font-size:17px;font-weight:800}
+.pp-line.big b{font-size:24px;color:var(--mint)}
+.pp-line.big.bad{background:rgba(255,107,122,.14)}.pp-line.big.bad b{color:var(--coral)}
+.pp-sum .pp-line:first-child{padding-top:0}
+.note-c{display:flex;align-items:flex-start;gap:10px;padding:12px}
+.note-c.done .note-t{text-decoration:line-through;color:var(--dim)}
+.note-t{margin:2px 0 6px;white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.4}
+.nt-tick{width:44px;height:44px;border-radius:14px;border:2px solid var(--line);background:rgba(0,0,0,.2);flex:none;font-size:22px;font-weight:900;color:#073a26;display:grid;place-items:center}
+.nt-tick.on{background:linear-gradient(180deg,#7ff0c3,#2fcf8d);border-color:transparent}
+textarea.in{resize:vertical;min-height:96px;font:inherit;color:inherit;line-height:1.4}
+.red-t{color:var(--coral)}
+.ch{padding:14px}
+.ch.won{box-shadow:0 0 0 2px rgba(255,201,74,.55),0 10px 30px rgba(0,0,0,.25)}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:6px;margin-top:12px}
+.ch-t{min-height:52px;min-width:44px;border-radius:12px;background:rgba(255,201,74,.12);border:1px solid rgba(255,201,74,.35);color:var(--ink);font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px;line-height:1.1}
+.ch-t small{font-size:12px;font-weight:600;color:var(--mut)}
+.ch-t.on{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--dim);filter:grayscale(1);text-decoration:line-through}
+.ch-t.on small{text-decoration:none}
 </style>
 </head>
 <body>
@@ -533,15 +571,15 @@ const QFX = (() => {
   function nextOf(o, from){ const t = dayOf(from); for(let y = t.getFullYear() - 1; y <= t.getFullYear() + 2; y++){ const w = o.win(y).map(([a, b]) => [dayOf(a), dayOf(b)]).filter(([, b]) => b >= t).sort((p, q) => p[0] - q[0]); if(w.length) return w[0]; } return null; }
 
   /* ───── prefs ───── */
-  let K = "", P = {sound:true, season:true, off:{}, seen:{}}, theme = BASE, cfg = {};
+  let K = "", P = {sound:true, season:true, off:{}, seen:{}, pick:""}, theme = BASE, cfg = {};
   function loadP(){ try{ const p = JSON.parse(localStorage.getItem(K) || "null"); if(p && typeof p === "object"){
-      P.sound = p.sound !== false; P.season = p.season !== false; P.off = p.off && typeof p.off === "object" ? p.off : {}; P.seen = p.seen && typeof p.seen === "object" ? p.seen : {}; } }catch(e){} }
+      P.sound = p.sound !== false; P.season = p.season !== false; P.off = p.off && typeof p.off === "object" ? p.off : {}; P.seen = p.seen && typeof p.seen === "object" ? p.seen : {}; P.pick = typeof p.pick === "string" && OCC.some(o => o.id === p.pick) ? p.pick : ""; } }catch(e){} }
   function saveP(){ try{ localStorage.setItem(K, JSON.stringify(P)); }catch(e){} }
   const now = () => api._now ? new Date(api._now) : new Date();
 
   /* ───── season layer ───── */
   let cur = null;
-  function current(){ return P.season ? activeOn(now(), P) : null; }
+  function current(){ if(P.pick){ const o = OCC.find(x => x.id === P.pick); if(o) return {o, start:now(), end:now(), picked:true}; } return P.season ? activeOn(now(), P) : null; }
   function paint(){ const a = api._force ? {o:OCC.find(o => o.id === api._force)} : current(), id = a && a.o ? a.o.id : "";
     if(id === (cur && cur.id) && document.getElementById("qfx-sky")) return;
     cur = a && a.o ? a.o : null; const old = document.getElementById("qfx-sky"); if(old) old.remove();
@@ -567,6 +605,9 @@ const QFX = (() => {
     const sw = (id, on, label, sub) => `<div class="qfx-row"><div class="qfx-tx"><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</div><button type="button" class="qfx-sw ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-qfx="${id}" aria-label="${label}"><i></i></button></div>`;
     wrap.innerHTML = `<div class="qfx-panel" role="dialog" aria-modal="true" aria-label="Sounds and seasonal themes"><h3>Sounds and themes</h3>
       ${sw("sound", P.sound, "Sounds", "Taps, rewards and celebrations. Your phone's silent switch still mutes them.")}
+      <div class="qfx-h">Show a theme now</div><div class="qfx-chips" role="group" aria-label="Show a theme now">
+        <button type="button" class="qfx-chip ${P.pick ? "" : "on"}" data-qfx="pick:" aria-pressed="${!P.pick}">Auto</button>${OCC.filter(o => !o.only || o.only.includes(R())).map(o => `<button type="button" class="qfx-chip ${P.pick === o.id ? "on" : ""}" data-qfx="pick:${o.id}" aria-pressed="${P.pick === o.id}">${o.e} ${o.name}</button>`).join("")}</div>
+      <p class="qfx-note">${P.pick ? "Your pick stays on until you choose Auto." : "Auto switches themes on by themselves on special days."}</p>
       ${sw("season", P.season, "Seasonal themes", a ? `On now: ${a.o.e} ${a.o.name}` : "Decorations switch on by themselves on special days.")}
       ${P.season ? `<div class="qfx-h">Occasions</div><div class="qfx-list">${list().map(({o, w}) => sw("occ:" + o.id, !P.off[o.id], `${o.e} ${o.name}`,
         (+w[0] === +w[1] ? fmt(w[0]) : fmt(w[0]) + " to " + fmt(w[1])) + (a && a.o.id === o.id ? " · on now" : ""))).join("")}</div>
@@ -578,6 +619,7 @@ const QFX = (() => {
   function onSet(k){ if(k === "open"){ play("tap"); return openSettings(); } if(k === "close"){ play("tap"); return close(); }
     if(k === "sound"){ P.sound = !P.sound; saveP(); if(P.sound) play("done"); }
     else if(k === "season"){ P.season = !P.season; saveP(); paint(); }
+    else if(k.startsWith("pick:")){ P.pick = k.slice(5); saveP(); paint(); }
     else if(k.startsWith("occ:")){ const id = k.slice(4); if(P.off[id]) delete P.off[id]; else P.off[id] = 1; saveP(); paint(); }
     else return;
     if(k !== "sound") play("tap");
@@ -611,7 +653,8 @@ const QFX = (() => {
 #qfx-set .qfx-sw{width:56px;height:44px;flex:none;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
 #qfx-set .qfx-sw i{display:block;width:48px;height:28px;border-radius:14px;background:#4a4363;position:relative;transition:background .2s}
 #qfx-set .qfx-sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
-#qfx-set .qfx-sw.on i{background:#3fcf8e}#qfx-set .qfx-sw.on i::after{transform:translateX(20px)}
+#qfx-set .qfx-sw.on i{background:#3fcf8e}
+#qfx-set .qfx-chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}#qfx-set .qfx-chip{min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:inherit;font:600 14px/1.2 inherit;cursor:pointer}#qfx-set .qfx-chip.on{background:#3fcf8e;border-color:#3fcf8e;color:#0b2a1c}#qfx-set .qfx-sw.on i::after{transform:translateX(20px)}
 #qfx-set .qfx-h{margin:16px 0 2px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#bdb5d9}
 #qfx-set .qfx-note{font-size:13px;color:#bdb5d9;margin:10px 0 0}
 #qfx-set .qfx-done{width:100%;min-height:48px;margin-top:16px;border:0;border-radius:14px;background:#ffc94a;color:#3a2300;font:inherit;font-weight:800;cursor:pointer}
@@ -644,7 +687,7 @@ const blank = () => ({v:1, hero:null, cur:"USD", pay:{freq:"monthly", amount:0, 
   xp:0, streak:{last:"", n:0, best:0}, badges:{}, checkins:{}, noSpend:{}, savedByWaiting:0,
   settings:{strategy:"snowball", extra:0}, lastPeriodStart:"", allowances:[],
   subs:[], caps:{}, ybills:[], cutBills:[], payPlan:{bonus:0, over:{}, moves:{}, jobs:{}}, side:{goal:0, hit:""}, sales:[], owed:[], adhd:[],
-  nw:{assets:[], liabs:[], useDebts:true, useVault:true, hist:{}, xp:{}}, free:{costs:[], streams:[], hit:{}}, mgoals:[], routine:[], rlog:{}});
+  nw:{assets:[], liabs:[], useDebts:true, useVault:true, hist:{}, xp:{}}, free:{costs:[], streams:[], hit:{}}, mgoals:[], routine:[], rlog:{}, notes:[], chals:[]});
 let S, RESCUED = null;
 /* old saves and old backups do not have the newer lists, so make sure they exist */
 function normalize(){
@@ -689,6 +732,13 @@ function normalize(){
     emoji:String(g.emoji || "🎯"), by:isD(g.by) ? g.by : "", why:String(g.why || ""), done:isD(g.done) ? g.done : "", xp:isD(g.done) ? (+g.xp || 0) : 0}));
   S.routine = (Array.isArray(S.routine) ? S.routine : []).filter(r => isObj(r) && typeof r.id === "string").map(r => ({...r, name:String(r.name || "Money habit"),
     freq:["daily","weekly","monthly"].includes(r.freq) ? r.freq : "daily", goalId:typeof r.goalId === "string" ? r.goalId : ""}));
+  /* Nov 2026 update 2: notes and savings challenges */
+  S.notes = (Array.isArray(S.notes) ? S.notes : []).filter(n => isObj(n) && typeof n.id === "string").map(n => ({id:n.id, text:String(n.text || "").slice(0,300), date:isD(n.date) ? n.date : "", done:!!n.done, t:+n.t || 0})).filter(n => n.text);
+  S.chals = (Array.isArray(S.chals) ? S.chals : []).filter(c => isObj(c) && typeof c.id === "string" && +c.target > 0).map(c => { const weeks = +c.weeks === 26 ? 26 : 52, done = {};
+    if(isObj(c.done)) Object.keys(c.done).forEach(k => { const v = c.done[k], i = +k; if(Number.isInteger(i) && i >= 1 && i <= weeks && isObj(v) && isD(v.d)) done[i] = {d:v.d, xp:Math.max(0, +v.xp || 0)}; });
+    const won = isD(c.won) && Object.keys(done).length >= weeks ? c.won : "";
+    return {id:c.id, name:String(c.name || weeks + "-week challenge").slice(0,40), weeks, style:c.style === "even" ? "even" : "grow", target:Math.round(+c.target*100)/100,
+      start:isD(c.start) ? c.start : nowD, done, won, wonXp:won ? Math.max(0, +c.wonXp || 0) : 0}; });
   if(!isObj(S.rlog)) S.rlog = {};
   Object.keys(S.rlog).forEach(k => { const e = S.rlog[k]; if(!isObj(e) || !isD(e.d)) delete S.rlog[k]; else e.xp = Math.max(0, +e.xp || 0); });
 }
@@ -1129,7 +1179,7 @@ function questsNow(){
   ${recurringBills()}
   ${cutSection()}`;
 }
-function quests(){ return segBills() + (billsView === "plan" ? planAhead() : questsNow()); }
+function quests(){ return segBills() + (billsView === "plan" ? planAhead() : billsView === "pp" ? paycheckPlan() : questsNow()); }
 
 function payoff(strategy, extra){
   const ds = S.debts.filter(d=>d.bal>0).map(d=>({id:d.id, bal:d.bal, apr:d.apr, min:d.min}));
@@ -1272,7 +1322,7 @@ function vaultTreasure(){
   ${ringGradient()}`;
 }
 
-function vault(){ const V = {side:sideView, loot:lootView, worth:nwView, free:freeView, plan:planView}[vaultView] || vaultTreasure; return segVault() + V(); }
+function vault(){ const V = {side:sideView, loot:lootView, worth:nwView, free:freeView, plan:planView, chal:chalView, notes:notesView}[vaultView] || vaultTreasure; return segVault() + V(); }
 
 /* ───────────────────────── forms ───────────────────────── */
 function spendForm(preTax){
@@ -1300,13 +1350,13 @@ function spendForm(preTax){
         save(); closeSheet(); render(); gain(5, tax ? "ADHD tax logged. Spotting it is the first step" : "Spend logged"); if(first) award("first_step"); };
     });
 }
-function incomeForm(){
+function incomeForm(d0){
   let kind = "cashback";
   sheet(`<h3>Log income</h3><p class="sub">Money in on top of your pay: cash back, interest, refunds.</p>
     <input class="in huge" id="a" inputmode="decimal" placeholder="${money(0)}" autocomplete="off">
     <label class="f">Type</label><div class="cats">${INCF.map(c=>`<button class="cat ${c[0]===kind?"on":""}" data-c="${c[0]}">${c[1]} ${c[2]}</button>`).join("")}</div>
     <label class="f">Note (optional)</label><input class="in" id="n" maxlength="60" placeholder="Grocery cash back">
-    <div class="two"><div><label class="f">Date</label><input class="in" id="d" type="date" value="${today()}"></div><div></div></div>
+    <div class="two"><div><label class="f">Date</label><input class="in" id="d" type="date" value="${d0 || today()}"></div><div></div></div>
     <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Add it</button></div>`, root => {
       root.querySelectorAll(".cat").forEach(b => b.onclick = () => { kind = b.dataset.c; root.querySelectorAll(".cat").forEach(x=>x.classList.toggle("on", x===b)); });
       root.querySelector("#a").focus();
@@ -1630,8 +1680,8 @@ function billsForPeriod(p, isCur){
   out.sort((a,b) => a.d < b.d ? -1 : 1);
   return out;
 }
-let billsView = "now";
-const segBills = () => `<div class="seg segtop"><button class="${billsView==="now"?"on":""}" data-act="bview" data-v="now">This paycheck</button><button class="${billsView==="plan"?"on":""}" data-act="bview" data-v="plan">Plan ahead</button></div>`;
+let billsView = "pp";
+const segBills = () => `<div class="seg segtop"><button class="${billsView==="pp"?"on":""}" data-act="bview" data-v="pp">Paycheck plan</button><button class="${billsView==="now"?"on":""}" data-act="bview" data-v="now">Bills</button><button class="${billsView==="plan"?"on":""}" data-act="bview" data-v="plan">Plan ahead</button></div>`;
 const wd = d => fmtDate(d,{weekday:"short",month:"short",day:"numeric"});
 function planAhead(){
   const pcs = paychecks(); if(!pcs.length) return `<div class="card empty"><div class="e">🗓️</div>Set your next payday in Settings to see your paychecks.</div>`;
@@ -1784,8 +1834,8 @@ const monthKey = () => today().slice(0,7);
 const sideEarned = () => round2(sum(S.incomes.filter(x => x.date.slice(0,7) === monthKey() && (x.kind === "side" || x.kind === "sale")).map(x=>x.amt)));
 const ago = d => { const n = daysBetween(d, today()); return n <= 0 ? "today" : n === 1 ? "yesterday" : n + " days ago"; };
 let vaultView = "treasure";
-const VSEG = [["treasure","💎","Treasure"],["loot","🎒","Loot bag"],["side","💼","Side money"],["worth","📈","Net worth"],["free","🏃","Freedom"],["plan","🧭","Goals"]];
-const segVault = () => `<div class="seg segtop seg3" role="tablist">${VSEG.map(([k,e,l]) => `<button class="${vaultView===k?"on":""}" data-act="vview" data-v="${k}" role="tab" aria-selected="${vaultView===k}"><span aria-hidden="true">${e}</span>${l}</button>`).join("")}</div>`;
+const VSEG = [["treasure","💎","Treasure"],["loot","🎒","Loot bag"],["side","💼","Side money"],["worth","📈","Net worth"],["free","🏃","Freedom"],["plan","🧭","Goals"],["chal","🪙","Challenge"],["notes","📝","Notes"]];
+const segVault = () => `<div class="seg segtop seg4" role="tablist">${VSEG.map(([k,e,l]) => `<button class="${vaultView===k?"on":""}" data-act="vview" data-v="${k}" role="tab" aria-selected="${vaultView===k}"><span aria-hidden="true">${e}</span>${l}</button>`).join("")}</div>`;
 function sideGoalHit(){ const k = monthKey(); if(S.side.goal > 0 && sideEarned() >= S.side.goal && S.side.hit !== k){ S.side.hit = k; save(); setTimeout(()=>{ coins(18); gain(50, "Side money goal hit"); }, 500); } }
 function sideView(){
   const got = sideEarned(), goal = S.side.goal, f = goal > 0 ? got/goal : 0;
@@ -2197,6 +2247,160 @@ function questActs(act, id, a){ const v = a.dataset.v;
   else return false;
   return true; }
 
+/* ───────────────────────── Nov 2026 update 2 (Jasmine's ideas): paycheck plan, notes, savings challenges ───────────────────────── */
+/* ── paycheck plan: one paycheck at a time, move back and forward with the arrows ── */
+let ppOff = 0;
+function ppPeriod(off){ const cur = period(); if(!cur) return null; let s = cur.start;
+  for(let i = 0; i < Math.abs(off); i++) s = off < 0 ? retreat(s) : advance(s);
+  return {start:s, end:advance(s)}; }
+function ppLabel(off){ return off === 0 ? "This paycheck" : off === -1 ? "Last paycheck" : off === 1 ? "Next paycheck" : off < 0 ? `${-off} paychecks ago` : `In ${off} paychecks`; }
+function ppRange(p){ const last = addDays(p.end, -1), sameY = p.start.slice(0,4) === last.slice(0,4);
+  return `${fmtDate(p.start, sameY ? {day:"numeric", month:"short"} : {day:"numeric", month:"short", year:"numeric"})} – ${fmtDate(last, {day:"numeric", month:"short", year:"numeric"})}`; }
+function paycheckPlan(){
+  const cur = period(); if(!cur) return `<div class="card empty"><div class="e">🗓️</div>Set your next payday in Settings to see your paycheck plan.</div>`;
+  const off = ppOff, now = off === 0, p = ppPeriod(off), pl = now ? plan() : plan(p, false), past = p.end <= today();
+  const pay = payFor(p.start), incs = S.incomes.filter(x => inP(x.date, p)).sort((a,b) => a.date < b.date ? -1 : 1), moneyIn = pay + pl.income;
+  const goals = S.goals.filter(g => g.saved < g.target || S.goalLog.some(l => l.goalId === g.id && inP(l.date, p)));
+  const gRows = goals.map(g => { const put = round2(sum(S.goalLog.filter(l => l.goalId === g.id && inP(l.date, p)).map(l => l.amt))), plan = g.saved < g.target ? (g.perPay || 0) : 0, ok = plan > 0 && put >= plan;
+    return `<div class="pp-row"><span class="pp-e" aria-hidden="true">${esc(g.emoji || "💎")}</span><div class="grow"><b>${esc(g.name)}</b>
+      <small>${plan > 0 ? `Set aside ${money(plan)}` : "Nothing set each paycheck"}${put > 0 ? ` · saved ${money(put)}` : ""}</small></div>
+      ${ok ? `<span class="chip ok">Saved ✓</span>` : now && g.saved < g.target ? `<button class="btn sm mint" data-act="deposit" data-id="${g.id}">Save now</button>` : ""}</div>`; }).join("");
+  const dRows = pl.mins.map(m => { const paid = round2(sum(S.debtLog.filter(l => l.debtId === m.d.id && inP(l.date, p)).map(l => l.amt))), ok = paid >= m.amt;
+    return `<div class="pp-row"><span class="pp-e" aria-hidden="true">⚔️</span><div class="grow"><b>${esc(m.d.name)}</b>
+      <small>${money(m.amt)} due ${fmtDate(m.o)}${paid > 0 ? ` · paid ${money(paid)}` : ""}</small></div>
+      ${ok ? `<span class="chip ok">Paid ✓</span>` : now ? `<button class="btn sm red" data-act="strike" data-id="${m.d.id}">Pay</button>` : ""}</div>`; }).join("");
+  const line = (label, v, cls, sub) => `<div class="pp-line ${cls || ""}"><span>${label}${sub ? `<small>${sub}</small>` : ""}</span><b>${v}</b></div>`;
+  return `<section class="card hero pp-head" style="padding:16px 12px">
+    <div class="pp-nav"><button class="pp-arr" data-act="ppNav" data-v="-1" aria-label="Previous paycheck" ${off <= -26 ? "disabled" : ""}>‹</button>
+      <div class="grow" style="text-align:center"><div class="lbl">Paycheck plan</div><b class="pp-dates">${ppRange(p)}</b><small class="muted">${ppLabel(off)}${isBonus(p.start) ? " · bonus paycheck" : ""}</small></div>
+      <button class="pp-arr" data-act="ppNav" data-v="1" aria-label="Next paycheck" ${off >= 26 ? "disabled" : ""}>›</button></div>
+    ${now ? "" : `<button class="btn sm ghost pp-today" data-act="ppNav" data-v="0">Back to this paycheck</button>`}</section>
+  <div class="h"><h2>1 · Money in</h2><button data-act="ppIncome" data-v="${now ? today() : p.start}">+ Extra money</button></div>
+  <section class="card" style="padding:12px 14px">
+    <div class="pp-row"><span class="pp-e" aria-hidden="true">💰</span><div class="grow"><b>Paycheck</b><small>${S.payPlan.over[p.start] ? "The amount you entered" : "Your usual pay. Tap to type the exact amount"}</small></div>
+      <button class="pc-amt" data-act="pcAmt" data-d="${p.start}" aria-label="Type the exact paycheck amount">${money(pay)} <span aria-hidden="true">✎</span></button></div>
+    ${incs.map(x => { const c = INC.find(k => k[0] === x.kind) || INC[INC.length-1]; return `<div class="pp-row"><span class="pp-e" aria-hidden="true">${c[1]}</span><div class="grow"><b>${esc(x.note || c[2])}</b><small>${c[2]} · ${fmtDate(x.date)}</small></div><span class="amt pos">+${money(x.amt)}</span></div>`; }).join("")}
+    ${line("Total money in", money(moneyIn), "tot")}</section>
+  <div class="h"><h2>2 · Savings and debts</h2></div>
+  <section class="card" style="padding:12px 14px">
+    <div class="lbl" style="margin-bottom:4px">Savings this paycheck</div>
+    ${gRows || `<p class="note" style="margin:4px 0 8px">No savings goals yet. <button class="link" data-act="addGoal">Add one</button></p>`}
+    <div class="lbl" style="margin:12px 0 4px">Debt payments this paycheck</div>
+    ${dRows || `<p class="note" style="margin:4px 0 0">No debt payments fall in this paycheck.</p>`}</section>
+  <div class="h"><h2>3 · Safe to spend</h2></div>
+  <section class="card pp-sum" style="padding:12px 14px">
+    ${line("Money in", money(moneyIn))}
+    ${line("− Bills", money(pl.billsDue), "neg", `${pl.bills.length} bill${pl.bills.length === 1 ? "" : "s"} due`)}
+    ${line("− Debt payments", money(pl.minsDue), "neg")}
+    ${line("− Allowances and envelopes", money(pl.allowSet), "neg", pl.allow.length ? pl.allow.map(x => catOf(x.a.cat)[2]).join(", ") : "")}
+    ${line("− Savings", money(pl.saveSet), "neg")}
+    ${line("Planned safe to spend", money(pl.budget), "tot")}
+    ${line("− Everyday spending", money(pl.spent), "neg", now || past ? "" : "Nothing yet, this paycheck hasn't started")}
+    ${pl.extra > 0 ? line("− Extra savings and debt payments", money(pl.extra), "neg") : ""}
+    ${line("Left to spend", money(pl.left), "big " + (pl.left < 0 ? "bad" : "good"), now ? `About ${money(Math.max(0, pl.perDay))} a day for ${pl.daysLeft} day${pl.daysLeft === 1 ? "" : "s"}` : past ? "How this paycheck ended" : "If you spend nothing else")}</section>
+  ${pl.bills.length ? `<div class="h"><h2>Bills in this paycheck</h2></div><section class="card" style="padding:8px 14px">${pl.bills.map(x => `<div class="pp-row"><span class="pp-e" aria-hidden="true">${esc(x.b.emoji || "🧾")}</span><div class="grow"><b>${esc(x.b.name)}</b><small>${fmtDate(x.d)}${x.early ? " · paid early" : ""}</small></div><span class="amt">${money(x.b.amt)}</span>${x.paid ? `<span class="chip ok" style="margin-left:6px">✓</span>` : ""}</div>`).join("")}</section>` : ""}
+  <p class="note" style="margin:12px 6px 0">Future paychecks use today's bills, debts, allowances and savings. Tap the paycheck amount to type exactly what you got.</p>`;
+}
+
+/* ── notes: important dates and things to do ── */
+const NOTE_MAX = 300;
+function noteWhen(d){ const n = daysBetween(today(), d); return n === 0 ? "Today" : n === 1 ? "Tomorrow" : n === -1 ? "Yesterday" : n < 0 ? `${-n} days ago` : `In ${n} days`; }
+function noteRow(n){ const late = n.date && !n.done && n.date < today(), soon = n.date && !n.done && !late && daysBetween(today(), n.date) <= 3;
+  return `<div class="card note-c ${n.done ? "done" : ""}"><button class="nt-tick ${n.done ? "on" : ""}" data-act="noteTick" data-id="${n.id}" aria-pressed="${n.done}" aria-label="${n.done ? "Mark not done" : "Mark done"}">${n.done ? "✓" : ""}</button>
+    <div class="grow"><p class="note-t">${esc(n.text)}</p>${n.date ? `<span class="chip ${late ? "late" : soon ? "soon" : ""}">📅 ${fmtDate(n.date, {weekday:"short", day:"numeric", month:"short"})} · ${noteWhen(n.date)}</span>` : ""}</div>
+    <button class="x" data-act="noteEdit" data-id="${n.id}" aria-label="Edit note">✎</button></div>`; }
+function notesView(){ const open = S.notes.filter(n => !n.done), done = S.notes.filter(n => n.done);
+  const dated = open.filter(n => n.date).sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.t - b.t), loose = open.filter(n => !n.date).sort((a,b) => b.t - a.t);
+  return `<section class="card hero" style="padding:16px 18px"><div class="row"><div class="grow"><div class="lbl">Notes</div><b style="font-size:20px">Dates and things to do</b>
+    <small class="muted" style="display:block;font-size:13px;margin-top:2px">Set up a payment plan, open a savings account, call the bank.</small></div>
+    <button class="btn" data-act="noteAdd">${I.plus} Note</button></div></section>
+  ${!S.notes.length ? `<div class="card empty"><div class="e">📝</div>Nothing here yet. Jot down a date to remember or something you need to do.<br><br><button class="btn" data-act="noteAdd">${I.plus} Add a note</button></div>` : ""}
+  ${dated.length ? `<div class="h"><h2>Coming up</h2></div>${dated.map(noteRow).join("")}` : ""}
+  ${loose.length ? `<div class="h"><h2>To do</h2></div>${loose.map(noteRow).join("")}` : ""}
+  ${done.length ? `<div class="h"><h2>Done</h2><button data-act="noteClear">Clear done</button></div>${done.sort((a,b) => b.t - a.t).map(noteRow).join("")}` : ""}`; }
+function noteForm(n){ const e = !!n;
+  sheet(`<h3>${e ? "Edit note" : "New note"}</h3>
+    <textarea class="in" id="tx" rows="4" maxlength="${NOTE_MAX}" placeholder="Set up a payment plan for the car loan">${e ? esc(n.text) : ""}</textarea>
+    <div class="two"><div><label class="f" for="nd">Date (optional)</label><input class="in" id="nd" type="date" value="${e ? n.date : ""}"></div><div></div></div>
+    <div class="actions">${e ? `<button class="btn ghost red-t" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      const tx = root.querySelector("#tx"); if(!e) tx.focus();
+      root.querySelector("#ok").onclick = () => { const text = tx.value.trim().slice(0, NOTE_MAX); if(!text) return tx.focus(); const date = val(root, "#nd") || "";
+        if(e){ n.text = text; n.date = date; } else S.notes.push({id:uid(), text, date, done:false, t:Date.now()});
+        save(); closeSheet(); render(); QFX.play("done"); };
+      const d = root.querySelector("#del"); if(d) d.onclick = () => { S.notes = S.notes.filter(x => x.id !== n.id); save(); closeSheet(); render(); QFX.play("del"); }; }); }
+
+/* ── savings challenges: 52 or 26 tiles, tap one when you have put that money aside ── */
+const CH_TILE_XP = 10, CH_TILES_DAY = 3, CH_WIN_XP = 100;
+function chAmts(c){ const n = c.weeks, tri = n*(n+1)/2, out = [];
+  for(let i = 1; i <= n; i++) out.push(round2(c.style === "even" ? c.target/n : c.target*i/tri));
+  out[n-1] = round2(c.target - sum(out.slice(0, n-1))); return out; }
+function chStats(c){ const a = chAmts(c), ks = Object.keys(c.done).map(Number), saved = round2(sum(ks.map(k => a[k-1])));
+  let next = 0; for(let i = 1; i <= c.weeks; i++) if(!c.done[i]){ next = i; break; }
+  return {a, n:ks.length, saved, frac: c.target > 0 ? saved/c.target : 0, next}; }
+function chCard(c){ const s = chStats(c);
+  return `<section class="card ch ${c.won ? "won" : ""}"><div class="row" style="align-items:center">${bagArt(s.frac, 84)}
+    <div class="grow"><div class="lbl">${c.weeks}-week challenge</div><b style="font-size:18px">${esc(c.name)}</b>
+      <div class="gold" style="font-size:24px;font-weight:800">${cash(s.saved)} <span class="muted" style="font-size:14px;font-weight:600">of ${cash(c.target)}</span></div>
+      <small class="muted">${s.n} of ${c.weeks} tiles${c.won ? ` · 🏆 Complete ${fmtDate(c.won)}` : ""}</small></div>
+    <button class="x" data-act="chEdit" data-id="${c.id}" aria-label="Edit ${esc(c.name)}">✎</button></div>
+    ${s.next ? `<button class="btn full mint" style="margin-top:12px" data-act="chTile" data-id="${c.id}" data-v="${s.next}">Next up: tile ${s.next} · put in ${money(s.a[s.next-1])}</button>` : ""}
+    <div class="ch-grid" role="list">${s.a.map((amt, i) => { const k = i+1, d = c.done[k];
+      return `<button class="ch-t ${d ? "on" : ""}" role="listitem" data-act="chTile" data-id="${c.id}" data-v="${k}" aria-pressed="${!!d}" aria-label="Tile ${k}, ${money(amt)}${d ? ", done" : ""}"><small>${k}</small>${cash(amt)}</button>`; }).join("")}</div></section>`; }
+function chalView(){ return `<section class="card hero" style="padding:16px 18px"><div class="row"><div class="grow"><div class="lbl">Savings challenges</div><b style="font-size:20px">52-week and 26-week quests</b>
+    <small class="muted" style="display:block;font-size:13px;margin-top:2px">Pick a total. Each paycheck, put a tile's amount aside and tap it. The tile greys out and the money drops into your challenge bag.</small></div></div>
+    <button class="btn full" style="margin-top:12px" data-act="chAdd">${I.plus} Start a challenge</button></section>
+  ${S.chals.length ? S.chals.map(chCard).join("") : `<div class="card empty"><div class="e">🪙</div>The classic 52-week challenge starts small and grows a little each time. Or split your total into even amounts.</div>`}
+  <p class="note" style="margin:8px 6px 0">+${CH_TILE_XP} XP a tile (up to ${CH_TILES_DAY} tiles a day) and +${CH_WIN_XP} XP when you finish. Undo a tile and its XP goes back. This tracks the money you put aside, it doesn't move any money.</p>`; }
+function chForm(c){ const e = !!c; let weeks = e ? c.weeks : 52, style = e ? c.style : "grow";
+  sheet(`<h3>${e ? "Edit challenge" : "New savings challenge"}</h3>
+    <label class="f" for="cn">Name</label><input class="in" id="cn" maxlength="40" value="${e ? esc(c.name) : ""}" placeholder="Christmas fund">
+    <label class="f" for="ct">How much do you want to save?</label><input class="in huge" id="ct" inputmode="decimal" value="${e ? c.target : ""}" placeholder="${money(1378, 0)}">
+    <label class="f">Length</label><div class="seg" id="cw">${[52,26].map(w => `<button class="${weeks===w?"on":""}" data-w="${w}">${w} tiles</button>`).join("")}</div>
+    <label class="f">Amounts</label><div class="seg" id="cs"><button class="${style==="grow"?"on":""}" data-s="grow">Grows each time</button><button class="${style==="even"?"on":""}" data-s="even">Same each time</button></div>
+    <p class="note" id="cp" style="margin:10px 2px 0"></p>
+    ${e && Object.keys(c.done).length ? `<p class="note" style="margin:6px 2px 0">You've ticked tiles already, so the length and amounts stay as they are.</p>` : ""}
+    <div class="actions">${e ? `<button class="btn ghost red-t" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">${e ? "Save" : "Start the quest"}</button></div>`, root => {
+      const locked = e && Object.keys(c.done).length > 0;
+      const prev = () => { const t = num(val(root, "#ct")); const a = t > 0 ? chAmts({weeks, style, target:t}) : null;
+        root.querySelector("#cp").textContent = a ? (style === "even" ? `${weeks} tiles of about ${money(a[0])}.` : `Starts at ${money(a[0])} and ends at ${money(a[weeks-1])}.`) : "Type a total to see the tile amounts."; };
+      if(locked){ root.querySelectorAll("#cw button, #cs button").forEach(b => b.disabled = true); root.querySelector("#ct").disabled = true; }
+      root.querySelectorAll("#cw button").forEach(b => b.onclick = () => { weeks = +b.dataset.w; root.querySelectorAll("#cw button").forEach(x => x.classList.toggle("on", x === b)); prev(); });
+      root.querySelectorAll("#cs button").forEach(b => b.onclick = () => { style = b.dataset.s; root.querySelectorAll("#cs button").forEach(x => x.classList.toggle("on", x === b)); prev(); });
+      root.querySelector("#ct").oninput = prev; prev();
+      root.querySelector("#ok").onclick = () => { const name = val(root, "#cn").trim().slice(0, 40) || `${weeks}-week challenge`, t = num(val(root, "#ct"));
+        if(!locked && !(t >= weeks*0.01)) return toast("Type the total you want to save","🪙");
+        if(e){ c.name = name; if(!locked){ c.target = t; c.weeks = weeks; c.style = style; } } else S.chals.push({id:uid(), name, weeks, style, target:t, start:today(), done:{}, won:"", wonXp:0});
+        save(); closeSheet(); render(); if(!e){ QFX.play("big"); toast("Challenge started","🪙"); } };
+      const d = root.querySelector("#del"); if(d) d.onclick = () => { if(!confirm(`Delete ${c.name}? Its XP goes back.`)) return;
+        const back = sum(Object.values(c.done).map(x => x.xp)) + (c.wonXp || 0); S.chals = S.chals.filter(x => x.id !== c.id); save(); closeSheet(); render(); takeXP(back); QFX.play("del"); }; }); }
+function chTileForm(c, k){ const a = chAmts(c)[k-1], d = c.done[k];
+  sheet(d ? `<h3>Tile ${k}</h3><p class="sub">You ticked this on ${fmtDate(d.d)}. Take ${money(a)} back out of the challenge bag?</p>
+      <div class="actions"><button class="btn ghost" data-close>Keep it</button><button class="btn red" id="ok">Undo tile</button></div>`
+    : `<h3>Tile ${k} · ${money(a)}</h3><p class="sub">Put ${money(a)} aside in your savings, then tick it off here.</p>
+      <div class="actions"><button class="btn ghost" data-close>Not yet</button><button class="btn mint" id="ok">I put it aside ✓</button></div>`, root => {
+    root.querySelector("#ok").onclick = () => { closeSheet(); chToggle(c, k); }; }); }
+function chToggle(c, k){ const t = today();
+  if(c.done[k]){ const back = (c.done[k].xp || 0) + (c.won ? c.wonXp || 0 : 0); delete c.done[k]; if(c.won){ c.won = ""; c.wonXp = 0; } save(); render(); takeXP(back); QFX.play("undo"); return; }
+  const paidToday = sum(S.chals.map(x => Object.values(x.done).filter(v => v.d === t && v.xp > 0).length));
+  c.done[k] = {d:t, xp: paidToday < CH_TILES_DAY ? CH_TILE_XP : 0}; QFX.play("xp"); coins(10);
+  const s = chStats(c);
+  if(s.n >= c.weeks && !c.won){ c.won = t; c.wonXp = CH_WIN_XP; save(); render(); confetti(160); QFX.play("big");
+    setTimeout(() => sheet(`<div class="levelup"><div style="font-size:60px">🏆</div><h3>${esc(c.name)} complete!</h3><p class="sub">You saved ${money(c.target)}, one tile at a time.</p>
+      <div class="actions"><button class="btn full" data-close>Amazing</button></div></div>`), 500);
+    gain(c.done[k].xp + CH_WIN_XP, "Savings challenge complete"); return; }
+  save(); render(); if(c.done[k].xp) gain(c.done[k].xp, `Tile ${k} saved`); else toast(`Tile ${k} saved`, "🪙"); }
+
+function ppActs(act, id, a){ const v = a.dataset.v;
+  if(act === "ppNav"){ ppOff = v === "0" ? 0 : Math.max(-26, Math.min(26, ppOff + +v)); render(); }
+  else if(act === "ppIncome"){ closeSheet(); incomeForm(v); }
+  else if(act === "noteAdd") noteForm(); else if(act === "noteEdit") noteForm(S.notes.find(n => n.id === id));
+  else if(act === "noteTick"){ const n = S.notes.find(x => x.id === id); if(!n) return true; n.done = !n.done; save(); render(); QFX.play(n.done ? "done" : "undo"); }
+  else if(act === "noteClear"){ S.notes = S.notes.filter(n => !n.done); save(); render(); }
+  else if(act === "chAdd") chForm(); else if(act === "chEdit") chForm(S.chals.find(c => c.id === id));
+  else if(act === "chTile"){ const c = S.chals.find(x => x.id === id); if(c) chTileForm(c, +v); }
+  else return false;
+  return true; }
+
 /* ───────────────────────── sample data ───────────────────────── */
 function demo(){
   const t = today(), D = n => addDays(t, n);
@@ -2259,6 +2463,14 @@ function demo(){
   for(let i=1;i<=6;i++) S.checkins[D(-i)] = true; S.noSpend = {[D(-4)]:true, [D(-7)]:true, [D(-11)]:true};
   ["first_step","checkin3","streak7","bill5","first_blood","boss_down","loot","goal","jail1","nospend","lootbag","networth"].forEach((b,i)=> S.badges[b] = D(-36+i*3));
   S.allowances = [{id:"a1",cat:"groceries",amt:150},{id:"a2",cat:"transport",amt:60}];
+  S.notes = [{id:"nt1", text:"Call the car loan company about a lower payment plan", date:D(3), done:false, t:3},
+    {id:"nt2", text:"Open an easy-access savings account for the emergency fund", date:D(12), done:false, t:2},
+    {id:"nt3", text:"Check which subscriptions renew in January", date:"", done:false, t:4},
+    {id:"nt4", text:"Ask HR when the Christmas bonus is paid", date:D(-5), done:true, t:1}];
+  S.chals = [{id:"ch1", name:"Christmas fund", weeks:52, style:"grow", target:1378, start:D(-80), done:{}, won:"", wonXp:0},
+    {id:"ch2", name:"Holiday pot", weeks:26, style:"even", target:520, start:D(-30), done:{}, won:"", wonXp:0}];
+  for(let k = 1; k <= 11; k++) S.chals[0].done[k] = {d:D(-80 + k*7), xp:10};
+  for(let k = 1; k <= 2; k++) S.chals[1].done[k] = {d:D(-30 + k*14), xp:10};
   S.subs = [["Streaming",12.99,"monthly",3,"streaming"],["Music",10.99,"monthly",9,"music"],["Cloud storage",29.99,"yearly",44,"storage"],["Gym app",4.99,"monthly",18,"fitness"],["News site",96,"yearly",130,"news"]]
     .map(([name,amt,cycle,n,cat],i) => ({id:"u"+i, name, amt, cycle, next:D(n), day:parse(D(n)).getDate(), cat, status:"active", created:D(-60), reviewed:"", sample:true}));
   S.subs.push({id:"u9", name:"Meal box", amt:24, cycle:"monthly", next:D(11), day:parse(D(11)).getDate(), cat:"other", status:"cancelled", cancelledOn:D(-5), created:D(-90), reviewed:"", sample:true});
@@ -2275,7 +2487,7 @@ document.addEventListener("click", e => {
   const tb = e.target.closest("[data-tab]"); if(tb){ tab = tb.dataset.tab; closeSheet(); render(); scrollTo({top:0,behavior:"smooth"}); return; }
   if(e.target.closest("[data-close]")){ closeSheet(); return; }
   const a = e.target.closest("[data-act]"); if(!a) return; const id = a.dataset.id, act = a.dataset.act, t = today();
-  if(newActs(act, id, a) || moreActs(act, id, a) || questActs(act, id, a)){}
+  if(newActs(act, id, a) || moreActs(act, id, a) || questActs(act, id, a) || ppActs(act, id, a)){}
   else if(act === "addSpend") spendForm();
   else if(act === "addIncome"){ closeSheet(); incomeForm(); }
   else if(act === "addBill") billForm(); else if(act === "editBill") billForm(findBill(id));
