@@ -427,6 +427,18 @@ textarea.in{resize:vertical;min-height:96px;font:inherit;color:inherit;line-heig
 .ch-t small{font-size:12px;font-weight:600;color:var(--mut)}
 .ch-t.on{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--dim);filter:grayscale(1);text-decoration:line-through}
 .ch-t.on small{text-decoration:none}
+html[data-season="christmas"]{--bg1:#08200f;--bg2:#145a2e}
+html[data-season="autumn"]{--bg1:#2b1204;--bg2:#8a3d0a}
+.vis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:6px}
+.vis-t{position:relative;display:block;padding:0;border-radius:16px;overflow:hidden;aspect-ratio:4/3;border:1px solid var(--line);background:rgba(0,0,0,.25);min-height:44px}
+.vis-t img{width:100%;height:100%;object-fit:cover;display:block}
+.vis-cap{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 7px;background:linear-gradient(transparent,rgba(10,6,24,.85));color:#fff;font-size:13px;font-weight:700;text-align:left;line-height:1.2}
+.vis-cap i{display:block;height:4px;border-radius:2px;background:var(--mint);margin-top:5px}
+.vis-empty{padding:14px}
+.vis-prev{border-radius:14px;overflow:hidden;aspect-ratio:4/3;border:1px solid var(--line)}.vis-prev img{width:100%;height:100%;object-fit:cover;display:block}
+.goal-vis{width:calc(100% + 24px);margin:-16px -12px 10px;aspect-ratio:4/3;object-fit:cover;display:block;border-radius:16px 16px 0 0}
+.goal.has-vis .ring{display:none}
+.mg-vis{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:12px;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -519,33 +531,33 @@ const QFX = (() => {
   const R = () => { try{ const l = (navigator.languages && navigator.languages[0]) || navigator.language || ""; const m = l.match(/[-_]([A-Za-z]{2})\b/); return m ? m[1].toUpperCase() : ""; }catch(e){ return ""; } };
   /* order = priority when two occasions overlap (first wins) */
   const OCC = [
-    {id:"newyear", name:"New Year", e:"✨", hi:"Happy New Year! 🎆", fx:["✨","✨","💫","⭐"], mv:"burst", glow:"255,215,110", acc:"firework",
+    {id:"newyear", name:"New Year", e:"✨", hi:"Happy New Year! 🎆", fx:["✨","✨","💫","⭐"], mv:"float", glow:"255,215,110", acc:"firework",
       win:y => [[D(y - 1, 12, 27), D(y, 1, 2)], [D(y, 12, 27), D(y + 1, 1, 2)]]},
-    {id:"valentine", name:"Valentine's Day", e:"💕", hi:"Happy Valentine's Day 💕", fx:["💕","❤️","💗","✨"], mv:"rise", glow:"255,120,160", acc:"harp",
+    {id:"valentine", name:"Valentine's Day", e:"💕", hi:"Happy Valentine's Day 💕", fx:["💕","❤️","💗","✨"], mv:"float", glow:"255,120,160", acc:"harp",
       win:y => [[D(y, 2, 10), D(y, 2, 14)]]},
-    {id:"stpatrick", name:"St Patrick's Day", e:"☘️", hi:"Happy St Patrick's Day ☘️", fx:["☘️","🍀","✨"], mv:"fall", glow:"90,200,120", acc:"whistle",
+    {id:"stpatrick", name:"St Patrick's Day", e:"☘️", hi:"Happy St Patrick's Day ☘️", fx:["☘️","🍀","✨"], mv:"float", glow:"90,200,120", acc:"whistle",
       win:y => [[D(y, 3, 15), D(y, 3, 17)]]},
-    {id:"mothers", name:"Mother's Day", e:"💐", hi:"Happy Mother's Day 💐", fx:["💐","🌷","🌸","💕"], mv:"fall", glow:"255,150,190", acc:"harp",
+    {id:"mothers", name:"Mother's Day", e:"💐", hi:"Happy Mother's Day 💐", fx:["💐","🌷","🌸","💕"], mv:"float", glow:"255,150,190", acc:"harp",
       win:y => { const d = ["GB","IE"].includes(R()) ? add(easter(y), -21) : nthDow(y, 5, 0, 2); return [[add(d, -2), d]]; }},
-    {id:"fathers", name:"Father's Day", e:"👔", hi:"Happy Father's Day ⭐", fx:["⭐","👔","🎉"], mv:"fall", glow:"110,170,255", acc:"warm",
+    {id:"fathers", name:"Father's Day", e:"👔", hi:"Happy Father's Day ⭐", fx:["⭐","👔","🎉"], mv:"float", glow:"110,170,255", acc:"warm",
       win:y => { const d = ["AU","NZ"].includes(R()) ? nthDow(y, 9, 0, 1) : nthDow(y, 6, 0, 3); return [[add(d, -2), d]]; }},
-    {id:"july4", name:"4th of July", e:"✨", hi:"Happy 4th of July! 🎆", fx:["✨","⭐","💫"], mv:"burst", glow:"120,160,255", acc:"firework", only:["US"],
+    {id:"july4", name:"4th of July", e:"✨", hi:"Happy 4th of July! 🎆", fx:["✨","⭐","💫"], mv:"float", glow:"120,160,255", acc:"firework", only:["US"],
       win:y => [[D(y, 7, 2), D(y, 7, 4)]]},
-    {id:"pkday", name:"Independence Day (Pakistan)", e:"🌙", hi:"Happy Independence Day 🌙⭐", fx:["🌙","⭐","✨"], mv:"burst", glow:"80,190,120", acc:"firework", only:["PK"],
+    {id:"pkday", name:"Independence Day (Pakistan)", e:"🌙", hi:"Happy Independence Day 🌙⭐", fx:["🌙","⭐","✨"], mv:"float", glow:"80,190,120", acc:"firework", only:["PK"],
       win:y => [[D(y, 8, 12), D(y, 8, 14)]]},
-    {id:"inday", name:"Independence Day (India)", e:"✨", hi:"Happy Independence Day 🎆", fx:["✨","✨","🪁"], mv:"burst", glow:"255,170,90", acc:"firework", only:["IN"],
+    {id:"inday", name:"Independence Day (India)", e:"✨", hi:"Happy Independence Day 🎆", fx:["✨","✨","🪁"], mv:"float", glow:"255,170,90", acc:"firework", only:["IN"],
       win:y => [[D(y, 8, 13), D(y, 8, 15)]]},
-    {id:"bonfire", name:"Bonfire Night", e:"💫", hi:"Happy Bonfire Night 🎇", fx:["💫","✨","🔥","✨"], mv:"burst", glow:"255,140,60", acc:"firework", only:["GB"],
+    {id:"bonfire", name:"Bonfire Night", e:"💫", hi:"Happy Bonfire Night 🎇", fx:["💫","✨","🔥","✨"], mv:"float", glow:"255,140,60", acc:"firework", only:["GB"],
       win:y => [[D(y, 11, 3), D(y, 11, 5)]]},
-    {id:"thanksgiving", name:"Thanksgiving", e:"🍂", hi:"Happy Thanksgiving 🍂", fx:["🍂","🍁","🥧"], mv:"fall", glow:"230,140,60", acc:"warm", only:["US","CA"],
+    {id:"thanksgiving", name:"Thanksgiving", e:"🍂", hi:"Happy Thanksgiving 🍂", fx:["🍂","🍁","🥧"], mv:"float", glow:"230,140,60", acc:"warm", only:["US","CA"],
       win:y => { const d = R() === "CA" ? nthDow(y, 10, 1, 2) : nthDow(y, 11, 4, 4); return [[add(d, -3), d]]; }},
-    {id:"holi", name:"Holi", e:"🎨", hi:"Happy Holi! 🎨", fx:["🟣","🟡","🟢","🔵","🩷"], mv:"burst", glow:"240,110,200", acc:"sparkle",
+    {id:"holi", name:"Holi", e:"🎨", hi:"Happy Holi! 🎨", fx:["🟣","🟡","🟢","🔵","🩷"], mv:"float", glow:"240,110,200", acc:"sparkle",
       win:y => { const d = fromT("holi", y); return d ? [[add(d, -1), add(d, 1)]] : []; }},
     {id:"diwali", name:"Diwali", e:"🪔", hi:"Happy Diwali 🪔", fx:["🪔","✨","💫"], mv:"float", glow:"255,190,80", acc:"sparkle",
       win:y => { const d = fromT("diwali", y); return d ? [[add(d, -2), add(d, 2)]] : []; }},
     {id:"lny", name:"Lunar New Year", e:"🧧", hi:"Happy Lunar New Year 🧧", fx:["🧧","🏮","✨","✨"], mv:"float", glow:"230,60,60", acc:"gong",
       win:y => { const d = fromT("lny", y); return d ? [[add(d, -1), add(d, 6)]] : []; }},
-    {id:"easter", name:"Easter", e:"🐣", hi:"Happy Easter 🐣", fx:["🥚","🐣","🌷","🌼"], mv:"fall", glow:"170,220,120", acc:"chirp",
+    {id:"easter", name:"Easter", e:"🐣", hi:"Happy Easter 🐣", fx:["🥚","🐣","🌷","🌼"], mv:"float", glow:"170,220,120", acc:"chirp",
       win:y => { const d = easter(y); return [[add(d, -3), add(d, 1)]]; }},
     {id:"fitr", name:"Eid al-Fitr", e:"🌙", hi:"Eid Mubarak! 🌙", fx:["🌙","⭐","✨","🏮"], mv:"float", glow:"120,200,170", acc:"lantern",
       win:y => { const d = fromT("fitr", y); return d ? [[d, add(d, 2)]] : []; }},
@@ -553,13 +565,15 @@ const QFX = (() => {
       win:y => { const d = fromT("adha", y); return d ? [[add(d, -1), add(d, 3)]] : []; }},
     {id:"halloween", name:"Halloween", e:"🎃", hi:"Happy Halloween 🎃", fx:["🎃","🦇","🍂","👻"], mv:"float", glow:"255,130,40", acc:"spooky",
       win:y => [[D(y, 10, 24), D(y, 10, 31)]]},
-    {id:"christmas", name:"Christmas", e:"🎄", hi:"Merry Christmas! 🎄", fx:["❄️","❄️","✨","❄️"], mv:"fall", glow:"120,200,255", acc:"bells",
+    {id:"christmas", name:"Christmas", e:"🎄", hi:"Merry Christmas! 🎄", fx:["❄️","❄️","✨","❄️"], mv:"float", glow:"120,200,255", acc:"bells",
       win:y => [[D(y, 12, 1), D(y, 12, 26)]]},
     {id:"hanukkah", name:"Hanukkah", e:"🕎", hi:"Happy Hanukkah 🕎", fx:["✨","⭐","🕯️"], mv:"float", glow:"110,160,255", acc:"sparkle",
       win:y => { const d = fromT("hanukkah", y); return d ? [[d, add(d, 8)]] : []; }},
     {id:"ramadan", name:"Ramadan", e:"🌙", hi:"Ramadan Mubarak 🌙", fx:["🌙","⭐","🏮","✨"], mv:"float", glow:"120,180,200", acc:"lantern",
       win:y => { const out = []; ["ramadan", "ramadanB"].forEach(k => { const s = fromT(k, y); if(!s) return;
-        const nx = OCC_FITR_AFTER(s); out.push([s, add(nx, -1)]); }); return out; }}
+        const nx = OCC_FITR_AFTER(s); out.push([s, add(nx, -1)]); }); return out; }},
+    {id:"autumn", name:"Fall / Autumn", e:"🍂", hi:"Happy fall 🍂", fx:["🎃","🦇","🍂"], mv:"float", glow:"255,130,40", acc:"warm",
+      win:y => ["AU","NZ","ZA","AR","CL","BR","UY"].includes(R()) ? [[D(y, 3, 20), D(y, 5, 31)]] : [[D(y, 9, 22), D(y, 11, 30)]]}
   ];
   /* Ramadan runs until the day before the next Eid al-Fitr */
   function OCC_FITR_AFTER(s){ for(let y = s.getFullYear(); y <= s.getFullYear() + 1; y++){ const f = fromT("fitr", y); if(f && f > s) return f; } return add(s, 30); }
@@ -739,13 +753,14 @@ function normalize(){
     const won = isD(c.won) && Object.keys(done).length >= weeks ? c.won : "";
     return {id:c.id, name:String(c.name || weeks + "-week challenge").slice(0,40), weeks, style:c.style === "even" ? "even" : "grow", target:Math.round(+c.target*100)/100,
       start:isD(c.start) ? c.start : nowD, done, won, wonXp:won ? Math.max(0, +c.wonXp || 0) : 0}; });
+  S.mgoals.forEach(g => { if(!okVis(g.photo)) delete g.photo; }); S.goals.forEach(g => { if(g && !okVis(g.photo)) delete g.photo; });
   if(!isObj(S.rlog)) S.rlog = {};
   Object.keys(S.rlog).forEach(k => { const e = S.rlog[k]; if(!isObj(e) || !isD(e.d)) delete S.rlog[k]; else e.xp = Math.max(0, +e.xp || 0); });
   /* Nov 2026 update 3: Future You, Split, Giving, Getting started */
-  const fd = {extra:0, cut:0, rise:2, growth:3, years:10, start:null, save:null, seen:0}, f0 = isObj(S.future) ? S.future : {};
-  S.future = {...fd}; ["extra","cut","rise","growth","years"].forEach(k => { const v = +f0[k]; if(isFinite(v) && v >= 0) S.future[k] = v; });
+  const fd = {extra:0, cut:0, rise:2, growth:3, years:10, start:null, save:null, seen:0, lump:0}, f0 = isObj(S.future) ? S.future : {};
+  S.future = {...fd}; ["extra","cut","rise","growth","years","lump"].forEach(k => { const v = +f0[k]; if(isFinite(v) && v >= 0) S.future[k] = v; });
   S.future.extra = Math.min(1000, S.future.extra); S.future.cut = Math.min(50, S.future.cut); S.future.rise = Math.min(10, S.future.rise); S.future.growth = Math.min(10, S.future.growth);
-  S.future.years = Math.min(30, Math.max(1, Math.round(S.future.years)));
+  S.future.years = Math.min(30, Math.max(1, Math.round(S.future.years))); S.future.lump = Math.min(1e7, round2(S.future.lump));
   ["start","save"].forEach(k => { S.future[k] = f0[k] === null || f0[k] === undefined || !isFinite(+f0[k]) ? null : Math.max(0, +f0[k]); }); S.future.seen = f0.seen ? 1 : 0;
   const sp = isObj(S.split) ? S.split : {};
   S.split = {a:String(sp.a || "You").slice(0,20), b:String(sp.b || "Partner").slice(0,20), ia:Math.max(0, +sp.ia || 0), ib:Math.max(0, +sp.ib || 0), mode:sp.mode === "half" ? "half" : "income",
@@ -1194,8 +1209,8 @@ function questsNow(){
 }
 function quests(){ return segBills() + (billsView === "plan" ? planAhead() : billsView === "pp" ? paycheckPlan() : questsNow()); }
 
-function payoff(strategy, extra){
-  const ds = S.debts.filter(d=>d.bal>0).map(d=>({id:d.id, bal:d.bal, apr:d.apr, min:d.min}));
+function payoff(strategy, extra, list){
+  const ds = (list || S.debts).filter(d=>d.bal>0).map(d=>({id:d.id, bal:d.bal, apr:d.apr, min:d.min}));
   if(!ds.length) return {months:0, interest:0, order:[], done:{}};
   const order = [...ds].sort((a,b)=> strategy==="avalanche" ? b.apr - a.apr || a.bal - b.bal : a.bal - b.bal || b.apr - a.apr).map(d=>d.id);
   const pool0 = sum(ds.map(d=>d.min)) + (+extra||0); let m = 0, interest = 0; const done = {};
@@ -1322,7 +1337,7 @@ function vaultTreasure(){
     <div class="muted">saved · ${money(S.savedByWaiting)} kept by waiting</div></div>
     <button class="btn" data-act="addGoal">${I.plus} Goal</button></div></section>
   ${S.goals.length ? `<div class="goals">${S.goals.map(g => { const f = g.target ? g.saved/g.target : 0;
-    return `<div class="card goal" style="margin:0"><div class="ring">${ring(f, f>=1?"var(--mint)":"url(#g)", 96, 10)}<div class="c">${esc(g.emoji||"💎")}</div></div>
+    return `<div class="card goal ${g.photo ? "has-vis" : ""}" style="margin:0">${g.photo ? `<img class="goal-vis" src="${g.photo}" alt="">` : ""}<div class="ring">${ring(f, f>=1?"var(--mint)":"url(#g)", 96, 10)}<div class="c">${esc(g.emoji||"💎")}</div></div>
       <b>${esc(g.name)}</b><div class="muted" style="font-size:14px;margin:2px 0 10px">${money(g.saved,0)} of ${money(g.target,0)}</div>
       <div class="row" style="justify-content:center;gap:6px">${f>=1 ? `<span class="pill">👑 Claimed</span>` : `<button class="btn sm" data-act="deposit" data-id="${g.id}">+ Add</button>`}
       <button class="x" data-act="editGoal" data-id="${g.id}">✎</button></div></div>`; }).join("")}</div>`
@@ -1376,12 +1391,45 @@ function futureView(){ fyReady(); const f = S.future;
       <input type="range" class="fy-range" id="fy-${k}" data-fy="${k}" min="${mn}" max="${mx}" step="${st}" value="${f[k]}" style="width:100%;accent-color:#ffb347;min-height:32px">`).join("")}
     <div class="two" style="margin-top:12px"><button class="btn ghost sm" data-act="fyEdit">Starting pot: ${money(fyStart(),0)}</button><button class="btn ghost sm" data-act="fyEdit">Saving now: ${money(fyBase(),0)}/mo${S.future.save === null ? " (est.)" : ""}</button></div></section>
   <div id="fy-out">${fyNumbers()}</div>
+  ${fyDebtCard()}
   <section class="card" style="margin-top:14px"><div class="row"><div class="emo">🤲</div><div class="grow"><b>Giving goal</b><div class="muted" style="font-size:14px">${S.settings.give > 0 ? S.settings.give + "% of pay · " + money(monthlyPay()*S.settings.give/100) + " a month" : "Set a % of your pay to give (zakat, sadaqah, tithing, charity)."}</div></div>
     <button class="btn sm ghost" data-act="giveSet">${S.settings.give > 0 ? "Change" : "Set"}</button></div></section>${ringGradient()}`; }
 document.addEventListener("input", e => { const k = e.target.dataset && e.target.dataset.fy; if(!k) return;
   S.future[k] = +e.target.value; const d = FYD.find(x => x[0] === k); const v = document.getElementById("fyv-" + k); if(v && d) v.textContent = d[5](S.future[k]);
   const o = document.getElementById("fy-out"); if(o) o.innerHTML = fyNumbers(); });
 document.addEventListener("change", e => { if(e.target.dataset && e.target.dataset.fy) save(); });
+/* Jasmine's idea: "If I paid off this much debt?" A what-if only: nothing is paid and no XP is given */
+const fyDebtTotal = () => round2(sum(S.debts.filter(d => d.bal > 0).map(d => d.bal)));
+const fyDebtStep = t => t <= 2000 ? 10 : t <= 20000 ? 50 : 100;
+function fyDebtCalc(lump){ const st = S.settings.strategy, ex = S.settings.extra, now = payoff(st, ex);
+  let left = Math.max(0, lump); const list = S.debts.filter(d => d.bal > 0).map(d => ({...d}));
+  now.order.forEach(id => { const d = list.find(x => x.id === id); if(d && left > 0){ const p = Math.min(left, d.bal); d.bal = round2(d.bal - p); left = round2(left - p); } });
+  const after = payoff(st, ex, list);
+  return {now, after, owed:round2(sum(list.map(d => Math.max(0, d.bal)))), beaten:list.filter(d => d.bal <= 0).length, mins:round2(sum(S.debts.filter(d => d.bal > 0).map(d => +d.min || 0)))}; }
+function fyDebtOut(){ const t = fyDebtTotal(), lump = Math.min(S.future.lump, t);
+  if(!(lump > 0)) return `<p class="muted" style="font-size:14px;margin:8px 0 0">Slide to see what paying off a lump sum would do to your bosses.</p>`;
+  const c = fyDebtCalc(lump), fin = isFinite(c.now.months), fin2 = isFinite(c.after.months);
+  const when = (r, ok) => r.months === 0 ? "Debt-free now" : ok ? monthsOut(r.months) : "Not yet";
+  const sooner = fin && fin2 ? c.now.months - c.after.months : 0, saved = fin && fin2 ? Math.max(0, round2(c.now.interest - c.after.interest)) : 0;
+  return `<div class="stats" style="margin-top:12px"><div class="stat"><small>Debt left</small><b>${money(c.owed,0)}</b></div>
+      <div class="stat"><small>Debt-free by</small><b class="pos">${when(c.after, fin2)}</b></div>
+      <div class="stat"><small>Interest saved</small><b class="pos">${fin && fin2 ? money(saved,0) : "–"}</b></div></div>
+    <p class="note" style="margin:10px 0 0">${c.beaten ? `${c.beaten} boss${c.beaten === 1 ? "" : "es"} defeated straight away. ` : ""}${
+      fin && fin2 ? (c.after.months === 0 ? `Every boss gone, and your ${money(c.mins,0)} a month in minimum payments is free for saving.` : sooner > 0 ? `That's ${sooner} month${sooner === 1 ? "" : "s"} sooner than ${monthsOut(c.now.months)}. Then your ${money(c.mins,0)} a month in minimum payments is free for saving.` : `Your debt-free date stays ${monthsOut(c.now.months)}, with less interest on the way.`)
+      : !fin2 ? "Payments still don't cover the interest. Add an extra amount in the Bosses tab." : `Your payments would finally beat the interest, debt-free by ${monthsOut(c.after.months)}.`}</p>`; }
+function fyDebtCard(){ const t = fyDebtTotal();
+  if(!(t > 0)) return `<section class="card" style="margin-top:14px"><div class="lbl">If I paid off this much debt</div>
+    <p class="muted" style="font-size:14px;margin:6px 0 12px">${S.debts.length ? "Every boss is defeated. Legendary." : "Add a debt boss and you can see what paying a chunk off would do."}</p>
+    ${S.debts.length ? "" : `<button class="btn ghost" data-tab="boss">Add a debt boss</button>`}</section>`;
+  const st = fyDebtStep(t), mx = Math.ceil(t / st) * st, v = Math.min(S.future.lump, mx);
+  return `<section class="card" style="margin-top:14px"><div class="lbl">If I paid off this much debt</div><b style="font-size:18px">See what a lump sum would do</b>
+    <p class="muted" style="font-size:14px;margin:6px 0 10px">A what-if only: nothing is paid. You owe ${money(t,0)} across your bosses.</p>
+    <label class="f" for="fy-lump" style="display:flex;justify-content:space-between"><span>Pay off now</span><b id="fyv-lump">${money(Math.min(v, t),0)}</b></label>
+    <input type="range" class="fy-range" id="fy-lump" data-fy="lump" min="0" max="${mx}" step="${st}" value="${v}" style="width:100%;accent-color:#ffb347;min-height:44px" aria-label="Debt to pay off">
+    <div id="fyd-out">${fyDebtOut()}</div></section>`; }
+document.addEventListener("input", e => { if(!(e.target.dataset && e.target.dataset.fy === "lump")) return;
+  const v = document.getElementById("fyv-lump"); if(v) v.textContent = money(Math.min(S.future.lump, fyDebtTotal()),0);
+  const o = document.getElementById("fyd-out"); if(o) o.innerHTML = fyDebtOut(); });
 function fyEditForm(){ const f = S.future;
   sheet(`<h3>Your numbers</h3><p class="sub">Leave blank to let Money Quest work them out from your goals, pay and spending.</p>
     <div class="two"><div><label class="f">Starting pot</label><input class="in" id="s" inputmode="decimal" value="${f.start ?? ""}" placeholder="${round2(sum(S.goals.map(g=>+g.saved||0)))}"></div>
@@ -1528,10 +1576,12 @@ function goalForm(g){
       <div><label class="f">Set aside each paycheck</label><input class="in" id="p" inputmode="decimal" value="${g.perPay}" placeholder="50"></div></div>
     <div class="two"><div><label class="f">Icon</label><select class="in" id="e">${["💎","🛟","✈️","🏡","🚗","💻","🎓","💍","🎁","🌴","🕋","👶"].map(x=>`<option ${x===g.emoji?"selected":""}>${x}</option>`).join("")}</select></div>
       <div>${e?"":`<label class="f">Already saved</label><input class="in" id="s" inputmode="decimal" placeholder="0">`}</div></div>
+    <label class="f">Vision photo (optional)</label><div id="vis"></div>
     <div class="actions">${e?`<button class="btn red" id="del">Delete</button>`:`<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
+      const vst = {photo: e && g.photo ? g.photo : ""}; visPicker(root, vst, !!(e && g.photo));
       root.querySelector("#ok").onclick = () => { const n = val(root,"#n"), t = num(val(root,"#t")); if(!n || t <= 0) return toast("Add a name and a target","✍️");
-        const o = {name:n, target:t, perPay:num(val(root,"#p")), emoji:val(root,"#e")};
-        if(e) Object.assign(g, o); else S.goals.push({id:uid(), saved:num(root.querySelector("#s").value), ...o}); save(); closeSheet(); render(); };
+        const o = {name:n, target:t, perPay:num(val(root,"#p")), emoji:val(root,"#e")}; let tg = g;
+        if(e) Object.assign(g, o); else { tg = {id:uid(), saved:num(root.querySelector("#s").value), ...o}; S.goals.push(tg); } saveVis(tg, vst.photo); closeSheet(); render(); };
       if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete ${g.name}?`)) return; S.goals = S.goals.filter(x=>x.id!==g.id); save(); closeSheet(); render(); };
     });
 }
@@ -2296,7 +2346,7 @@ function rRow(r, edit){ const on = rDone(r), g = S.mgoals.find(x=>x.id===r.goalI
       <span class="dots-h" aria-hidden="true">${h.map(x => `<i class="${x ? "on" : ""}"></i>`).join("")}</span></div></div>
     ${edit ? `<button class="x" data-act="rtEdit" data-id="${r.id}" aria-label="Edit ${esc(r.name)}">✎</button>` : ""}</div>`; }
 function planView(){ const open = S.mgoals.filter(g=>!g.done), done = S.mgoals.filter(g=>g.done);
-  const gRow = g => `<div class="card mg ${g.done ? "done" : ""}"><div class="row" style="align-items:flex-start"><div class="emo">${esc(g.emoji)}</div>
+  const gRow = g => `<div class="card mg ${g.done ? "done" : ""}">${g.photo ? `<img class="mg-vis" src="${g.photo}" alt="">` : ""}<div class="row" style="align-items:flex-start"><div class="emo">${esc(g.emoji)}</div>
     <div class="grow"><b>${esc(g.name)}</b>${g.why ? `<small class="mg-why">“${esc(g.why)}”</small>` : ""}</div>
     <button class="x" data-act="mgEdit" data-id="${g.id}" aria-label="Edit ${esc(g.name)}">✎</button></div>
     <div class="mg-foot"><span class="pill">${g.done ? "🏁 Reached " + fmtDate(g.done) : g.by ? "📅 By " + fmtDate(g.by, {day:"numeric", month:"short", year:"numeric"}) : "📅 No date yet"}</span>
@@ -2304,6 +2354,7 @@ function planView(){ const open = S.mgoals.filter(g=>!g.done), done = S.mgoals.f
   return `<section class="card hero" style="padding:18px"><div class="lbl">Money goals, then a money routine</div>
     <div class="row" style="margin-top:8px"><div class="step-n">1</div><div class="grow"><b>Decide what you want your money to do</b><small class="muted" style="display:block;font-size:13px">Big or small. Add a date and your reason why.</small></div></div>
     <div class="row" style="margin-top:10px"><div class="step-n">2</div><div class="grow"><b>Build small habits that get you there</b><small class="muted" style="display:block;font-size:13px">Daily, weekly and monthly ticks. Each one earns XP.</small></div></div></section>
+  ${visionBoard()}
   <div class="h"><h2>1 · Money goals</h2><button data-act="mgAdd">+ Goal</button></div>
   ${open.length || done.length ? `<div class="mg-list">${open.map(gRow).join("")}${done.map(gRow).join("")}</div>`
     : `<div class="card empty" style="padding:18px"><div class="e">🎯</div>Pay off a card, build a 3-month safety net, stop impulse shopping, cover rent with side income.<br><br><button class="btn" data-act="mgAdd">${I.plus} Add a money goal</button></div>`}
@@ -2320,10 +2371,12 @@ function mgForm(g){ const e = !!g; let em = e ? g.emoji : "🎯";
     <label class="f">Icon</label><div class="cats" id="ge">${GEMO.map(x => `<button type="button" class="cat ${x===em?"on":""}" data-c="${x}" aria-label="${x}">${x}</button>`).join("")}</div>
     <div class="two"><div><label class="f">By when (optional)</label><input class="in" id="b" type="date" value="${e ? g.by : ""}"></div><div></div></div>
     <label class="f">Why it matters (optional)</label><input class="in" id="w" maxlength="70" value="${e ? esc(g.why) : ""}" placeholder="So I can breathe at the end of the month">
+    <label class="f">Vision photo (optional)</label><div id="vis"></div>
     <div class="actions">${e ? `<button class="btn red" id="del">Delete</button>` : `<button class="btn ghost" data-close>Cancel</button>`}<button class="btn" id="ok">Save</button></div>`, root => {
-      pickCats(root, "#ge", v => em = v);
+      pickCats(root, "#ge", v => em = v); const vst = {photo: e && g.photo ? g.photo : ""}; visPicker(root, vst, !!(e && g.photo));
       root.querySelector("#ok").onclick = () => { const n = val(root,"#n"); if(!n) return root.querySelector("#n").focus();
-        const o = {name:n, emoji:em, by:val(root,"#b"), why:val(root,"#w")}; if(e) Object.assign(g, o); else S.mgoals.push({id:uid(), done:"", xp:0, ...o}); save(); closeSheet(); render(); };
+        const o = {name:n, emoji:em, by:val(root,"#b"), why:val(root,"#w")}; let t = g; if(e) Object.assign(g, o); else { t = {id:uid(), done:"", xp:0, ...o}; S.mgoals.push(t); }
+        saveVis(t, vst.photo); closeSheet(); render(); };
       if(e) root.querySelector("#del").onclick = () => { if(!confirm(`Delete the goal "${g.name}"?`)) return; const back = g.xp || 0;
         S.mgoals = S.mgoals.filter(x=>x.id!==g.id); S.routine.forEach(r => { if(r.goalId === g.id) r.goalId = ""; }); save(); closeSheet(); render(); takeXP(back); }; }); }
 function rtForm(r){ const e = !!r; let fr = e ? r.freq : "weekly";
@@ -2515,6 +2568,58 @@ function ppActs(act, id, a){ const v = a.dataset.v;
   else return false;
   return true; }
 
+
+/* ── vision board: your own photo on money goals and savings goals (stays on this phone) ── */
+const VIS_MAX = 12;
+const okVis = v => typeof v === "string" && v.startsWith("data:image/jpeg;base64,") && v.length < 260000;
+function visCount(){ return S.mgoals.filter(g => g.photo).length + S.goals.filter(g => g.photo).length; }
+function readVision(file){ return new Promise((res, rej) => {
+  const bad = () => { toast("That picture could not be opened","⚠️"); rej(new Error("photo")); };
+  if(!file || (file.type && !/^image\//.test(file.type))) return bad();
+  const url = URL.createObjectURL(file), im = new Image();
+  im.onload = () => { try{ const w = im.naturalWidth, h = im.naturalHeight; if(!w || !h) throw 0;
+      const R = 4/3; let sw = w, sh = w/R; if(sh > h){ sh = h; sw = h*R; }
+      const c = document.createElement("canvas"); c.width = 480; c.height = 360;
+      c.getContext("2d").drawImage(im, (w - sw)/2, (h - sh)/2, sw, sh, 0, 0, 480, 360);
+      let d = c.toDataURL("image/jpeg", 0.78); if(d.length > 200000) d = c.toDataURL("image/jpeg", 0.55);
+      if(!okVis(d)) throw 0; res(d); }
+    catch(e){ bad(); } finally{ URL.revokeObjectURL(url); } };
+  im.onerror = () => { URL.revokeObjectURL(url); bad(); };
+  im.src = url; }); }
+/* the photo part of a goal form; st.photo holds the picture until Save */
+function visPicker(root, st, has){
+  const box = root.querySelector("#vis"), draw = () => {
+    box.innerHTML = st.photo ? `<div class="vis-prev"><img src="${st.photo}" alt="Your goal photo"></div><div class="row" style="gap:8px;margin-top:8px"><button type="button" class="btn sm ghost grow" id="vchg">Change photo</button><button type="button" class="btn sm ghost red-t" id="vrm">Remove</button></div>`
+      : `<button type="button" class="btn ghost full" id="vadd">🖼️ Add a photo of your dream</button>`;
+    const pick = () => { if(!st.photo && !has && visCount() >= VIS_MAX) return toast(`Up to ${VIS_MAX} vision photos. Remove one first.`, "🖼️");
+      const i = document.createElement("input"); i.type = "file"; i.accept = "image/*";
+      i.onchange = () => readVision(i.files[0]).then(d => { st.photo = d; draw(); }).catch(() => {}); i.click(); };
+    const a = box.querySelector("#vadd"), c = box.querySelector("#vchg"), r = box.querySelector("#vrm");
+    if(a) a.onclick = pick; if(c) c.onclick = pick; if(r) r.onclick = () => { st.photo = ""; draw(); }; };
+  draw(); }
+/* save, and if the phone is out of space undo the photo change so nothing else is lost */
+function saveVis(g, photo){ const before = g.photo || ""; if(photo) g.photo = photo; else delete g.photo;
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); return true; }
+  catch(e){ if(before) g.photo = before; else delete g.photo; save(); toast("Not enough space on this phone for that photo","⚠️"); return false; } }
+function visionBoard(){ const items = [...S.mgoals.filter(g => g.photo && !g.done).map(g => ({g, kind:"mg"})), ...S.goals.filter(g => g.photo).map(g => ({g, kind:"sv"}))];
+  if(!items.length) return `<section class="card vis-empty"><div class="row"><div style="font-size:30px">🖼️</div><div class="grow"><b>Vision board</b><small class="muted" style="display:block;font-size:13px">Add a photo to a goal, like the beach, a debt-free day or a new home, and it shows up here.</small></div></div></section>`;
+  return `<div class="h"><h2>Vision board</h2></div><div class="vis-grid">${items.map(({g, kind}) => { const f = kind === "sv" && g.target ? Math.min(1, g.saved/g.target) : null;
+    return `<button class="vis-t" data-act="${kind === "mg" ? "mgEdit" : "editGoal"}" data-id="${g.id}" aria-label="${esc(g.name)}"><img src="${g.photo}" alt=""><span class="vis-cap">${esc(g.emoji || "")} ${esc(g.name)}${f !== null ? `<i style="width:${Math.round(f*100)}%"></i>` : ""}</span></button>`; }).join("")}</div>`; }
+
+/* simple painted pictures for the sample data, so the vision board has something to show */
+function visSample(kind){ try{ const c = document.createElement("canvas"); c.width = 480; c.height = 360; const x = c.getContext("2d");
+  const sky = (a, b) => { const g = x.createLinearGradient(0,0,0,360); g.addColorStop(0,a); g.addColorStop(1,b); x.fillStyle = g; x.fillRect(0,0,480,360); };
+  if(kind === "beach"){ sky("#ff9a6b","#ffd59a"); x.fillStyle = "#fff3b0"; x.beginPath(); x.arc(330,190,46,0,7); x.fill();
+    x.fillStyle = "#2a8fb8"; x.fillRect(0,210,480,80); x.fillStyle = "#f1d39a"; x.beginPath(); x.moveTo(0,290); x.quadraticCurveTo(240,250,480,290); x.lineTo(480,360); x.lineTo(0,360); x.fill();
+    x.strokeStyle = "#5b3b1a"; x.lineWidth = 8; x.beginPath(); x.moveTo(90,330); x.quadraticCurveTo(110,240,140,190); x.stroke(); x.fillStyle = "#2f7a3a";
+    for(const a of [-0.9,-0.3,0.3,0.9,1.6]){ x.beginPath(); x.ellipse(140 + Math.cos(a)*34, 190 + Math.sin(a)*14, 40, 10, a, 0, 7); x.fill(); } }
+  else if(kind === "home"){ sky("#6fb6ff","#cfeaff"); x.fillStyle = "#7cc66b"; x.fillRect(0,270,480,90); x.fillStyle = "#f4e4c8"; x.fillRect(150,170,180,110);
+    x.fillStyle = "#c2523c"; x.beginPath(); x.moveTo(130,175); x.lineTo(240,95); x.lineTo(350,175); x.fill(); x.fillStyle = "#6b4226"; x.fillRect(222,215,36,65);
+    x.fillStyle = "#9fd3ff"; x.fillRect(170,195,36,30); x.fillRect(274,195,36,30); x.fillStyle = "#fff"; x.beginPath(); x.arc(90,70,22,0,7); x.arc(118,62,28,0,7); x.arc(148,72,20,0,7); x.fill(); }
+  else { sky("#2b2a6b","#ff9e6b"); x.fillStyle = "#ffe3a3"; x.beginPath(); x.arc(240,250,60,0,7); x.fill(); x.fillStyle = "#3b2d5c";
+    x.beginPath(); x.moveTo(0,300); x.lineTo(120,170); x.lineTo(220,280); x.lineTo(330,150); x.lineTo(480,300); x.lineTo(480,360); x.lineTo(0,360); x.fill();
+    x.fillStyle = "#fff"; for(let i = 0; i < 30; i++){ x.fillRect((i*97)%480, (i*53)%140, 2, 2); } }
+  return c.toDataURL("image/jpeg", 0.8); }catch(e){ return ""; } }
 /* ───────────────────────── sample data ───────────────────────── */
 function demo(){
   const t = today(), D = n => addDays(t, n);
@@ -2567,6 +2672,8 @@ function demo(){
     {id:"m2",name:"Pay off the credit card",emoji:"💳",by:D(300),why:"Stop paying 24.9%",done:"",xp:0},
     {id:"m3",name:"Cover rent with side income",emoji:"🏃",by:D(720),why:"Freedom to choose my hours",done:"",xp:0},
     {id:"m4",name:"Stop late-night online shopping",emoji:"🛍️",by:"",why:"",done:D(-10),xp:40}];
+  S.goals[1].photo = visSample("beach"); S.mgoals[2].photo = visSample("home"); S.mgoals[0].photo = visSample("free");
+  S.goals.concat(S.mgoals).forEach(g => { if(!g.photo) delete g.photo; });
   S.routine = [{id:"r1",name:"Log today's spending",freq:"daily",goalId:""},{id:"r2",name:"Check my bank balance",freq:"weekly",goalId:"m1"},
     {id:"r3",name:"Visit the impulse jail",freq:"weekly",goalId:"m4"},{id:"r4",name:"Extra payment to the card",freq:"monthly",goalId:"m2"},
     {id:"r5",name:"Update my net worth",freq:"monthly",goalId:""},{id:"r6",name:"Post 3 new items in my shop",freq:"weekly",goalId:"m3"}];
