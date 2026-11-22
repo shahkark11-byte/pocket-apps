@@ -37,6 +37,12 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .logo{width:44px;height:44px;border-radius:14px;flex:none;display:grid;place-items:center;
   background:radial-gradient(circle at 50% 72%,#ffe2a8 0 22%,#ffb05e 23% 36%,transparent 37%),linear-gradient(180deg,#3b2f6e,#21194a);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),-4px 6px 14px rgba(0,0,0,.35)}
 .top .grow{min-width:0}
+button.logo{position:relative;padding:0;overflow:visible}
+.logo.photo{background:none;box-shadow:0 0 0 2px var(--sun),-4px 6px 14px rgba(6,4,18,.6)}
+.logo img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.logo .cam{position:absolute;right:-5px;bottom:-5px;width:20px;height:20px;border-radius:50%;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-size:10px;line-height:1}
+.ph-prev{width:132px;height:132px;border-radius:34px;margin:6px auto 4px;overflow:hidden;display:grid;place-items:center;font-size:44px;background:var(--card2);border:1px solid var(--line)}
+.ph-prev img{width:100%;height:100%;object-fit:cover;display:block}
 .top b{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lv{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);font-weight:600}
 .lv i{font-style:normal;background:linear-gradient(180deg,#ffe3a3,#ffb45f);color:#3a1d0b;border-radius:7px;padding:1px 7px;font-weight:800}
@@ -312,33 +318,33 @@ const QFX = (() => {
   const R = () => { try{ const l = (navigator.languages && navigator.languages[0]) || navigator.language || ""; const m = l.match(/[-_]([A-Za-z]{2})\b/); return m ? m[1].toUpperCase() : ""; }catch(e){ return ""; } };
   /* order = priority when two occasions overlap (first wins) */
   const OCC = [
-    {id:"newyear", name:"New Year", e:"✨", hi:"Happy New Year! 🎆", fx:["✨","✨","💫","⭐"], mv:"burst", glow:"255,215,110", acc:"firework",
+    {id:"newyear", name:"New Year", e:"✨", hi:"Happy New Year! 🎆", fx:["✨","✨","💫","⭐"], mv:"float", glow:"255,215,110", acc:"firework",
       win:y => [[D(y - 1, 12, 27), D(y, 1, 2)], [D(y, 12, 27), D(y + 1, 1, 2)]]},
-    {id:"valentine", name:"Valentine's Day", e:"💕", hi:"Happy Valentine's Day 💕", fx:["💕","❤️","💗","✨"], mv:"rise", glow:"255,120,160", acc:"harp",
+    {id:"valentine", name:"Valentine's Day", e:"💕", hi:"Happy Valentine's Day 💕", fx:["💕","❤️","💗","✨"], mv:"float", glow:"255,120,160", acc:"harp",
       win:y => [[D(y, 2, 10), D(y, 2, 14)]]},
-    {id:"stpatrick", name:"St Patrick's Day", e:"☘️", hi:"Happy St Patrick's Day ☘️", fx:["☘️","🍀","✨"], mv:"fall", glow:"90,200,120", acc:"whistle",
+    {id:"stpatrick", name:"St Patrick's Day", e:"☘️", hi:"Happy St Patrick's Day ☘️", fx:["☘️","🍀","✨"], mv:"float", glow:"90,200,120", acc:"whistle",
       win:y => [[D(y, 3, 15), D(y, 3, 17)]]},
-    {id:"mothers", name:"Mother's Day", e:"💐", hi:"Happy Mother's Day 💐", fx:["💐","🌷","🌸","💕"], mv:"fall", glow:"255,150,190", acc:"harp",
+    {id:"mothers", name:"Mother's Day", e:"💐", hi:"Happy Mother's Day 💐", fx:["💐","🌷","🌸","💕"], mv:"float", glow:"255,150,190", acc:"harp",
       win:y => { const d = ["GB","IE"].includes(R()) ? add(easter(y), -21) : nthDow(y, 5, 0, 2); return [[add(d, -2), d]]; }},
-    {id:"fathers", name:"Father's Day", e:"👔", hi:"Happy Father's Day ⭐", fx:["⭐","👔","🎉"], mv:"fall", glow:"110,170,255", acc:"warm",
+    {id:"fathers", name:"Father's Day", e:"👔", hi:"Happy Father's Day ⭐", fx:["⭐","👔","🎉"], mv:"float", glow:"110,170,255", acc:"warm",
       win:y => { const d = ["AU","NZ"].includes(R()) ? nthDow(y, 9, 0, 1) : nthDow(y, 6, 0, 3); return [[add(d, -2), d]]; }},
-    {id:"july4", name:"4th of July", e:"✨", hi:"Happy 4th of July! 🎆", fx:["✨","⭐","💫"], mv:"burst", glow:"120,160,255", acc:"firework", only:["US"],
+    {id:"july4", name:"4th of July", e:"✨", hi:"Happy 4th of July! 🎆", fx:["✨","⭐","💫"], mv:"float", glow:"120,160,255", acc:"firework", only:["US"],
       win:y => [[D(y, 7, 2), D(y, 7, 4)]]},
-    {id:"pkday", name:"Independence Day (Pakistan)", e:"🌙", hi:"Happy Independence Day 🌙⭐", fx:["🌙","⭐","✨"], mv:"burst", glow:"80,190,120", acc:"firework", only:["PK"],
+    {id:"pkday", name:"Independence Day (Pakistan)", e:"🌙", hi:"Happy Independence Day 🌙⭐", fx:["🌙","⭐","✨"], mv:"float", glow:"80,190,120", acc:"firework", only:["PK"],
       win:y => [[D(y, 8, 12), D(y, 8, 14)]]},
-    {id:"inday", name:"Independence Day (India)", e:"✨", hi:"Happy Independence Day 🎆", fx:["✨","✨","🪁"], mv:"burst", glow:"255,170,90", acc:"firework", only:["IN"],
+    {id:"inday", name:"Independence Day (India)", e:"✨", hi:"Happy Independence Day 🎆", fx:["✨","✨","🪁"], mv:"float", glow:"255,170,90", acc:"firework", only:["IN"],
       win:y => [[D(y, 8, 13), D(y, 8, 15)]]},
-    {id:"bonfire", name:"Bonfire Night", e:"💫", hi:"Happy Bonfire Night 🎇", fx:["💫","✨","🔥","✨"], mv:"burst", glow:"255,140,60", acc:"firework", only:["GB"],
+    {id:"bonfire", name:"Bonfire Night", e:"💫", hi:"Happy Bonfire Night 🎇", fx:["💫","✨","🔥","✨"], mv:"float", glow:"255,140,60", acc:"firework", only:["GB"],
       win:y => [[D(y, 11, 3), D(y, 11, 5)]]},
-    {id:"thanksgiving", name:"Thanksgiving", e:"🍂", hi:"Happy Thanksgiving 🍂", fx:["🍂","🍁","🥧"], mv:"fall", glow:"230,140,60", acc:"warm", only:["US","CA"],
+    {id:"thanksgiving", name:"Thanksgiving", e:"🍂", hi:"Happy Thanksgiving 🍂", fx:["🍂","🍁","🥧"], mv:"float", glow:"230,140,60", acc:"warm", only:["US","CA"],
       win:y => { const d = R() === "CA" ? nthDow(y, 10, 1, 2) : nthDow(y, 11, 4, 4); return [[add(d, -3), d]]; }},
-    {id:"holi", name:"Holi", e:"🎨", hi:"Happy Holi! 🎨", fx:["🟣","🟡","🟢","🔵","🩷"], mv:"burst", glow:"240,110,200", acc:"sparkle",
+    {id:"holi", name:"Holi", e:"🎨", hi:"Happy Holi! 🎨", fx:["🟣","🟡","🟢","🔵","🩷"], mv:"float", glow:"240,110,200", acc:"sparkle",
       win:y => { const d = fromT("holi", y); return d ? [[add(d, -1), add(d, 1)]] : []; }},
     {id:"diwali", name:"Diwali", e:"🪔", hi:"Happy Diwali 🪔", fx:["🪔","✨","💫"], mv:"float", glow:"255,190,80", acc:"sparkle",
       win:y => { const d = fromT("diwali", y); return d ? [[add(d, -2), add(d, 2)]] : []; }},
     {id:"lny", name:"Lunar New Year", e:"🧧", hi:"Happy Lunar New Year 🧧", fx:["🧧","🏮","✨","✨"], mv:"float", glow:"230,60,60", acc:"gong",
       win:y => { const d = fromT("lny", y); return d ? [[add(d, -1), add(d, 6)]] : []; }},
-    {id:"easter", name:"Easter", e:"🐣", hi:"Happy Easter 🐣", fx:["🥚","🐣","🌷","🌼"], mv:"fall", glow:"170,220,120", acc:"chirp",
+    {id:"easter", name:"Easter", e:"🐣", hi:"Happy Easter 🐣", fx:["🥚","🐣","🌷","🌼"], mv:"float", glow:"170,220,120", acc:"chirp",
       win:y => { const d = easter(y); return [[add(d, -3), add(d, 1)]]; }},
     {id:"fitr", name:"Eid al-Fitr", e:"🌙", hi:"Eid Mubarak! 🌙", fx:["🌙","⭐","✨","🏮"], mv:"float", glow:"120,200,170", acc:"lantern",
       win:y => { const d = fromT("fitr", y); return d ? [[d, add(d, 2)]] : []; }},
@@ -346,13 +352,15 @@ const QFX = (() => {
       win:y => { const d = fromT("adha", y); return d ? [[add(d, -1), add(d, 3)]] : []; }},
     {id:"halloween", name:"Halloween", e:"🎃", hi:"Happy Halloween 🎃", fx:["🎃","🦇","🍂","👻"], mv:"float", glow:"255,130,40", acc:"spooky",
       win:y => [[D(y, 10, 24), D(y, 10, 31)]]},
-    {id:"christmas", name:"Christmas", e:"🎄", hi:"Merry Christmas! 🎄", fx:["❄️","❄️","✨","❄️"], mv:"fall", glow:"120,200,255", acc:"bells",
+    {id:"christmas", name:"Christmas", e:"🎄", hi:"Merry Christmas! 🎄", fx:["❄️","❄️","✨","❄️"], mv:"float", glow:"120,200,255", acc:"bells",
       win:y => [[D(y, 12, 1), D(y, 12, 26)]]},
     {id:"hanukkah", name:"Hanukkah", e:"🕎", hi:"Happy Hanukkah 🕎", fx:["✨","⭐","🕯️"], mv:"float", glow:"110,160,255", acc:"sparkle",
       win:y => { const d = fromT("hanukkah", y); return d ? [[d, add(d, 8)]] : []; }},
     {id:"ramadan", name:"Ramadan", e:"🌙", hi:"Ramadan Mubarak 🌙", fx:["🌙","⭐","🏮","✨"], mv:"float", glow:"120,180,200", acc:"lantern",
       win:y => { const out = []; ["ramadan", "ramadanB"].forEach(k => { const s = fromT(k, y); if(!s) return;
-        const nx = OCC_FITR_AFTER(s); out.push([s, add(nx, -1)]); }); return out; }}
+        const nx = OCC_FITR_AFTER(s); out.push([s, add(nx, -1)]); }); return out; }},
+    {id:"autumn", name:"Fall / Autumn", e:"🍂", hi:"Happy fall 🍂", fx:["🎃","🦇","🍂"], mv:"float", glow:"255,130,40", acc:"warm",
+      win:y => ["AU","NZ","ZA","AR","CL","BR","UY"].includes(R()) ? [[D(y, 3, 20), D(y, 5, 31)]] : [[D(y, 9, 22), D(y, 11, 30)]]}
   ];
   /* Ramadan runs until the day before the next Eid al-Fitr */
   function OCC_FITR_AFTER(s){ for(let y = s.getFullYear(); y <= s.getFullYear() + 1; y++){ const f = fromT("fitr", y); if(f && f > s) return f; } return add(s, 30); }
@@ -364,15 +372,15 @@ const QFX = (() => {
   function nextOf(o, from){ const t = dayOf(from); for(let y = t.getFullYear() - 1; y <= t.getFullYear() + 2; y++){ const w = o.win(y).map(([a, b]) => [dayOf(a), dayOf(b)]).filter(([, b]) => b >= t).sort((p, q) => p[0] - q[0]); if(w.length) return w[0]; } return null; }
 
   /* ───── prefs ───── */
-  let K = "", P = {sound:true, season:true, off:{}, seen:{}}, theme = BASE, cfg = {};
+  let K = "", P = {sound:true, season:true, off:{}, seen:{}, pick:""}, theme = BASE, cfg = {};
   function loadP(){ try{ const p = JSON.parse(localStorage.getItem(K) || "null"); if(p && typeof p === "object"){
-      P.sound = p.sound !== false; P.season = p.season !== false; P.off = p.off && typeof p.off === "object" ? p.off : {}; P.seen = p.seen && typeof p.seen === "object" ? p.seen : {}; } }catch(e){} }
+      P.sound = p.sound !== false; P.season = p.season !== false; P.off = p.off && typeof p.off === "object" ? p.off : {}; P.seen = p.seen && typeof p.seen === "object" ? p.seen : {}; P.pick = typeof p.pick === "string" && OCC.some(o => o.id === p.pick) ? p.pick : ""; } }catch(e){} }
   function saveP(){ try{ localStorage.setItem(K, JSON.stringify(P)); }catch(e){} }
   const now = () => api._now ? new Date(api._now) : new Date();
 
   /* ───── season layer ───── */
   let cur = null;
-  function current(){ return P.season ? activeOn(now(), P) : null; }
+  function current(){ if(P.pick){ const o = OCC.find(x => x.id === P.pick); if(o) return {o, start:now(), end:now(), picked:true}; } return P.season ? activeOn(now(), P) : null; }
   function paint(){ const a = api._force ? {o:OCC.find(o => o.id === api._force)} : current(), id = a && a.o ? a.o.id : "";
     if(id === (cur && cur.id) && document.getElementById("qfx-sky")) return;
     cur = a && a.o ? a.o : null; const old = document.getElementById("qfx-sky"); if(old) old.remove();
@@ -398,6 +406,9 @@ const QFX = (() => {
     const sw = (id, on, label, sub) => `<div class="qfx-row"><div class="qfx-tx"><b>${label}</b>${sub ? `<small>${sub}</small>` : ""}</div><button type="button" class="qfx-sw ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-qfx="${id}" aria-label="${label}"><i></i></button></div>`;
     wrap.innerHTML = `<div class="qfx-panel" role="dialog" aria-modal="true" aria-label="Sounds and seasonal themes"><h3>Sounds and themes</h3>
       ${sw("sound", P.sound, "Sounds", "Taps, rewards and celebrations. Your phone's silent switch still mutes them.")}
+      <div class="qfx-h">Show a theme now</div><div class="qfx-chips" role="group" aria-label="Show a theme now">
+        <button type="button" class="qfx-chip ${P.pick ? "" : "on"}" data-qfx="pick:" aria-pressed="${!P.pick}">Auto</button>${OCC.filter(o => !o.only || o.only.includes(R())).map(o => `<button type="button" class="qfx-chip ${P.pick === o.id ? "on" : ""}" data-qfx="pick:${o.id}" aria-pressed="${P.pick === o.id}">${o.e} ${o.name}</button>`).join("")}</div>
+      <p class="qfx-note">${P.pick ? "Your pick stays on until you choose Auto." : "Auto switches themes on by themselves on special days."}</p>
       ${sw("season", P.season, "Seasonal themes", a ? `On now: ${a.o.e} ${a.o.name}` : "Decorations switch on by themselves on special days.")}
       ${P.season ? `<div class="qfx-h">Occasions</div><div class="qfx-list">${list().map(({o, w}) => sw("occ:" + o.id, !P.off[o.id], `${o.e} ${o.name}`,
         (+w[0] === +w[1] ? fmt(w[0]) : fmt(w[0]) + " to " + fmt(w[1])) + (a && a.o.id === o.id ? " · on now" : ""))).join("")}</div>
@@ -408,7 +419,8 @@ const QFX = (() => {
   function close(){ const s = document.getElementById("qfx-set"); if(s){ api._scroll = 0; s.remove(); } }
   function onSet(k){ if(k === "open"){ play("tap"); return openSettings(); } if(k === "close"){ play("tap"); return close(); }
     if(k === "sound"){ P.sound = !P.sound; saveP(); if(P.sound) play("done"); }
-    else if(k === "season"){ P.season = !P.season; saveP(); paint(); }
+    else if(k === "season"){ P.season = !P.season; if(!P.season) P.pick = ""; saveP(); paint(); }
+    else if(k.startsWith("pick:")){ P.pick = k.slice(5); if(P.pick) P.season = true; saveP(); paint(); }
     else if(k.startsWith("occ:")){ const id = k.slice(4); if(P.off[id]) delete P.off[id]; else P.off[id] = 1; saveP(); paint(); }
     else return;
     if(k !== "sound") play("tap");
@@ -442,7 +454,8 @@ const QFX = (() => {
 #qfx-set .qfx-sw{width:56px;height:44px;flex:none;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
 #qfx-set .qfx-sw i{display:block;width:48px;height:28px;border-radius:14px;background:#4a4363;position:relative;transition:background .2s}
 #qfx-set .qfx-sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
-#qfx-set .qfx-sw.on i{background:#3fcf8e}#qfx-set .qfx-sw.on i::after{transform:translateX(20px)}
+#qfx-set .qfx-sw.on i{background:#3fcf8e}
+#qfx-set .qfx-chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}#qfx-set .qfx-chip{min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:inherit;font:600 14px/1.2 inherit;cursor:pointer}#qfx-set .qfx-chip.on{background:#3fcf8e;border-color:#3fcf8e;color:#0b2a1c}#qfx-set .qfx-sw.on i::after{transform:translateX(20px)}
 #qfx-set .qfx-h{margin:16px 0 2px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#bdb5d9}
 #qfx-set .qfx-note{font-size:13px;color:#bdb5d9;margin:10px 0 0}
 #qfx-set .qfx-done{width:100%;min-height:48px;margin-top:16px;border:0;border-radius:14px;background:#ffc94a;color:#3a2300;font:inherit;font-weight:800;cursor:pointer}
@@ -506,6 +519,7 @@ function normalize(){
     if(!["active","paused","done"].includes(q.status)) q.status = "active"; if(typeof q.id !== "string") q.id = uid(); });
   if(S.hero !== null && (!isObj(S.hero) || typeof S.hero.name !== "string")) S.hero = {name:"Friend", created:today()};
   if(S.ready && !S.hero) S.hero = {name:"Friend", created:today()};
+  if(S.hero && !okPhoto(S.hero.photo)) delete S.hero.photo;
   if(S.ready && (!S.plan.y0 || !S.flags.planY2)){ S.plan.y0 = firstSprintYear(); S.flags.planY2 = true; }
   Object.keys(S.vision).forEach(k => { if(typeof S.vision[k] !== "string") delete S.vision[k]; });
   Object.keys(S.review).forEach(k => { const r = S.review[k]; if(!isObj(r)){ delete S.review[k]; return; } if(!Array.isArray(r.wins)) r.wins = [];
@@ -647,7 +661,8 @@ function renderNav(){ const n = document.getElementById("nav");
   if(!S.ready){ n.style.display = "none"; return; } n.style.display = "";
   n.innerHTML = NAV.map(([k,l]) => `<button class="${tab === k ? "on" : ""}" data-tab="${k}" ${tab === k ? 'aria-current="page"' : ""}>${I[k]}${l}</button>`).join(""); }
 function topBar(){ const l = lvlOf(S.xp), a = xpAt(l), b = xpAt(l+1);
-  return `<header class="top"><div class="logo" aria-hidden="true"></div><div class="grow"><b>${esc(S.hero ? S.hero.name : "")}</b>
+  const ph = S.hero && okPhoto(S.hero.photo) ? S.hero.photo : "";
+  return `<header class="top"><button class="logo${ph ? " photo" : ""}" data-act="photo" aria-label="${ph ? "Change your photo" : "Add your photo"}">${ph ? `<img src="${ph}" alt="">` : `<span class="cam" aria-hidden="true">📷</span>`}</button><div class="grow"><b>${esc(S.hero ? S.hero.name : "")}</b>
     <div class="lv"><i>LV ${l}</i>${esc(titleOf(l))} · ${S.xp - a}/${b - a} XP</div><div class="xpbar"><u style="width:${Math.round((S.xp - a)/(b - a)*100)}%"></u></div></div>
     <button class="icb" data-act="settings" aria-label="Settings">${I.gear}</button></header>`; }
 function render(){
@@ -934,6 +949,30 @@ function openLetter(l){ if(!l) return; const first = !l.opened; if(l.unlock > to
     <div class="card" style="white-space:pre-wrap;line-height:1.55">${esc(l.text)}</div>
     <div class="actions"><button class="btn" data-close>Close</button></div>`);
   if(first){ gain(15, "Letter opened"); award("letter_open"); render(); } }
+/* profile photo: cropped to a small square and kept on this device only */
+const okPhoto = v => typeof v === "string" && v.startsWith("data:image/") && v.length < 400000;
+function readPhoto(file){ return new Promise((res, rej) => {
+  const bad = () => { toast("That picture couldn't be opened"); rej(new Error("photo")); };
+  if(!file || (file.type && !/^image\//.test(file.type))) return bad();
+  const url = URL.createObjectURL(file), im = new Image();
+  im.onload = () => { try{ const w = im.naturalWidth, h = im.naturalHeight, z = Math.min(w, h); if(!z) throw 0;
+      const c = document.createElement("canvas"); c.width = c.height = 192;
+      c.getContext("2d").drawImage(im, (w - z)/2, (h - z)/2, z, z, 0, 0, 192, 192);
+      res(c.toDataURL("image/jpeg", 0.85)); }
+    catch(e){ bad(); } finally{ URL.revokeObjectURL(url); } };
+  im.onerror = () => { URL.revokeObjectURL(url); bad(); };
+  im.src = url; }); }
+function photoForm(){ let ph = okPhoto(S.hero.photo) ? S.hero.photo : "";
+  sheet(`<h3>Your photo</h3><p class="sub">Shown at the top of the app. It stays on this device and is never uploaded.</p>
+    <div id="phb"></div><div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`, root => {
+    const draw = () => { root.querySelector("#phb").innerHTML = `<div class="ph-prev">${ph ? `<img src="${ph}" alt="Your photo">` : "🙂"}</div>
+      <div class="two" style="margin-top:12px"><button class="btn ghost" id="pick">🖼️ ${ph ? "Change photo" : "Choose a photo"}</button><button class="btn ghost" id="rm" ${ph ? "" : "disabled"}>Remove</button></div>`;
+      root.querySelector("#pick").onclick = () => { const i = document.createElement("input"); i.type = "file"; i.accept = "image/*";
+        i.onchange = () => readPhoto(i.files[0]).then(d => { ph = d; draw(); }).catch(() => {}); i.click(); };
+      root.querySelector("#rm").onclick = () => { ph = ""; draw(); }; };
+    draw();
+    root.querySelector("#ok").onclick = () => { if(ph) S.hero.photo = ph; else delete S.hero.photo; save(); closeSheet(); render(); toast(ph ? "Photo saved" : "Photo removed"); };
+  }); }
 function goalsForm(y){ y = +y; const g = goalsOf(y).map(x => ({...x})); while(g.length < 5) g.push({id:uid(), text:"", done:false});
   sheet(`<h3>${y} goals</h3><p class="sub">${yearTag(y)}. What do you want this year to bring? Keep each one short. Your quests and 12-week laps are how you get there.</p>
     <div id="gl"></div>${g.length < 8 ? `<button class="btn sm ghost full" id="addG" style="margin-top:10px">${I.plus} Another goal</button>` : ""}
@@ -949,6 +988,7 @@ function goalsForm(y){ y = +y; const g = goalsOf(y).map(x => ({...x})); while(g.
 function settingsForm(){ const s = S.settings;
   sheet(`<h3>Settings</h3><p class="sub">Your data stays on this device. Back it up now and then.</p>
     <label class="f" for="sn">Your name</label><input class="in" id="sn" maxlength="30" value="${esc(S.hero.name)}">
+    <button class="btn ghost full" id="ph" style="margin-top:10px">📷 ${okPhoto(S.hero.photo) ? "Change your photo" : "Add your photo"}</button>
     <div class="two"><div><label class="f" for="sw">Week starts</label><select class="in" id="sw"><option value="1">Monday</option><option value="0" ${s.ws === 0 ? "selected" : ""}>Sunday</option></select></div>
       <div><label class="f" for="sb">Birthday (optional)</label><input class="in" id="sb" type="date" value="${s.bday ? "2000-" + s.bday : ""}"></div></div>
     <p class="note" style="margin-top:6px">Your birthday is only used to show a fresh-start reminder. The year isn't stored.</p>
@@ -965,6 +1005,7 @@ function settingsForm(){ const s = S.settings;
       const b = val(root,"#sb"); S.settings.bday = b ? b.slice(5) : "";
       const ss = val(root,"#ss"), ss0 = S.sprint.start; if(nws !== s.ws){ S.settings.ws = nws; remapWeeks(); }
       if(ss && ss !== ss0) S.sprint.start = weekKey(ss); const sy = +val(root,"#sy"); if(sy) S.plan.y0 = sy; mapYr = 0; mapSp = -1; save(); closeSheet(); render(); toast("Saved"); };
+    root.querySelector("#ph").onclick = () => photoForm();
     root.querySelector("#ex").onclick = exportData; root.querySelector("#im").onclick = () => document.getElementById("importFile").click();
     root.querySelector("#demo").onclick = () => { if(!confirm("Replace everything with sample data? Back up first if you want to keep yours.")) return; demo(); closeSheet(); tab = "week"; render(); };
     root.querySelector("#reset").onclick = () => { if(!confirm("Erase everything on this device? This can't be undone.")) return; if(!confirm("Really erase? Last chance.")) return;
@@ -1087,6 +1128,7 @@ document.addEventListener("click", e => {
   else if(act === "addLetter") letterForm();
   else if(act === "openLetter") openLetter(S.letters.find(l => l.id === id));
   else if(act === "settings") settingsForm();
+  else if(act === "photo") photoForm();
   else if(act === "editGoals") goalsForm(a.dataset.y);
   else if(act === "goalT"){ const g = goalsOf(+a.dataset.y).find(x => x.id === id); if(!g) return; g.done = !g.done; save(); render();
     if(g.done){ QFX.play("done"); if(!g.xp && capOk("goal", 5)){ g.xp = true; save(); gain(30, "Goal reached"); } award("goal_done"); } }

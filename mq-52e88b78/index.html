@@ -632,8 +632,8 @@ const QFX = (() => {
   function close(){ const s = document.getElementById("qfx-set"); if(s){ api._scroll = 0; s.remove(); } }
   function onSet(k){ if(k === "open"){ play("tap"); return openSettings(); } if(k === "close"){ play("tap"); return close(); }
     if(k === "sound"){ P.sound = !P.sound; saveP(); if(P.sound) play("done"); }
-    else if(k === "season"){ P.season = !P.season; saveP(); paint(); }
-    else if(k.startsWith("pick:")){ P.pick = k.slice(5); saveP(); paint(); }
+    else if(k === "season"){ P.season = !P.season; if(!P.season) P.pick = ""; saveP(); paint(); }
+    else if(k.startsWith("pick:")){ P.pick = k.slice(5); if(P.pick) P.season = true; saveP(); paint(); }
     else if(k.startsWith("occ:")){ const id = k.slice(4); if(P.off[id]) delete P.off[id]; else P.off[id] = 1; saveP(); paint(); }
     else return;
     if(k !== "sound") play("tap");
