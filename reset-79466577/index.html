@@ -43,6 +43,12 @@ button.logo{position:relative;padding:0;overflow:visible}
 .logo .cam{position:absolute;right:-5px;bottom:-5px;width:20px;height:20px;border-radius:50%;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-size:10px;line-height:1}
 .ph-prev{width:132px;height:132px;border-radius:34px;margin:6px auto 4px;overflow:hidden;display:grid;place-items:center;font-size:44px;background:var(--card2);border:1px solid var(--line)}
 .ph-prev img{width:100%;height:100%;object-fit:cover;display:block}
+.crop{position:relative;width:240px;height:240px;margin:6px auto 0;border-radius:40px;overflow:hidden;background:var(--card2);border:1px solid var(--line);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.crop img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:none;-webkit-user-drag:none}
+.crop:active{cursor:grabbing}
+.zoom{display:flex;align-items:center;gap:10px;margin-top:14px}
+.zoom span{font-size:18px;color:var(--mut);width:22px;text-align:center}
+.zoom input{flex:1;accent-color:var(--sun);height:32px}
 .top b{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lv{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);font-weight:600}
 .lv i{font-style:normal;background:linear-gradient(180deg,#ffe3a3,#ffb45f);color:#3a1d0b;border-radius:7px;padding:1px 7px;font-weight:800}
@@ -520,6 +526,8 @@ function normalize(){
   if(S.hero !== null && (!isObj(S.hero) || typeof S.hero.name !== "string")) S.hero = {name:"Friend", created:today()};
   if(S.ready && !S.hero) S.hero = {name:"Friend", created:today()};
   if(S.hero && !okPhoto(S.hero.photo)) delete S.hero.photo;
+  if(S.hero && !okPhoto(S.hero.photoSrc)){ delete S.hero.photoSrc; delete S.hero.crop; }
+  if(S.hero && S.hero.crop){ const c = S.hero.crop; if(!isObj(c) || !(c.z >= 1 && c.z <= 4) || !(c.cx >= 0 && c.cx <= 1) || !(c.cy >= 0 && c.cy <= 1)) delete S.hero.crop; }
   if(S.ready && (!S.plan.y0 || !S.flags.planY2)){ S.plan.y0 = firstSprintYear(); S.flags.planY2 = true; }
   Object.keys(S.vision).forEach(k => { if(typeof S.vision[k] !== "string") delete S.vision[k]; });
   Object.keys(S.review).forEach(k => { const r = S.review[k]; if(!isObj(r)){ delete S.review[k]; return; } if(!Array.isArray(r.wins)) r.wins = [];
@@ -950,7 +958,7 @@ function openLetter(l){ if(!l) return; const first = !l.opened; if(l.unlock > to
     <div class="actions"><button class="btn" data-close>Close</button></div>`);
   if(first){ gain(15, "Letter opened"); award("letter_open"); render(); } }
 /* profile photo: cropped to a small square and kept on this device only */
-const okPhoto = v => typeof v === "string" && v.startsWith("data:image/") && v.length < 400000;
+const okPhoto = v => typeof v === "string" && v.startsWith("data:image/") && v.length < 900000;
 function readPhoto(file){ return new Promise((res, rej) => {
   const bad = () => { toast("That picture couldn't be opened"); rej(new Error("photo")); };
   if(!file || (file.type && !/^image\//.test(file.type))) return bad();
@@ -962,16 +970,58 @@ function readPhoto(file){ return new Promise((res, rej) => {
     catch(e){ bad(); } finally{ URL.revokeObjectURL(url); } };
   im.onerror = () => { URL.revokeObjectURL(url); bad(); };
   im.src = url; }); }
-function photoForm(){ let ph = okPhoto(S.hero.photo) ? S.hero.photo : "";
-  sheet(`<h3>Your photo</h3><p class="sub">Shown at the top of the app. It stays on this device and is never uploaded.</p>
+/* the original picture (max 900px) is kept so the framing can be changed later */
+function loadSrc(file){ return new Promise((res, rej) => {
+  const bad = () => { toast("That picture couldn't be opened"); rej(new Error("photo")); };
+  if(!file || (file.type && !/^image\//.test(file.type))) return bad();
+  const url = URL.createObjectURL(file), im = new Image();
+  im.onload = () => { try{ const w = im.naturalWidth, h = im.naturalHeight; if(!w || !h) throw 0; const k = Math.min(1, 900 / Math.max(w, h));
+      const c = document.createElement("canvas"); c.width = Math.round(w*k); c.height = Math.round(h*k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", 0.85)); }
+    catch(e){ bad(); } finally{ URL.revokeObjectURL(url); } };
+  im.onerror = () => { URL.revokeObjectURL(url); bad(); };
+  im.src = url; }); }
+function photoForm(){ const V = 240;
+  let src = okPhoto(S.hero.photoSrc) ? S.hero.photoSrc : okPhoto(S.hero.photo) ? S.hero.photo : "";
+  let c = isObj(S.hero.crop) && S.hero.photoSrc ? {...S.hero.crop} : {z:1, cx:.5, cy:.5};
+  let im = null;
+  sheet(`<h3>Your photo</h3><p class="sub">Drag to move it, and use the slider to zoom. It stays on this device and is never uploaded.</p>
     <div id="phb"></div><div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`, root => {
-    const draw = () => { root.querySelector("#phb").innerHTML = `<div class="ph-prev">${ph ? `<img src="${ph}" alt="Your photo">` : "🙂"}</div>
-      <div class="two" style="margin-top:12px"><button class="btn ghost" id="pick">🖼️ ${ph ? "Change photo" : "Choose a photo"}</button><button class="btn ghost" id="rm" ${ph ? "" : "disabled"}>Remove</button></div>`;
+    const fit = () => { if(!im) return {}; const base = V / Math.min(im.w, im.h), sc = base * c.z, dw = im.w * sc, dh = im.h * sc;
+      const x = Math.min(0, Math.max(V - dw, V/2 - c.cx * dw)), y = Math.min(0, Math.max(V - dh, V/2 - c.cy * dh));
+      c.cx = (V/2 - x) / dw; c.cy = (V/2 - y) / dh; return {sc, dw, dh, x, y}; };
+    const place = () => { const el = root.querySelector(".crop img"); if(!el || !im) return; const f = fit();
+      el.style.width = im.w + "px"; el.style.height = im.h + "px"; el.style.transform = `translate(${f.x}px,${f.y}px) scale(${f.sc})`; };
+    const draw = () => {
+      root.querySelector("#phb").innerHTML = src ? `<div class="crop" id="cb"><img src="${src}" alt="Your photo"></div>
+        <div class="zoom"><span aria-hidden="true">−</span><input type="range" id="zm" min="1" max="4" step="0.01" value="${c.z}" aria-label="Zoom"><span aria-hidden="true">+</span></div>`
+        : `<div class="ph-prev">🙂</div>`;
+      root.querySelector("#phb").insertAdjacentHTML("beforeend", `<div class="two" style="margin-top:12px"><button class="btn ghost" id="pick">🖼️ ${src ? "Change photo" : "Choose a photo"}</button><button class="btn ghost" id="rm" ${src ? "" : "disabled"}>Remove</button></div>`);
       root.querySelector("#pick").onclick = () => { const i = document.createElement("input"); i.type = "file"; i.accept = "image/*";
-        i.onchange = () => readPhoto(i.files[0]).then(d => { ph = d; draw(); }).catch(() => {}); i.click(); };
-      root.querySelector("#rm").onclick = () => { ph = ""; draw(); }; };
+        i.onchange = () => loadSrc(i.files[0]).then(d => { src = d; c = {z:1, cx:.5, cy:.5}; im = null; draw(); }).catch(() => {}); i.click(); };
+      root.querySelector("#rm").onclick = () => { src = ""; im = null; draw(); };
+      if(!src) return;
+      const img = root.querySelector(".crop img"), box = root.querySelector("#cb"), zm = root.querySelector("#zm");
+      const ready = () => { im = {el:img, w:img.naturalWidth, h:img.naturalHeight}; place(); };
+      if(img.complete && img.naturalWidth) ready(); else img.onload = ready;
+      zm.oninput = () => { c.z = +zm.value; place(); };
+      const pts = new Map(); let last = null, pinch0 = 0, z0 = 1;
+      box.addEventListener("pointerdown", e => { box.setPointerCapture(e.pointerId); pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+        last = {x:e.clientX, y:e.clientY}; if(pts.size === 2){ const [p, q] = [...pts.values()]; pinch0 = Math.hypot(p.x - q.x, p.y - q.y); z0 = c.z; } });
+      box.addEventListener("pointermove", e => { if(!pts.has(e.pointerId) || !im) return; pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+        if(pts.size === 2 && pinch0){ const [p, q] = [...pts.values()]; c.z = Math.min(4, Math.max(1, z0 * Math.hypot(p.x - q.x, p.y - q.y) / pinch0)); zm.value = c.z; place(); return; }
+        const f = fit(); c.cx -= (e.clientX - last.x) / f.dw; c.cy -= (e.clientY - last.y) / f.dh; last = {x:e.clientX, y:e.clientY}; place(); });
+      const up = e => { pts.delete(e.pointerId); if(pts.size < 2) pinch0 = 0; const r = [...pts.values()][0]; if(r) last = {...r}; };
+      box.addEventListener("pointerup", up); box.addEventListener("pointercancel", up);
+      box.addEventListener("wheel", e => { e.preventDefault(); c.z = Math.min(4, Math.max(1, c.z * (e.deltaY < 0 ? 1.08 : 1/1.08))); zm.value = c.z; place(); }, {passive:false}); };
     draw();
-    root.querySelector("#ok").onclick = () => { if(ph) S.hero.photo = ph; else delete S.hero.photo; save(); closeSheet(); render(); toast(ph ? "Photo saved" : "Photo removed"); };
+    root.querySelector("#ok").onclick = () => {
+      if(!src){ delete S.hero.photo; delete S.hero.photoSrc; delete S.hero.crop; save(); closeSheet(); render(); toast("Photo removed"); return; }
+      if(!im) return toast("One moment, the photo is still loading");
+      const f = fit(), cv = document.createElement("canvas"); cv.width = cv.height = 256;
+      cv.getContext("2d").drawImage(im.el, -f.x / f.sc, -f.y / f.sc, V / f.sc, V / f.sc, 0, 0, 256, 256);
+      S.hero.photo = cv.toDataURL("image/jpeg", 0.88); S.hero.photoSrc = src; S.hero.crop = {z:c.z, cx:c.cx, cy:c.cy};
+      save(); closeSheet(); render(); toast("Photo saved"); };
   }); }
 function goalsForm(y){ y = +y; const g = goalsOf(y).map(x => ({...x})); while(g.length < 5) g.push({id:uid(), text:"", done:false});
   sheet(`<h3>${y} goals</h3><p class="sub">${yearTag(y)}. What do you want this year to bring? Keep each one short. Your quests and 12-week laps are how you get there.</p>
