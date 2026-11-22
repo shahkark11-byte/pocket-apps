@@ -128,10 +128,32 @@ input,textarea,select{font:inherit;color:var(--ink)}
 .sprint i.strong{background:linear-gradient(180deg,#ffd895,#ff9f5e);color:#3a1d0b}
 .sprint i.now{outline:2px solid var(--ink);outline-offset:1px}
 
-.year{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;margin-top:12px}
-.year i{aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.07)}
-.year i{position:relative}.year i.up{background:rgba(98,224,182,.4)}.year i.strong{background:#ffb867}.year i.strong::after{content:"";position:absolute;inset:35%;border-radius:50%;background:#3a1d0b}.year i.fresh{box-shadow:inset 0 0 0 2px var(--sky)}
+.year{display:grid;grid-template-columns:24px repeat(13,minmax(0,1fr));gap:4px;margin-top:12px;align-items:center}
+.year .ql{font-size:10px;font-weight:800;color:var(--mut);letter-spacing:.04em}
+.year i{aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.07);display:grid;place-items:center;font-style:normal;font-size:9px;font-weight:800;color:var(--dim)}
+.year i{position:relative}.year i.up{background:rgba(98,224,182,.4)}.year i.strong{background:#ffb867}.year i.strong{color:#3a1d0b}.year i.up{color:#dffbf0}.year i.fresh{box-shadow:inset 0 0 0 2px var(--sky)}
 .year i.future{background:rgba(255,255,255,.03)}.year i.now{outline:2px solid var(--ink);outline-offset:1px}
+.navr{display:flex;align-items:center;gap:10px}
+.arw{width:44px;height:44px;border-radius:13px;background:var(--card2);border:1px solid var(--line);font-size:22px;font-weight:800;color:var(--ink);display:grid;place-items:center;flex:none}
+.arw[disabled]{opacity:.28;pointer-events:none}
+.navr .mid{flex:1;min-width:0;text-align:center}
+.navr .mid b{display:block;font-size:17px;font-weight:800}
+.navr .mid small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
+.lapflow{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font-weight:800}
+.lapflow span{padding:8px 12px;border-radius:12px;background:var(--card2);font-size:14px}
+.lapflow span.nx{background:rgba(255,196,107,.18);color:var(--sun)}
+.goal{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line);text-align:left;width:100%;min-height:48px}
+.goal:first-of-type{border-top:0}
+.goal .ck{width:30px;height:30px;border-radius:9px;border:2px solid rgba(255,255,255,.22);display:grid;place-items:center;flex:none;font-weight:900;font-size:15px;color:#06341f}
+.goal.done .ck{background:var(--mint);border-color:var(--mint)}
+.goal.done .gt{text-decoration:line-through;color:var(--mut)}
+.goal .gt{flex:1;min-width:0;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
+.yc{margin-bottom:12px}
+.yc.now{border-color:rgba(255,196,107,.55);background:linear-gradient(160deg,rgba(255,196,107,.12),var(--card))}
+.yc.past{opacity:.82}
+.yc .yh{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.yc .yh b{font-size:17px;font-weight:800}
+.laps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:12px;color:var(--mut)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:12px;height:12px;border-radius:4px;display:inline-block}
@@ -461,7 +483,7 @@ QFX.init({key:KEY,
   acts:{untick:"undo"}});
 const blank = () => ({v:1, hero:null, step:0, ready:false, review:{}, vision:{}, word:"", who:"",
   quests:[], sprint:{start:"", n:1, history:[]}, weeks:{}, letters:[], restarts:[], xp:0, badges:{}, caps:{}, flags:{},
-  settings:{ws:1, bday:""}});
+  settings:{ws:1, bday:""}, plan:{y0:0, goals:{}}});
 let S, RESCUED = null;
 const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
 const isD = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
@@ -470,6 +492,11 @@ function normalize(){
   ["review","vision","weeks","badges","caps","flags"].forEach(k => { if(!isObj(S[k])) S[k] = {}; });
   if(!isObj(S.sprint)) S.sprint = {}; if(!isD(S.sprint.start)) S.sprint.start = ""; S.sprint.n = Math.max(1, +S.sprint.n || 1);
   if(!Array.isArray(S.sprint.history)) S.sprint.history = [];
+  S.sprint.history = S.sprint.history.filter(h => isObj(h) && isD(h.start));
+  if(!isObj(S.plan)) S.plan = {}; S.plan.y0 = Math.round(+S.plan.y0) || 0; if(S.plan.y0 < 2000 || S.plan.y0 > 2200) S.plan.y0 = 0;
+  if(!isObj(S.plan.goals)) S.plan.goals = {};
+  Object.keys(S.plan.goals).forEach(y => { const g = S.plan.goals[y]; if(!/^\d{4}$/.test(y) || !Array.isArray(g)){ delete S.plan.goals[y]; return; }
+    S.plan.goals[y] = g.filter(x => isObj(x) && typeof x.text === "string" && x.text.trim()).slice(0, 8).map(x => ({id:typeof x.id === "string" ? x.id : uid(), text:x.text.slice(0, 90), done:!!x.done})); });
   if(!isObj(S.settings)) S.settings = {}; S.settings.ws = S.settings.ws === 0 ? 0 : 1;
   if(typeof S.settings.bday !== "string" || !/^\d{2}-\d{2}$/.test(S.settings.bday)) S.settings.bday = "";
   if(typeof S.word !== "string") S.word = ""; if(typeof S.who !== "string") S.who = "";
@@ -479,6 +506,7 @@ function normalize(){
     if(!["active","paused","done"].includes(q.status)) q.status = "active"; if(typeof q.id !== "string") q.id = uid(); });
   if(S.hero !== null && (!isObj(S.hero) || typeof S.hero.name !== "string")) S.hero = {name:"Friend", created:today()};
   if(S.ready && !S.hero) S.hero = {name:"Friend", created:today()};
+  if(S.ready && !S.plan.y0) S.plan.y0 = firstSprintYear();
   Object.keys(S.vision).forEach(k => { if(typeof S.vision[k] !== "string") delete S.vision[k]; });
   Object.keys(S.review).forEach(k => { const r = S.review[k]; if(!isObj(r)){ delete S.review[k]; return; } if(!Array.isArray(r.wins)) r.wins = [];
     r.wins = r.wins.map(x => typeof x === "string" ? x : ""); ["lesson","drop","year"].forEach(f => { if(typeof r[f] !== "string") r[f] = f === "year" ? k : ""; }); });
@@ -514,6 +542,22 @@ function weekRange(k){ const a = parse(k), e = addDays(k,6), b = parse(e), m = d
   return a.getMonth() === b.getMonth() ? `${m(a)} ${a.getDate()}–${b.getDate()}` : `${m(a)} ${a.getDate()} – ${m(b)} ${b.getDate()}`; }
 const reviewYear = () => String(+today().slice(0,4) - (+today().slice(5,7) >= 10 ? 0 : 1));
 const weekNo = k => S.sprint.start ? Math.floor(daysBetween(S.sprint.start, k) / 7) + 1 : 0;
+/* 5-year plan: years, laps (12-week sprints) inside each year, week numbers 1-52 */
+const yrOf = k => +addDays(k, 3).slice(0,4);
+const yearStartWeek = y => { let k = weekKey(iso(new Date(y, 0, 1))); if(yrOf(k) < y) k = addDays(k, 7); return k; };
+function weeksOfYear(y){ const out = []; for(let k = yearStartWeek(y); yrOf(k) === y && out.length < 53; k = addDays(k, 7)) out.push(k); return out; }
+const woy = k => Math.floor(daysBetween(yearStartWeek(yrOf(k)), k) / 7) + 1;
+const thisYear = () => yrOf(curWeek());
+function firstSprintYear(){ const h = S.sprint.history[0], st = h ? h.start : S.sprint.start; return st ? yrOf(st) : thisYear(); }
+const y0 = () => S.plan.y0 || firstSprintYear();
+const planYr = y => y - y0() + 1;
+function allSprints(){ const a = S.sprint.history.map(h => ({start:h.start, n:+h.n || 1})); if(S.sprint.start) a.push({start:S.sprint.start, n:S.sprint.n, cur:true}); return a; }
+function lapOf(sp){ const y = yrOf(sp.start); return allSprints().filter(x => yrOf(x.start) === y && x.start <= sp.start).length; }
+const sprintWeeks = st => Array.from({length:12}, (_,i) => addDays(st, i*7));
+function yearTag(y){ const n = planYr(y); return n >= 1 && n <= 5 ? `Year ${n} of 5` : n > 5 ? "After your 5 years" : "Before your plan"; }
+const goalsOf = y => S.plan.goals[String(y)] || [];
+function goalRows(y){ const g = goalsOf(y);
+  return g.map(x => `<button class="goal${x.done ? " done" : ""}" data-act="goalT" data-y="${y}" data-id="${x.id}" aria-pressed="${x.done}"><span class="ck">${x.done ? "✓" : ""}</span><span class="gt">${esc(x.text)}</span></button>`).join(""); }
 function secondFridayJan(y){ const d = new Date(y, 0, 1); let n = 0; while(true){ if(d.getDay() === 5 && ++n === 2) return iso(d); d.setDate(d.getDate()+1); } }
 
 /* ───────── areas ───────── */
@@ -529,6 +573,8 @@ const titleOf = l => TITLES[Math.min(TITLES.length-1, l-1)];
 const BADGES = [
   ["first_step","👣","First Step","Tick your first action"],
   ["future","🔭","Future Me","Write your 5-year vision"],
+  ["year_goals","🎯","Year Planner","Set your goals for a year"],
+  ["goal_done","✅","Goal Reached","Tick off a yearly goal"],
   ["lookback","🪞","Look Back","Review the last year"],
   ["planner","🧭","If-Then Planner","Make 3 if-then plans"],
   ["checkin1","📝","Checked In","First weekly check-in"],
@@ -626,8 +672,9 @@ function weekView(){
   const prevK = addDays(k, -7), prevEmpty = weekNo(prevK) >= 1 && !shownUp(prevK) && !shownUp(k);
   return `
   <section class="card hero"><div class="row" style="align-items:flex-start"><div class="grow">
-    <div class="lbl">Week ${n} of 12${S.sprint.n > 1 ? ` · sprint ${S.sprint.n}` : ""}</div>
+    <div class="lbl">${yearTag(yrOf(S.sprint.start))} · Lap ${lapOf({start:S.sprint.start})} · Week ${n} of 12</div>
     <div class="big" style="margin-top:6px">${weekRange(k)}</div>
+    <div class="muted" style="margin-top:4px;font-size:14px">Week ${woy(k)} of ${weeksOfYear(yrOf(k)).length} in ${yrOf(k)}</div>
     <div class="muted" style="margin-top:4px">${tgt ? `${done} of ${tgt} actions this week` : "Add an if-then plan to a quest"}</div></div>
     <div class="ring">${ring(tgt ? done/tgt : 0)}<div class="c">${tgt ? Math.round(done/tgt*100) : 0}%<small>this week</small></div></div></div>
     ${pick ? `<div class="fut"><span>${areaOf(pick[0])[1]} Future you, 5 years from now</span>${esc(pick[1])}</div>` : ""}</section>
@@ -636,6 +683,7 @@ function weekView(){
   ${prevEmpty ? `<section class="card banner sky"><div class="e">🌱</div><div><b>Last week was empty. That's fine.</b><p class="note">Nothing is lost. Start this week small: tick just one thing.</p>
     <button class="btn sm ghost" data-act="fresh" style="margin-top:10px">Make this week easier</button></div></section>` : ""}
   ${qs.length ? qs.map(questCard).join("") : `<div class="card empty"><div class="e">🧭</div>No active quests.<br><br><button class="btn sm" data-act="addQuest">${I.plus} Add a quest</button></div>`}
+  ${goalsCard(yrOf(k))}
   ${checkCard(k, w)}
   <div style="text-align:center;margin-top:6px"><button class="link" data-act="fresh">Rough week? Start fresh</button></div>`;
 }
@@ -649,6 +697,11 @@ function questCard(q){ const k = curWeek(), w = peek(k), a = areaOf(q.area);
         <button class="tick${full ? " done" : ""}" data-act="tick" data-q="${q.id}" data-p="${p.id}" aria-label="${full ? "Done for this week" : "Mark done"}">${full ? "✓" : "+1"}</button></div>`; }).join("")
       : `<p class="note" style="margin-top:10px">No if-then plan yet. <button class="link" data-act="editQuest" data-id="${q.id}">Add one</button></p>`}
   </section>`; }
+function goalsCard(y){ const g = goalsOf(y), d = g.filter(x => x.done).length;
+  if(!g.length) return `<section class="card"><div class="row"><div class="emo">🎯</div><div class="grow"><b>Your ${y} goals</b><small class="muted" style="display:block;font-size:13px">${yearTag(y)} · what do you want this year to bring?</small></div>
+    <button class="btn sm" data-act="editGoals" data-y="${y}">Set goals</button></div></section>`;
+  return `<section class="card"><div class="row" style="margin-bottom:6px"><div class="grow"><div class="lbl">${yearTag(y)} · ${y} goals</div><small class="muted" style="font-size:13px">${d} of ${g.length} done</small></div>
+    <button class="link" data-act="editGoals" data-y="${y}">Edit</button></div>${goalRows(y)}</section>`; }
 function checkCard(k, w){
   if(w.check) return `<section class="card"><div class="row"><div class="emo">📝</div><div class="grow"><b>Check-in done</b><small class="muted" style="display:block;font-size:13px">${esc(feelLabel(w.check.feel))}</small></div>
     <button class="btn sm ghost" data-act="checkin">Edit</button></div>
@@ -664,11 +717,15 @@ function waitView(){ const k = curWeek();
     ${activeQ().map(q => `<div class="item" style="margin-bottom:10px"><div class="emo">${areaOf(q.area)[1]}</div><div class="grow"><b>${esc(q.title)}</b><small>${q.plans.length} if-then plan${q.plans.length === 1 ? "" : "s"}</small></div></div>`).join("")}`; }
 function sprintEndView(){ const st = S.sprint.start, ks = Array.from({length:12}, (_,i) => addDays(st, i*7));
   const up = ks.filter(shownUp).length, ticks = sum(ks.map(k => sum(Object.values(peek(k).ticks)))), ch = ks.filter(k => peek(k).check).length;
-  return `<section class="card hero"><div class="lbl">Sprint ${S.sprint.n} complete</div><div class="big gold" style="margin-top:6px">${up ? "12 weeks done" : "A new start"}</div>
+  const lap = lapOf({start:st}), ny = thisYear(), sameYr = ny === yrOf(st), nextLap = sameYr ? lap + 1 : 1;
+  return `<section class="card hero"><div class="lbl">${yearTag(yrOf(st))} · Lap ${lap} complete</div><div class="big gold" style="margin-top:6px">${up ? "12 weeks done" : "A new start"}</div>
     <p class="muted" style="margin-top:6px">${up ? `You showed up in ${up} of 12 weeks. That's what counts.` : "This one didn't get going, and that's okay. The next 12 weeks start whenever you're ready."}</p>
     <div class="stats"><div class="stat"><small>Weeks shown up</small><b>${up}</b></div><div class="stat"><small>Actions</small><b>${ticks}</b></div><div class="stat"><small>Check-ins</small><b>${ch}</b></div></div>
     <div class="sprint">${ks.map((k,i) => `<i class="${strong(k) ? "strong" : shownUp(k) ? "up" : ""}">${i+1}</i>`).join("")}</div></section>
-    <section class="card"><b>What next?</b><p class="note" style="margin-top:6px">Mark any quest you finished as complete in Quests, adjust the rest, then start your next 12 weeks.</p>
+    <section class="card"><b>What next?</b>
+    <div class="lapflow"><span>Lap ${lap}${sameYr ? "" : ` · ${yrOf(st)}`}</span><span aria-hidden="true">→</span><span class="nx">${sameYr ? "" : `${yearTag(ny)} · `}Lap ${nextLap}</span></div>
+    <p class="note" style="margin-top:12px">Everything from this lap stays saved in Map. Mark any quest you finished as complete in Quests, adjust the rest, then start your next 12 weeks.${sameYr ? "" : ` It's a new year too, so set your ${ny} goals.`}</p>
+    ${sameYr ? "" : `<button class="btn sm ghost full" data-act="editGoals" data-y="${ny}" style="margin-top:12px">🎯 Set ${ny} goals</button>`}
     <div class="actions"><button class="btn ghost" data-tab="quests">Review quests</button><button class="btn" data-act="newSprint">Start next 12 weeks</button></div></section>`; }
 
 /* Quests */
@@ -699,6 +756,10 @@ function futureView(){ const ry = reviewYear(), rv = S.review[ry] || S.review[St
   <div class="h"><h2>In 5 years</h2><button data-act="editVision">Edit</button></div>
   <div class="areas">${AREAS.filter(a => S.vision[a[0]]).map(a => `<div class="area"><div class="e">${a[1]}</div><b>${a[2]}</b><p>${esc(S.vision[a[0]])}</p></div>`).join("") ||
     `<div class="card empty" style="grid-column:1/-1;margin:0"><div class="e">🔭</div>Describe your life 5 years from now, one area at a time.</div>`}</div>
+  <div class="h"><h2>Your 5-year plan</h2><span class="muted" style="font-size:14px">${y0()}–${y0() + 4}</span></div>
+  ${planDone() ? `<section class="card banner sun"><div class="e">🏁</div><div><b>Your 5 years are done</b><p class="note">Look how far you came. Ready for the next 5?</p>
+    <button class="btn sm" data-act="newPlan" style="margin-top:10px">Start a new 5-year plan</button></div></section>` : ""}
+  ${Array.from({length:5}, (_,i) => yearCard(y0() + i)).join("")}
   <div class="h"><h2>Letters to future you</h2><button data-act="addLetter">+ Write</button></div>
   ${lt.length ? `<div class="list">${lt.map(l => { const ready = !l.opened && l.unlock <= t;
     return `<div class="letter${ready ? " ready" : ""}"><div class="seal">${l.opened ? "💌" : ready ? "✨" : "🔒"}</div><div class="grow"><b style="display:block">${l.opened ? "Opened" : ready ? "Ready to open" : "Sealed"}</b>
@@ -712,20 +773,45 @@ function futureView(){ const ry = reviewYear(), rv = S.review[ry] || S.review[St
     ${rv.drop ? `<p class="note" style="margin-top:6px"><b style="color:var(--ink)">Leaving behind:</b> ${esc(rv.drop)}</p>` : ""}</section>`
     : `<div class="card empty"><div class="e">🪞</div>Three wins, one lesson, one thing to leave behind. Five minutes.</div>`}`; }
 
+function planDone(){ return planYr(thisYear()) > 5; }
+function yearCard(y){ const n = planYr(y), cy = thisYear(), g = goalsOf(y), d = g.filter(x => x.done).length;
+  const laps = allSprints().filter(x => yrOf(x.start) === y);
+  const st = y === cy ? `<span class="chip sun">Now</span>` : y < cy ? `<span class="chip">Done</span>` : `<span class="chip sky">Ahead</span>`;
+  return `<section class="card yc${y === cy ? " now" : y < cy ? " past" : ""}"><div class="yh"><b>Year ${n} · ${y}</b>${st}<span class="grow"></span>
+    <button class="link" data-act="editGoals" data-y="${y}">${g.length ? "Edit" : "+ Goals"}</button></div>
+    ${g.length ? `<small class="muted" style="font-size:13px">${d} of ${g.length} goals done</small>${goalRows(y)}` : `<p class="note">${y < cy ? "No goals were set for this year." : "No goals yet. Add up to 8 things you want this year to bring."}</p>`}
+    ${laps.length ? `<div class="laps">${laps.map((x,i) => { const up = sprintWeeks(x.start).filter(shownUp).length;
+      return `<span class="chip${x.cur ? " sun" : " mint"}">Lap ${i+1}${x.cur ? " · now" : ` · ${up}/12`}</span>`; }).join("")}</div>` : ""}</section>`; }
+
 /* Map */
-function mapView(){ const k = curWeek(), y = +today().slice(0,4), ys = weekKey(iso(new Date(y,0,1)));
-  const yearWeeks = []; for(let d = ys; +d.slice(0,4) <= y && yearWeeks.length < 53; d = addDays(d,7)) yearWeeks.push(d);
-  const freshSet = new Set(S.restarts.map(r => weekKey(r.date)));
-  const st = S.sprint.start, ks = st ? Array.from({length:12}, (_,i) => addDays(st, i*7)) : [];
+let mapSp = -1, mapYr = 0;
+function mapView(){ const k = curWeek(), sps = allSprints(), cy = thisYear();
+  if(mapSp < 0 || mapSp >= sps.length) mapSp = sps.length - 1;
+  if(!mapYr) mapYr = cy;
+  const y = mapYr, yearWeeks = weeksOfYear(y), freshSet = new Set(S.restarts.map(r => weekKey(r.date)));
+  const sp = sps[mapSp], ks = sp ? sprintWeeks(sp.start) : [];
   const up = shownWeeks().length, got = BADGES.filter(b => S.badges[b[0]]).length;
-  return `<section class="card hero"><div class="lbl">Sprint ${S.sprint.n} · 12 weeks</div>
-    <div class="big" style="margin-top:6px">${st ? `${ks.filter(shownUp).length} <span class="muted" style="font-size:18px;font-weight:700">of 12 weeks shown up</span>` : "Not started"}</div>
-    ${st ? `<div class="sprint">${ks.map((x,i) => `<i class="${strong(x) ? "strong" : shownUp(x) ? "up" : ""}${x === k ? " now" : ""}">${i+1}</i>`).join("")}</div>` : ""}
-    <div class="stats"><div class="stat"><small>Weeks shown up</small><b>${up}</b></div><div class="stat"><small>Actions</small><b>${totalTicks()}</b></div><div class="stat"><small>Comebacks</small><b>${S.restarts.length}</b></div></div></section>
-  <div class="h"><h2>${y} at a glance</h2></div>
-  <section class="card"><div class="year">${yearWeeks.map(x => `<i class="${x > k ? "future" : strong(x) ? "strong" : shownUp(x) ? "up" : ""}${freshSet.has(x) ? " fresh" : ""}${x === k ? " now" : ""}" title="${fmt(x)}"></i>`).join("")}</div>
+  const spUp = ks.filter(shownUp).length, spTicks = sum(ks.map(x => sum(Object.values(peek(x).ticks)))), spCh = ks.filter(x => peek(x).check).length;
+  const rows = []; for(let i = 0; i < yearWeeks.length; i += 13) rows.push(yearWeeks.slice(i, i + 13));
+  const minY = Math.min(y0(), sps.length ? yrOf(sps[0].start) : cy), maxY = Math.max(y0() + 4, cy);
+  return `<section class="card hero">
+    ${sp ? `<div class="navr"><button class="arw" data-act="mapSp" data-d="-1" ${mapSp <= 0 ? "disabled" : ""} aria-label="Previous lap">‹</button>
+      <div class="mid"><div class="lbl">${yearTag(yrOf(sp.start))} · Lap ${lapOf(sp)}</div><b>${sp.cur ? "This lap" : "Lap " + lapOf(sp) + " of " + yrOf(sp.start)}</b>
+        <small>${fmt(sp.start)} – ${fmt(addDays(sp.start, 83),{day:"numeric",month:"short",year:"numeric"})}</small></div>
+      <button class="arw" data-act="mapSp" data-d="1" ${mapSp >= sps.length - 1 ? "disabled" : ""} aria-label="Next lap">›</button></div>
+    <div class="sprint">${ks.map((x,i) => `<i class="${strong(x) ? "strong" : shownUp(x) ? "up" : ""}${x === k ? " now" : ""}">${i+1}</i>`).join("")}</div>
+    <div class="stats"><div class="stat"><small>Weeks shown up</small><b>${spUp} / 12</b></div><div class="stat"><small>Actions</small><b>${spTicks}</b></div><div class="stat"><small>Check-ins</small><b>${spCh}</b></div></div>`
+    : `<div class="lbl">Your laps</div><div class="big" style="margin-top:6px">Not started</div>`}</section>
+  <div class="h"><h2>All time</h2></div>
+  <div class="stats" style="margin-top:0"><div class="stat"><small>Weeks shown up</small><b>${up}</b></div><div class="stat"><small>Actions</small><b>${totalTicks()}</b></div><div class="stat"><small>Comebacks</small><b>${S.restarts.length}</b></div></div>
+  <div class="h"><h2>Year at a glance</h2></div>
+  <section class="card"><div class="navr"><button class="arw" data-act="mapYr" data-d="-1" ${y <= minY ? "disabled" : ""} aria-label="Previous year">‹</button>
+      <div class="mid"><b>${y}</b><small>${yearTag(y)} · ${yearWeeks.length} weeks</small></div>
+      <button class="arw" data-act="mapYr" data-d="1" ${y >= maxY ? "disabled" : ""} aria-label="Next year">›</button></div>
+    <div class="year">${rows.map((r,ri) => `<span class="ql">${ri < 4 ? "Q" + (ri + 1) : ""}</span>${r.map((x,i) => `<i class="${x > k ? "future" : strong(x) ? "strong" : shownUp(x) ? "up" : ""}${freshSet.has(x) ? " fresh" : ""}${x === k ? " now" : ""}" title="Week ${ri*13 + i + 1} · ${fmt(x)}">${ri*13 + i + 1}</i>`).join("")}${r.length < 13 ? '<span></span>'.repeat(13 - r.length) : ""}`).join("")}</div>
     <div class="legend"><span><i style="background:rgba(98,224,182,.4)"></i>Showed up</span><span><i style="background:#ffb867"></i>Every plan done</span><span><i style="box-shadow:inset 0 0 0 2px var(--sky)"></i>Fresh start</span></div>
-    <p class="note" style="margin-top:10px">Empty weeks are just empty. Nothing is taken away.</p></section>
+    <p class="note" style="margin-top:10px">Weeks 1–52, one row per quarter. Empty weeks are just empty. Nothing is taken away.</p></section>
+  ${goalsOf(y).length ? `<section class="card"><div class="row" style="margin-bottom:6px"><div class="grow"><div class="lbl">${y} goals</div></div><button class="link" data-act="editGoals" data-y="${y}">Edit</button></div>${goalRows(y)}</section>` : ""}
   <div class="h"><h2>Badges</h2><span class="muted" style="font-size:14px">${got} of ${BADGES.length}</span></div>
   <div class="badges">${BADGES.map(b => `<div class="badge${S.badges[b[0]] ? "" : " off"}"><div class="e">${b[1]}</div><b>${b[2]}</b><small>${S.badges[b[0]] ? "Earned " + fmt(S.badges[b[0]]) : b[3]}</small></div>`).join("")}</div>`; }
 
@@ -845,13 +931,26 @@ function openLetter(l){ if(!l) return; const first = !l.opened; if(l.unlock > to
     <div class="card" style="white-space:pre-wrap;line-height:1.55">${esc(l.text)}</div>
     <div class="actions"><button class="btn" data-close>Close</button></div>`);
   if(first){ gain(15, "Letter opened"); award("letter_open"); render(); } }
+function goalsForm(y){ y = +y; const g = goalsOf(y).map(x => ({...x})); while(g.length < 5) g.push({id:uid(), text:"", done:false});
+  sheet(`<h3>${y} goals</h3><p class="sub">${yearTag(y)}. What do you want this year to bring? Keep each one short. Your quests and 12-week laps are how you get there.</p>
+    <div id="gl"></div>${g.length < 8 ? `<button class="btn sm ghost full" id="addG" style="margin-top:10px">${I.plus} Another goal</button>` : ""}
+    <div class="actions"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="ok">Save</button></div>`, root => {
+    const draw = () => { root.querySelector("#gl").innerHTML = g.map((x,i) => `<label class="f" for="g${i}">Goal ${i+1}</label><input class="in" id="g${i}" data-i="${i}" maxlength="90" value="${esc(x.text)}" placeholder="${esc(["Save a £3,000 emergency fund","Run a 5K","Finish my course","Visit family twice","Read 12 books"][i] || "")}">`).join("");
+      root.querySelectorAll("#gl input").forEach(inp => inp.oninput = () => { g[+inp.dataset.i].text = inp.value; }); };
+    draw();
+    const ad = root.querySelector("#addG"); if(ad) ad.onclick = () => { if(g.length >= 8) return; g.push({id:uid(), text:"", done:false}); draw(); if(g.length >= 8) ad.remove(); };
+    root.querySelector("#ok").onclick = () => { const out = g.map(x => ({...x, text:clampTxt(x.text, 90)})).filter(x => x.text);
+      if(out.length) S.plan.goals[String(y)] = out; else delete S.plan.goals[String(y)];
+      save(); closeSheet(); render(); if(out.length){ toast("Goals saved"); if(!S.badges.year_goals){ gain(15, `${y} goals set`); award("year_goals"); } } };
+  }); }
 function settingsForm(){ const s = S.settings;
   sheet(`<h3>Settings</h3><p class="sub">Your data stays on this device. Back it up now and then.</p>
     <label class="f" for="sn">Your name</label><input class="in" id="sn" maxlength="30" value="${esc(S.hero.name)}">
     <div class="two"><div><label class="f" for="sw">Week starts</label><select class="in" id="sw"><option value="1">Monday</option><option value="0" ${s.ws === 0 ? "selected" : ""}>Sunday</option></select></div>
       <div><label class="f" for="sb">Birthday (optional)</label><input class="in" id="sb" type="date" value="${s.bday ? "2000-" + s.bday : ""}"></div></div>
     <p class="note" style="margin-top:6px">Your birthday is only used to show a fresh-start reminder. The year isn't stored.</p>
-    <label class="f" for="ss">Sprint started on</label><input class="in" id="ss" type="date" value="${S.sprint.start}">
+    <div class="two"><div><label class="f" for="ss">This lap started on</label><input class="in" id="ss" type="date" value="${S.sprint.start}"></div>
+      <div><label class="f" for="sy">5-year plan starts in</label><select class="in" id="sy">${Array.from({length:7}, (_,i) => thisYear() - 4 + i).map(v => `<option value="${v}" ${v === y0() ? "selected" : ""}>${v}</option>`).join("")}</select></div></div>
     <div class="actions"><button class="btn full" id="ok">Save changes</button></div>
     ${QFX.button()}
     <label class="f" style="margin-top:24px">Backup</label>
@@ -862,7 +961,7 @@ function settingsForm(){ const s = S.settings;
     root.querySelector("#ok").onclick = () => { S.hero.name = clampTxt(val(root,"#sn"),30) || S.hero.name; const nws = +val(root,"#sw");
       const b = val(root,"#sb"); S.settings.bday = b ? b.slice(5) : "";
       const ss = val(root,"#ss"), ss0 = S.sprint.start; if(nws !== s.ws){ S.settings.ws = nws; remapWeeks(); }
-      if(ss && ss !== ss0) S.sprint.start = weekKey(ss); save(); closeSheet(); render(); toast("Saved"); };
+      if(ss && ss !== ss0) S.sprint.start = weekKey(ss); const sy = +val(root,"#sy"); if(sy) S.plan.y0 = sy; mapYr = 0; mapSp = -1; save(); closeSheet(); render(); toast("Saved"); };
     root.querySelector("#ex").onclick = exportData; root.querySelector("#im").onclick = () => document.getElementById("importFile").click();
     root.querySelector("#demo").onclick = () => { if(!confirm("Replace everything with sample data? Back up first if you want to keep yours.")) return; demo(); closeSheet(); tab = "week"; render(); };
     root.querySelector("#reset").onclick = () => { if(!confirm("Erase everything on this device? This can't be undone.")) return; if(!confirm("Really erase? Last chance.")) return;
@@ -879,12 +978,13 @@ document.getElementById("importFile").onchange = e => { const f = e.target.files
     catch(err){ toast("That file isn't a Reset Quest backup"); } }; r.readAsText(f); e.target.value = ""; };
 
 /* ───────── onboarding ritual ───────── */
-const OBN = 5;
+const OBN = 6;
+const obYear = () => { const d = parse(today()); return d.getMonth() >= 10 ? d.getFullYear() + 1 : d.getFullYear(); };
 function stepsBar(i){ return `<div class="steps" aria-label="Step ${i} of ${OBN}">${Array.from({length:OBN}, (_,j) => `<i class="${j < i ? "on" : ""}"></i>`).join("")}</div>`; }
 function onboarding(){ const s = S.step;
   if(s === 0) return `<div class="ob"><div class="sunart" aria-hidden="true"></div><h1>Reset<br><span class="gold">Quest</span></h1>
     <p class="sub">A fresh start you can actually keep. Picture who you'll be in 5 years, pick 3 quests, and take it one week at a time.</p>
-    <div class="cats" style="margin:10px 0 4px"><span class="chip sun">🔭 Future Me in 5 years</span><span class="chip sun">🧭 3 quests</span><span class="chip sun">🗓️ 12-week sprints</span></div>
+    <div class="cats" style="margin:10px 0 4px"><span class="chip sun">🔭 Future Me in 5 years</span><span class="chip sun">🎯 Yearly goals</span><span class="chip sun">🧭 3 quests</span><span class="chip sun">🗓️ 12-week sprints</span></div>
     <label class="f" for="nm">What should we call you?</label><input class="in" id="nm" maxlength="30" placeholder="Your name" value="${esc(S.hero ? S.hero.name : "")}">
     <div class="actions"><button class="btn ghost" data-ob="demo">Try sample data</button><button class="btn" data-ob="next0">Begin</button></div>
     <p class="note" style="margin-top:14px;text-align:center">Takes about 10 minutes. Everything stays on your phone.</p>
@@ -900,7 +1000,11 @@ function onboarding(){ const s = S.step;
     ${["money","health","people"].map(k => { const a = areaOf(k); return `<label class="f" for="va${k}">${a[1]} ${a[2]} in 5 years</label><textarea class="in" id="va${k}" maxlength="160" placeholder="${esc(PH[k])}">${esc(S.vision[k] || "")}</textarea>`; }).join("")}
     <p class="note" style="margin-top:8px">You can add other areas (work, mind, faith, home, fun) later in Future me.</p>
     <div class="actions"><button class="btn ghost" data-ob="back">Back</button><button class="btn" data-ob="next2">Next</button></div></div>`;
-  if(s === 3) return `<div class="ob">${stepsBar(3)}<h2>Pick up to 3 quests</h2><p class="sub">Things to <b>start</b> doing this year that move you toward Future You. Fewer is better.</p>
+  if(s === 3){ const y = obYear(), g = goalsOf(y);
+    return `<div class="ob">${stepsBar(3)}<h2>Your goals for ${y}</h2><p class="sub">Year 1 of your 5-year plan. What do you want this year to bring? You can set goals for years 2 to 5 later in Future me.</p>
+    ${[0,1,2,3,4].map(i => `<label class="f" for="og${i}">Goal ${i+1}${i > 1 ? " (optional)" : ""}</label><input class="in" id="og${i}" maxlength="90" value="${esc((g[i] || {}).text || "")}" placeholder="${esc(["Save a £3,000 emergency fund","Run a 5K","Finish my course","Visit family twice","Read 12 books"][i])}">`).join("")}
+    <div class="actions"><button class="btn ghost" data-ob="back">Back</button><button class="btn" data-ob="nextG">Next</button></div></div>`; }
+  if(s === 4) return `<div class="ob">${stepsBar(4)}<h2>Pick up to 3 quests</h2><p class="sub">Things to <b>start</b> doing this year that move you toward Future You. Fewer is better.</p>
     <div class="list" style="margin-top:8px">${activeQ().map(q => `<div class="item"><div class="emo">${areaOf(q.area)[1]}</div><div class="grow"><b>${esc(q.title)}</b><small>${q.plans.length} if-then plan${q.plans.length === 1 ? "" : "s"}</small></div>
       <button class="x" data-act="editQuest" data-id="${q.id}" aria-label="Edit">✎</button></div>`).join("")}</div>
     ${activeQ().length < 3 ? `<button class="btn ghost full" data-act="addQuest" style="margin-top:12px">${I.plus} Add a quest</button>` : ""}
@@ -910,7 +1014,7 @@ function onboarding(){ const s = S.step;
   const ny = iso(new Date(d.getFullYear()+1, 0, 1));
   const opts = [["now", "This week", k], ["next", "Next " + (S.settings.ws ? "Monday" : "Sunday"), nk], ["month", "The week of " + fmt(fm,{day:"numeric",month:"long"}), fmk]];
   if(d.getMonth() >= 10) opts.push(["ny", "New Year's week", weekKey(ny)]);
-  return `<div class="ob">${stepsBar(4)}<h2>When do your 12 weeks start?</h2><p class="sub">Fresh starts feel strongest on a new week, a new month or the new year. Pick one.</p>
+  return `<div class="ob">${stepsBar(5)}<h2>When do your 12 weeks start?</h2><p class="sub">Fresh starts feel strongest on a new week, a new month or the new year. Pick one.</p>
     <div class="list" style="margin-top:8px">${opts.map((o,i) => `<button class="item" data-start="${o[2]}" style="text-align:left;width:100%"><div class="emo">${["🌤️","📅","🗓️","🎆"][i]}</div><div class="grow"><b>${o[1]}</b><small>Starts ${fmt(o[2],{weekday:"short",day:"numeric",month:"short"})}</small></div></button>`).join("")}</div>
     <div class="actions"><button class="btn ghost" data-ob="back">Back</button></div></div>`; }
 function bindOb(){ const app = document.getElementById("app");
@@ -925,9 +1029,12 @@ function bindOb(){ const app = document.getElementById("app");
       if(o.wins.some(Boolean) || o.lesson || o.drop){ S.review[y] = o; if(!S.flags["rv"+y]){ S.flags["rv"+y] = true; S.xp += 25; S.badges.lookback = today(); } } S.step = 2; }
     if(a === "next2"){ S.who = clampTxt(val(app,"#vw"),120); ["money","health","people"].forEach(k => { const t = clampTxt(val(app,"#va"+k),160); if(t) S.vision[k] = t; else delete S.vision[k]; });
       if(Object.keys(S.vision).length && !S.flags.visionXp){ S.flags.visionXp = true; S.xp += 25; S.badges.future = today(); } S.step = 3; }
-    if(a === "next3"){ if(!activeQ().length) return; if(activeQ().some(q => !q.plans.length) && !confirm("Some quests have no if-then plan yet. Plans make a big difference. Continue anyway?")) return; S.step = 4; }
+    if(a === "nextG"){ const y = obYear(), old = goalsOf(y); const out = [0,1,2,3,4].map(i => clampTxt(val(app,"#og"+i), 90)).filter(Boolean).map((t,i) => ({id:(old[i] || {}).id || uid(), text:t, done:false}));
+      if(out.length){ S.plan.goals[String(y)] = out; if(!S.badges.year_goals){ S.xp += 15; S.badges.year_goals = today(); } } else delete S.plan.goals[String(y)]; S.step = 4; }
+    if(a === "next3"){ if(!activeQ().length) return; if(activeQ().some(q => !q.plans.length) && !confirm("Some quests have no if-then plan yet. Plans make a big difference. Continue anyway?")) return; S.step = 5; }
     save(); render(); scrollTo(0,0); });
-  app.querySelectorAll("[data-start]").forEach(b => b.onclick = () => { S.sprint = {start:b.dataset.start, n:1, history:[]}; S.ready = true; S.step = 5; save(); tab = "week"; render(); scrollTo(0,0);
+  app.querySelectorAll("[data-start]").forEach(b => b.onclick = () => { S.sprint = {start:b.dataset.start, n:1, history:[]}; S.ready = true; S.step = 6;
+    const py = yrOf(b.dataset.start), oy = obYear(); if(py !== oy && S.plan.goals[oy] && !S.plan.goals[py]){ S.plan.goals[py] = S.plan.goals[oy]; delete S.plan.goals[oy]; } S.plan.y0 = py; save(); tab = "week"; render(); scrollTo(0,0);
     toast("Your reset has begun. One week at a time."); });
 }
 
@@ -950,7 +1057,12 @@ function demo(){ const t = today(); S = blank(); normalize(); const k = curWeek(
   W.forEach((r,i) => { const wk2 = addDays(st, i*7); const w = S.weeks[wk2] = {ticks:{}}; ["p1","p2","p3","p4"].forEach((p,j) => { if(r[j]) w.ticks[p] = r[j]; });
     if(r[4]) { w.check = {feel:r[4], good:["Walked every evening I planned","Read most nights","",'Cooked twice instead of ordering',"Hit every plan"][i] || "", hard:["","Late shifts","","Ill for two days",""][i] || "", next:["Keep it going","Walk at lunch on shift days","","Start small again","Same again"][i] || "", at:addDays(wk2,6)}; w.checkXp = true; } });
   S.weeks[addDays(st,21)].fresh = true; S.weeks[addDays(st,21)].comebackXp = true; S.restarts = [{date:addDays(st,21), note:"Ill for a few days"}];
-  S.sprint = {start:st, n:1, history:[]};
+  S.sprint = {start:st, n:2, history:[{start:addDays(st, -84), n:1}]};
+  const W0 = [[2,3,1,1],[3,5,1,2],[0,0,0,0],[1,2,1,0],[3,5,1,2],[2,4,1,1],[3,5,1,2],[0,0,0,0],[2,3,1,1],[3,4,1,2],[3,5,1,2],[2,3,1,1]];
+  W0.forEach((r,i) => { const wk0 = addDays(st, -84 + i*7); const w = S.weeks[wk0] = {ticks:{}}; ["p1","p2","p3","p4"].forEach((p,j) => { if(r[j]) w.ticks[p] = r[j]; }); });
+  const yy = yrOf(st); S.plan = {y0:yrOf(addDays(st, -84)), goals:{}};
+  S.plan.goals[yy] = [{id:"g1", text:"Save a £3,000 emergency fund", done:false}, {id:"g2", text:"Run a 5K", done:true}, {id:"g3", text:"Read 12 books", done:false}];
+  S.plan.goals[yy + 1] = [{id:"g4", text:"Save a house deposit", done:false}, {id:"g5", text:"Get qualified", done:false}];
   S.letters = [{id:"l1", text:"Dear future me,\n\nRight now I'm tired but hopeful. I want you to remember that you started small and kept going.\n\nBe proud of the weeks you showed up.", written:addDays(t,-40), unlock:addDays(t,-1), opened:""},
     {id:"l2", text:"Did you keep walking? I hope so.", written:addDays(t,-30), unlock:addDays(t, 300), opened:""}];
   S.xp = 610; ["first_step","future","lookback","planner","checkin1","checkin4","weeks4","comeback","letter_sealed","full_week"].forEach((b,i) => S.badges[b] = addDays(st, i*3));
@@ -972,8 +1084,14 @@ document.addEventListener("click", e => {
   else if(act === "addLetter") letterForm();
   else if(act === "openLetter") openLetter(S.letters.find(l => l.id === id));
   else if(act === "settings") settingsForm();
+  else if(act === "editGoals") goalsForm(a.dataset.y);
+  else if(act === "goalT"){ const g = goalsOf(+a.dataset.y).find(x => x.id === id); if(!g) return; g.done = !g.done; save(); render();
+    if(g.done){ QFX.play("done"); if(!g.xp && capOk("goal", 5)){ g.xp = true; save(); gain(30, "Goal reached"); } award("goal_done"); } }
+  else if(act === "mapSp"){ mapSp += +a.dataset.d; render(); }
+  else if(act === "mapYr"){ mapYr += +a.dataset.d; render(); }
+  else if(act === "newPlan"){ if(!confirm(`Start a new 5-year plan from ${thisYear()}? Your old years and goals stay saved.`)) return; S.plan.y0 = thisYear(); save(); render(); toast("A new 5 years begins"); }
   else if(act === "startNow"){ S.sprint.start = curWeek(); save(); render(); }
-  else if(act === "newSprint"){ const ks = Array.from({length:12}, (_,i) => addDays(S.sprint.start, i*7)); S.sprint.history.push({start:S.sprint.start, n:S.sprint.n}); if(ks.filter(shownUp).length >= 4) award("sprint"); S.sprint = {start:curWeek(), n:S.sprint.n + 1, history:S.sprint.history}; save(); render(); toast("New sprint. Week 1 starts now."); }
+  else if(act === "newSprint"){ const ks = Array.from({length:12}, (_,i) => addDays(S.sprint.start, i*7)); S.sprint.history.push({start:S.sprint.start, n:S.sprint.n}); if(ks.filter(shownUp).length >= 4) award("sprint"); S.sprint = {start:curWeek(), n:S.sprint.n + 1, history:S.sprint.history}; mapSp = -1; save(); render(); toast(`Lap ${lapOf({start:S.sprint.start})} begins. Week 1 starts now.`); }
   else if(act === "pauseQ" || act === "resumeQ"){ const q = S.quests.find(x => x.id === id); if(!q) return;
     if(act === "resumeQ" && activeQ().length >= 3) return toast("Three active quests at most. Pause or complete one first.");
     q.status = act === "pauseQ" ? "paused" : "active"; save(); render(); }
