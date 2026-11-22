@@ -1,5 +1,5 @@
 // Reset Quest offline cache. Change the end of V on every update.
-const V = "reset-79466577-6f6f52a87e";
+const V = "reset-79466577-b0662b5312";
 const PREFIX = "reset-79466577-";
 const CORE = ["./", "./index.html", "./manifest.json", "./icon-180.png", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 self.addEventListener("install", e => {
