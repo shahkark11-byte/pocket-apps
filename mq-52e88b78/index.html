@@ -13,12 +13,15 @@
   --card:rgba(255,255,255,.06);--card2:rgba(255,255,255,.1);--line:rgba(255,255,255,.12);
   --gold:#ffc94a;--gold2:#ff9f43;--mint:#4be3a5;--coral:#ff6b7a;--violet:#9b7bff;--sky:#5ec8ff;
   --r:22px;--nav:76px;
+  /* colours the App colours dial can change; these defaults are the Classic look */
+  --acc-rgb:255,201,74;--acc-glow:255,170,60;--acc-a:#ffd76a;--acc-b:#ffb238;--acc-ink:#3a2300;--acc-sh:#b9741a;--acc-light:#ffe7a6;--acc-top:#fff1b8;
+  --glow1:#3b1f8f;--glow2:#0f4a6b;--sheet1:#2a1b66;--sheet2:#1a1044;--nav-bg:rgba(24,15,62,.82);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%}
 body{font-family:'Outfit',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);
-  background:radial-gradient(1200px 700px at 80% -10%,#3b1f8f 0%,transparent 60%),
-             radial-gradient(900px 600px at -10% 110%,#0f4a6b 0%,transparent 55%),
+  background:radial-gradient(1200px 700px at 80% -10%,var(--glow1) 0%,transparent 60%),
+             radial-gradient(900px 600px at -10% 110%,var(--glow2) 0%,transparent 55%),
              linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;
   -webkit-font-smoothing:antialiased;overflow-x:hidden}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.55;
@@ -34,10 +37,10 @@ button{cursor:pointer;border:0;background:none}
 /* header */
 .top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 .ava{width:54px;height:54px;border-radius:18px;background:linear-gradient(145deg,#ffd76a,#ff8f4a);display:grid;place-items:center;
-  box-shadow:0 6px 18px rgba(255,160,60,.35),inset 0 -3px 0 rgba(0,0,0,.15);flex:none;overflow:hidden}
+  box-shadow:0 6px 18px rgba(var(--acc-glow),.35),inset 0 -3px 0 rgba(0,0,0,.15);flex:none;overflow:hidden}
 .ava svg{width:48px;height:48px}
 .ava-img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
-.ava.photo{background:none;box-shadow:0 0 0 2px var(--gold),0 6px 18px rgba(255,160,60,.35)}
+.ava.photo{background:none;box-shadow:0 0 0 2px var(--gold),0 6px 18px rgba(var(--acc-glow),.35)}
 .who{flex:1;min-width:0}
 .who b{font-size:19px;font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who small{color:var(--mut);font-size:13px;font-weight:500}
@@ -55,14 +58,14 @@ button{cursor:pointer;border:0;background:none}
 .h button{min-height:44px;min-width:44px;margin:-13px 0;padding:0 2px}
 .muted{color:var(--mut)}.dim{color:var(--dim)}
 .big{font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1}
-.gold{background:linear-gradient(180deg,#fff1b8,var(--gold) 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.gold{background:linear-gradient(180deg,var(--acc-top),var(--gold) 55%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .neg{color:var(--coral)}.pos{color:var(--mint)}
 .row{display:flex;align-items:center;gap:12px}
 .grow{flex:1;min-width:0}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--card2);font-size:13px;font-weight:600}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:16px;font-weight:700;font-size:15px;
-  background:linear-gradient(180deg,#ffd76a,#ffb238);color:#3a2300;box-shadow:0 6px 0 #b9741a,0 10px 24px rgba(255,170,60,.3);transition:transform .08s}
-.btn:active{transform:translateY(3px);box-shadow:0 3px 0 #b9741a}
+  background:linear-gradient(180deg,var(--acc-a),var(--acc-b));color:var(--acc-ink);box-shadow:0 6px 0 var(--acc-sh),0 10px 24px rgba(var(--acc-glow),.3);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 3px 0 var(--acc-sh)}
 .btn.ghost{background:var(--card2);color:var(--ink);box-shadow:none;border:1px solid var(--line)}
 .btn.mint{background:linear-gradient(180deg,#7ff0c3,#2fcf8d);color:#073a26;box-shadow:0 6px 0 #1d8f5f}
 .btn.red{background:linear-gradient(180deg,#ff8f9a,#f0566a);color:#3a0710;box-shadow:0 6px 0 #a3283a}
@@ -91,30 +94,30 @@ button{cursor:pointer;border:0;background:none}
 .x{width:44px;height:44px;border-radius:10px;color:var(--dim);display:grid;place-items:center;flex:none}
 .x:hover{background:var(--card2);color:var(--coral)}
 .chip{font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;white-space:nowrap}
-.chip.late{background:rgba(255,107,122,.2);color:#ff9aa5}.chip.soon{background:rgba(255,201,74,.18);color:var(--gold)}
+.chip.late{background:rgba(255,107,122,.2);color:#ff9aa5}.chip.soon{background:rgba(var(--acc-rgb),.18);color:var(--gold)}
 .chip.ok{background:rgba(75,227,165,.16);color:var(--mint)}.chip.later{background:var(--card2);color:var(--mut)}
 .done b{text-decoration:line-through;color:var(--dim)}
 .empty{text-align:center;padding:26px 16px;color:var(--mut)}
 .empty .e{font-size:38px;margin-bottom:8px}
 /* nav */
 nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));width:min(588px,calc(100% - 24px));height:var(--nav);
-  display:grid;grid-template-columns:1.25fr 1.25fr 66px 1fr 1fr 1fr 1fr;align-items:center;background:rgba(24,15,62,.82);border:1px solid var(--line);
+  display:grid;grid-template-columns:1.25fr 1.25fr 66px 1fr 1fr 1fr 1fr;align-items:center;background:var(--nav-bg);border:1px solid var(--line);
   border-radius:26px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:20;box-shadow:0 18px 40px rgba(0,0,0,.4)}
 nav button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--dim);height:100%;min-width:0;white-space:nowrap}
 nav button svg{width:24px;height:24px}
 nav .nl-s{display:none}
 @media(max-width:400px){nav .nl-l{display:none}nav .nl-s{display:inline}}
 nav button.on{color:var(--ink)}
-nav button.on svg{color:var(--gold);filter:drop-shadow(0 0 8px rgba(255,201,74,.6))}
+nav button.on svg{color:var(--gold);filter:drop-shadow(0 0 8px rgba(var(--acc-rgb),.6))}
 nav .fab{position:relative}
 nav .fab span{width:60px;height:60px;border-radius:20px;margin-top:-34px;display:grid;place-items:center;
-  background:linear-gradient(180deg,#ffd76a,#ffb238);color:#3a2300;box-shadow:0 6px 0 #b9741a,0 14px 30px rgba(255,170,60,.45)}
+  background:linear-gradient(180deg,var(--acc-a),var(--acc-b));color:var(--acc-ink);box-shadow:0 6px 0 var(--acc-sh),0 14px 30px rgba(var(--acc-glow),.45)}
 nav .fab span svg{width:30px;height:30px}
 @media(max-width:380px){nav{width:calc(100% - 16px);grid-template-columns:1fr 1fr 54px 1fr 1fr 1fr 1fr}nav .fab span{width:54px;height:54px}}
 /* forms */
 .sheet-bg{position:fixed;inset:0;background:rgba(8,4,24,.62);backdrop-filter:blur(4px);z-index:40;display:flex;align-items:flex-end;justify-content:center;
   animation:fade .2s}
-.sheet{width:min(620px,100%);max-height:92vh;overflow:auto;background:linear-gradient(180deg,#2a1b66,#1a1044);border:1px solid var(--line);border-bottom:0;
+.sheet{width:min(620px,100%);max-height:92vh;overflow:auto;background:linear-gradient(180deg,var(--sheet1),var(--sheet2));border:1px solid var(--line);border-bottom:0;
   border-radius:28px 28px 0 0;padding:22px 20px calc(24px + env(safe-area-inset-bottom));animation:up .28s cubic-bezier(.2,.9,.2,1)}
 @media(min-width:700px){.sheet-bg{align-items:center}.sheet{border-radius:28px;border-bottom:1px solid var(--line)}}
 @keyframes up{from{transform:translateY(40px);opacity:0}}@keyframes fade{from{opacity:0}}
@@ -122,7 +125,7 @@ nav .fab span svg{width:30px;height:30px}
 .sheet p.sub{color:var(--mut);margin-bottom:16px}
 label.f{display:block;font-size:13px;font-weight:700;color:var(--mut);margin:14px 2px 6px;letter-spacing:.03em}
 .in{width:100%;padding:14px 15px;border-radius:15px;background:rgba(0,0,0,.25);border:1px solid var(--line);outline:none;font-size:16px}
-.in:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,201,74,.18)}
+.in:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.18)}
 .in.huge{font-size:40px;font-weight:800;text-align:center;padding:16px}
 select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);
   background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;background-size:6px 6px;background-repeat:no-repeat}
@@ -130,7 +133,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .two>*{min-width:0}.in{min-width:0}.sheet{overflow-x:hidden}
 .cats{display:flex;flex-wrap:wrap;gap:8px}
 .cat{padding:9px 12px;min-height:44px;min-width:44px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:14px}
-.cat.on{background:rgba(255,201,74,.18);border-color:var(--gold);color:#ffe7a6}
+.cat.on{background:rgba(var(--acc-rgb),.18);border-color:var(--gold);color:var(--acc-light)}
 .seg{display:flex;background:rgba(0,0,0,.25);border-radius:14px;padding:4px;gap:4px}
 .seg button{flex:1;padding:10px;min-height:44px;border-radius:11px;font-weight:700;font-size:14px;color:var(--mut)}
 .seg button.on{background:var(--card2);color:var(--ink)}
@@ -171,14 +174,14 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .floor .fl b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .floor .fl small{display:block;font-size:12.5px;color:#d9cff0}
 .floor .btn.sm{min-width:44px;min-height:44px}
-.floor .lv{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:13px;background:rgba(0,0,0,.28);color:#ffe7a6}
+.floor .lv{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-weight:900;font-size:13px;background:rgba(0,0,0,.28);color:var(--acc-light)}
 .floor .hp{height:8px;margin:8px 0 0}
 .rubble{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px 0 2px}
 .rubble span{font-size:12.5px;font-weight:700;color:#bff5dc;background:rgba(75,227,165,.14);border:1px solid rgba(75,227,165,.3);padding:5px 9px;border-radius:999px}
 .gate{position:relative;height:74px;margin:8px -14px 0;background:linear-gradient(180deg,#3a3152,#2a2340);border-top:2px solid rgba(255,255,255,.08);display:flex;align-items:flex-end;justify-content:center}
 .gate .door{width:58px;height:58px;border-radius:30px 30px 0 0;background:linear-gradient(180deg,#1a1430,#0d0a1c);box-shadow:inset 0 2px 0 rgba(255,255,255,.08)}
 .gate .you{position:absolute;left:18%;bottom:8px;font-size:30px;filter:drop-shadow(-3px 4px 4px rgba(0,0,0,.5))}
-.gate .you small{display:block;font-size:12px;font-weight:800;color:#ffe7a6;text-align:center;margin-top:-2px}
+.gate .you small{display:block;font-size:12px;font-weight:800;color:var(--acc-light);text-align:center;margin-top:-2px}
 .goblins{display:flex;flex-direction:column;gap:10px}
 .gob{display:flex;align-items:center;gap:12px}
 .gob svg{width:46px;height:46px;flex:none;filter:drop-shadow(-3px 5px 6px rgba(0,0,0,.35))}
@@ -224,7 +227,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .bar .t i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--violet),var(--sky))}
 /* toast + fx */
 .toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
-.toast{background:rgba(20,12,50,.92);border:1px solid rgba(255,201,74,.5);padding:10px 16px;border-radius:14px;font-weight:700;
+.toast{background:rgba(20,12,50,.92);border:1px solid rgba(var(--acc-rgb),.5);padding:10px 16px;border-radius:14px;font-weight:700;
   box-shadow:0 10px 30px rgba(0,0,0,.4);animation:tin .35s cubic-bezier(.2,.9,.3,1.4),tout .4s 2.4s forwards;display:flex;gap:8px;align-items:center}
 .toast em{font-style:normal;color:var(--gold)}
 @keyframes tin{from{transform:translateY(-20px) scale(.9);opacity:0}}@keyframes tout{to{transform:translateY(-14px);opacity:0}}
@@ -233,7 +236,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .levelup .n{font-size:96px;font-weight:900;line-height:1}
 .ava-pick{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 .ava-pick button{aspect-ratio:1;border-radius:18px;background:var(--card);border:2px solid var(--line);display:grid;place-items:center;overflow:hidden;min-width:0;padding:0}
-.ava-pick button.on{border-color:var(--gold);background:rgba(255,201,74,.15)}
+.ava-pick button.on{border-color:var(--gold);background:rgba(var(--acc-rgb),.15)}
 .ava-pick svg{width:80%;height:80%}
 .ava-pick .ph{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--mut)}
 .ava-pick .ph svg{width:26px;height:26px}
@@ -252,7 +255,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .splash .f2{width:84px;height:84px;left:8%;top:6%;animation-delay:-1.3s;opacity:.85}
 .splash .f3{width:96px;height:96px;right:6%;top:30%;animation-delay:-2.6s;opacity:.85}
 .sp-coin{position:absolute;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c9,#ffc94a 50%,#d98a1c);
-  box-shadow:0 0 18px rgba(255,201,74,.6);animation:bob 3s ease-in-out infinite}
+  box-shadow:0 0 18px rgba(var(--acc-rgb),.6);animation:bob 3s ease-in-out infinite}
 .sp-coin.c1{left:22%;top:38%}.sp-coin.c2{right:24%;top:10%;animation-delay:-1s;width:16px;height:16px}
 .sp-coin.c3{left:12%;top:52%;animation-delay:-2s;width:14px;height:14px}.sp-coin.c4{right:14%;top:60%;animation-delay:-.5s}
 @keyframes bob{50%{transform:translateY(-14px) rotate(3deg)}}
@@ -291,7 +294,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .al-line .al-bar{margin:0;height:8px}
 .al-r{font-size:13px;font-weight:600;white-space:nowrap;text-align:right;color:var(--mut)}
 .al-r.neg{color:var(--coral)}
-.al-pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(255,201,74,.16);color:var(--gold);vertical-align:middle;margin-left:4px}
+.al-pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(var(--acc-rgb),.16);color:var(--gold);vertical-align:middle;margin-left:4px}
 /* new year upgrade: subscriptions tab and load safety net */
 .sub-row{padding:14px;margin-bottom:10px}
 .sub-row .row b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
@@ -301,7 +304,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .sub-acts .x{background:var(--card2)}
 .sub-due{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--mut)}
 .sub-due.soon{color:var(--gold)}
-.sub-warn{border-color:rgba(255,201,74,.45);background:rgba(255,201,74,.1)}
+.sub-warn{border-color:rgba(var(--acc-rgb),.45);background:rgba(var(--acc-rgb),.1)}
 .sub-warn ul{list-style:none;margin-top:8px;font-size:14px;color:var(--ink)}
 .sub-warn li{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
 .sub-warn li span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -317,7 +320,7 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .segtop{margin-bottom:14px}
 .pc{padding:16px;margin-bottom:12px}
 .pc.now{border-color:rgba(75,227,165,.5)}
-.pc.bonus{border-color:rgba(255,201,74,.55)}
+.pc.bonus{border-color:rgba(var(--acc-rgb),.55)}
 .pc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pc-top b{font-size:17px;font-weight:700}
 .pc-amt{font-size:20px;font-weight:800;color:var(--ink);white-space:nowrap}
@@ -332,13 +335,13 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 .pc-parts{margin-top:8px;font-size:13px;color:var(--mut);line-height:1.4}
 .pc-left{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .pc-left b{font-size:20px;font-weight:800}
-.pc-job{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(255,201,74,.1);border:1px solid rgba(255,201,74,.35)}
+.pc-job{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(var(--acc-rgb),.1);border:1px solid rgba(var(--acc-rgb),.35)}
 .pc-job b{display:block;font-weight:700}.pc-job small{color:var(--mut);font-size:12px}
 .pc-job.done{color:var(--mint);font-weight:600;background:rgba(75,227,165,.1);border-color:rgba(75,227,165,.35)}
 .pickc{display:flex;flex-direction:column;gap:10px}
 .pick{display:flex;align-items:center;gap:10px;text-align:left;padding:13px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line);width:100%}
 .pick b{display:block;font-weight:700}.pick small{color:var(--mut);font-size:13px}
-.pick.on{border-color:var(--gold);background:rgba(255,201,74,.1)}
+.pick.on{border-color:var(--gold);background:rgba(var(--acc-rgb),.1)}
 .taxc{padding:9px 12px;border-radius:13px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:14px}
 .taxc.on{background:rgba(255,107,122,.18);border-color:var(--coral);color:#ffd0d5}
 /* loot bag, net worth, freedom journey, money goals and routine */
@@ -421,27 +424,31 @@ select.in{appearance:none;background-image:linear-gradient(45deg,transparent 50%
 textarea.in{resize:vertical;min-height:96px;font:inherit;color:inherit;line-height:1.4}
 .red-t{color:var(--coral)}
 .ch{padding:14px}
-.ch.won{box-shadow:0 0 0 2px rgba(255,201,74,.55),0 10px 30px rgba(0,0,0,.25)}
+.ch.won{box-shadow:0 0 0 2px rgba(var(--acc-rgb),.55),0 10px 30px rgba(0,0,0,.25)}
 .ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:6px;margin-top:12px}
-.ch-t{min-height:52px;min-width:44px;border-radius:12px;background:rgba(255,201,74,.12);border:1px solid rgba(255,201,74,.35);color:var(--ink);font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px;line-height:1.1}
+.ch-t{min-height:52px;min-width:44px;border-radius:12px;background:rgba(var(--acc-rgb),.12);border:1px solid rgba(var(--acc-rgb),.35);color:var(--ink);font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:2px;line-height:1.1}
 .ch-t small{font-size:12px;font-weight:600;color:var(--mut)}
 .ch-t.on{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--dim);filter:grayscale(1);text-decoration:line-through}
 .ch-t.on small{text-decoration:none}
 html[data-season="christmas"]{--bg1:#08200f;--bg2:#145a2e}
 html[data-season="autumn"]{--bg1:#2b1204;--bg2:#8a3d0a}
-/* Pastel look: soft lavender to pink gradient (Settings → App colours) */
-html[data-look="pastel"]{--bg1:#4a3a7a;--bg2:#9b6492;--mut:#eadcf3;--dim:#cdb5dc;--gold:#ffc6e1;--gold2:#cfaeff;--violet:#d2b9ff;--sky:#c3dcff;
-  --mint:#a9eed2;--coral:#ffa3b5;--card:rgba(255,255,255,.1);--card2:rgba(255,255,255,.17);--line:rgba(255,255,255,.22)}
-html[data-look="pastel"] body{background:radial-gradient(1200px 700px at 85% -10%,#c99be0 0%,transparent 60%),
-  radial-gradient(900px 600px at -10% 110%,#e8a3c4 0%,transparent 55%),linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed}
-html[data-look="pastel"] .gold{background:linear-gradient(180deg,#fff,#ffd3ea 55%,#dcbcff);-webkit-background-clip:text;background-clip:text;color:transparent}
-html[data-look="pastel"] .btn:not(.ghost):not(.mint):not(.red),html[data-look="pastel"] nav .fab span{background:linear-gradient(180deg,#ffd9ec,#dcb9ff);color:#3d1f52;box-shadow:0 6px 0 #a47bc4,0 10px 24px rgba(214,160,255,.35)}
-html[data-look="pastel"] .btn:not(.ghost):not(.mint):not(.red):active{box-shadow:0 3px 0 #a47bc4}
-html[data-look="pastel"] nav{background:rgba(78,56,116,.84)}
-html[data-look="pastel"] nav button.on svg{filter:drop-shadow(0 0 8px rgba(255,198,225,.7))}
-html[data-look="pastel"] .cat.on{background:rgba(255,198,225,.2);color:#ffe3f1}
-html[data-look="pastel"] .sheet{background:linear-gradient(180deg,#5f4a8e,#7d5683)}
-html[data-look="pastel"] #g stop:first-child{stop-color:#ffd3ea}html[data-look="pastel"] #g stop:last-child{stop-color:#c9a2ff}
+/* progress-ring gradient follows the accent colour */
+#g stop:first-child{stop-color:var(--acc-a)}#g stop:last-child{stop-color:var(--gold2)}
+/* App colours dial (Settings) */
+.lk-presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.lk-presets .cat{display:inline-flex;align-items:center;gap:7px}
+.lk-sw{width:16px;height:16px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.lk-dial{position:relative;width:220px;height:220px;margin:16px auto 6px;border-radius:50%;touch-action:none;cursor:pointer;outline:none;
+  background:conic-gradient(from 0deg,hsl(0,85%,62%),hsl(60,85%,62%),hsl(120,85%,62%),hsl(180,85%,62%),hsl(240,85%,62%),hsl(300,85%,62%),hsl(360,85%,62%))}
+.lk-dial:focus-visible{box-shadow:0 0 0 3px var(--ink)}
+.lk-dial::after{content:"";position:absolute;inset:44px;border-radius:50%;background:var(--sheet2);box-shadow:inset 0 0 0 1px var(--line)}
+.lk-mid{position:absolute;inset:60px;border-radius:50%;z-index:1;display:grid;place-items:center;text-align:center;font-size:13px;font-weight:700;color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,.5);box-shadow:0 6px 18px rgba(0,0,0,.35),inset 0 0 0 2px rgba(255,255,255,.4);pointer-events:none}
+.lk-knob{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;z-index:2;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none}
+.lk-dial.off .lk-knob{display:none}
+.lk-soft{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;font-weight:700;color:var(--mut)}
+.lk-soft input{flex:1;accent-color:var(--gold);height:32px}
+.lk-note{text-align:center;margin-top:4px}
 .vis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:6px}
 .vis-t{position:relative;display:block;padding:0;border-radius:16px;overflow:hidden;aspect-ratio:4/3;border:1px solid var(--line);background:rgba(0,0,0,.25);min-height:44px}
 .vis-t img{width:100%;height:100%;object-fit:cover;display:block}
@@ -708,13 +715,109 @@ html.reduce #qfx-sky i{display:none}html.reduce #qfx-hi{animation:none}
 "use strict";
 /* ───────────────────────── storage ───────────────────────── */
 const KEY = "moneyquest.v1";
-/* app colours: kept on this device, separate from the quest so "Start over" keeps it */
+/* ───────── App colours: a dial for background, accent and outlines. Kept on this device, separate from the quest ───────── */
 const LOOK_KEY = KEY + ".look";
-function getLook(){ try{ return localStorage.getItem(LOOK_KEY) === "pastel" ? "pastel" : "classic"; }catch(e){ return "classic"; } }
-function applyLook(l){ l = l || getLook(); const h = document.documentElement; if(l === "pastel") h.dataset.look = "pastel"; else delete h.dataset.look;
-  const m = document.querySelector('meta[name="theme-color"]'); if(m) m.content = l === "pastel" ? "#4a3a7a" : "#140d33"; }
-function setLook(l){ try{ localStorage.setItem(LOOK_KEY, l); }catch(e){} applyLook(l); }
+const LOOK_BASE = {bgH:255, spread:20, accH:42, accSpread:-14, lineH:null, soft:0, sat:1};
+const LOOK_PRESETS = [
+  ["classic","Classic",null],
+  ["pastel","Pastel",{bgH:255, spread:55, accH:330, accSpread:-66, lineH:null, soft:1, sat:1}],
+  ["ocean","Ocean",{bgH:205, spread:-25, accH:178, accSpread:20, lineH:null, soft:.3, sat:1}],
+  ["forest","Forest",{bgH:150, spread:-20, accH:88, accSpread:-30, lineH:null, soft:.25, sat:.9}],
+  ["sunset","Sunset",{bgH:300, spread:45, accH:30, accSpread:-20, lineH:null, soft:.35, sat:1}],
+  ["rose","Rose",{bgH:340, spread:-25, accH:350, accSpread:-30, lineH:null, soft:.8, sat:.9}],
+  ["mono","Mono",{bgH:230, spread:0, accH:220, accSpread:0, lineH:null, soft:.2, sat:.12}]];
+const LOOK_VARS = ["--bg1","--bg2","--ink","--mut","--dim","--line","--gold","--gold2","--acc-rgb","--acc-glow","--acc-a","--acc-b","--acc-ink","--acc-sh","--acc-light","--acc-top","--glow1","--glow2","--sheet1","--sheet2","--nav-bg"];
+const clampN = (v, lo, hi, d) => { v = +v; return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; };
+const wrapH = h => ((Math.round(+h) % 360) + 360) % 360;
+function cleanLook(o){ if(!o || typeof o !== "object") return null;
+  return {bgH:wrapH(o.bgH ?? LOOK_BASE.bgH), spread:clampN(o.spread, -90, 90, LOOK_BASE.spread), accH:wrapH(o.accH ?? LOOK_BASE.accH),
+    accSpread:clampN(o.accSpread, -90, 90, LOOK_BASE.accSpread), lineH:o.lineH === null || o.lineH === undefined ? null : wrapH(o.lineH),
+    soft:clampN(o.soft, 0, 1, 0), sat:clampN(o.sat, 0, 1, 1)}; }
+function getLook(){ let raw = null; try{ raw = localStorage.getItem(LOOK_KEY); }catch(e){}
+  if(!raw || raw === "classic") return null;
+  if(raw === "pastel") return {...LOOK_PRESETS[1][2]};
+  try{ return cleanLook(JSON.parse(raw)); }catch(e){ return null; } }
+/* colour maths: HSL to RGB, then WCAG contrast so text always stays readable */
+function hslRgb(h, s, l){ s /= 100; l /= 100; const k = n => (n + h/30) % 12, a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return [f(0), f(8), f(4)].map(v => Math.round(v * 255)); }
+function lum(rgb){ const c = rgb.map(v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v + .055)/1.055, 2.4); }); return .2126*c[0] + .7152*c[1] + .0722*c[2]; }
+function contrast(a, b){ const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); }
+const WHITE = [255,255,255];
+/* darkest-first: lower lightness until white text on it passes the target */
+function darkFor(h, s, l, target){ while(l > 4 && contrast(hslRgb(h, s, l), WHITE) < target) l -= 1; return l; }
+/* lightest-first: raise lightness (then ease the colour) until text in this colour is readable on every background shade given */
+function lightFor(h, s, l, bgs, target){ const ok = () => bgs.every(b => contrast(hslRgb(h, s, l), b) >= target);
+  while(l < 97 && !ok()) l += 1; while(s > 0 && !ok()) s -= 5; return [s, l]; }
+const hex = rgb => "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join("");
+const hsl = (h, s, l, a) => a === undefined ? hex(hslRgb(wrapH(h), s, l)) : `rgba(${hslRgb(wrapH(h), s, l).join(",")},${a})`;
+function lookVars(o){ const t = o.soft, m = o.sat;
+  const bs = (58 - 26*t) * m, h1 = o.bgH, h2 = o.bgH + o.spread;
+  /* white text must stay readable on the lighter end of the background, with room for the see-through cards */
+  const l1 = darkFor(h1, bs, 12 + 22*t, 7), l2 = darkFor(h2, bs, 26 + 22*t, 5.2);
+  const as = (100 - 18*t) * Math.max(m, .25), a1h = o.accH, a2h = o.accH + o.accSpread;
+  const la = 72 + 15*t, lb = 60 + 20*t;
+  /* accent text sits on the background, so it must be light enough; the button label must be readable on the accent */
+  let ink = 13, inkC = contrast(hslRgb(a2h, as, lb), hslRgb(a1h, 70, ink));
+  let lb2 = lb; while(inkC < 4.6 && lb2 < 92){ lb2 += 1; inkC = contrast(hslRgb(a2h, as, lb2), hslRgb(a1h, 70, ink)); }
+  const B1 = hslRgb(wrapH(h1), bs, l1), B2 = hslRgb(wrapH(h2), bs, l2), BG = [B1, B2];
+  const [gs, gl] = lightFor(a1h, as, la, BG, 4.6), [ms, ml] = lightFor(h1, 50*m, 87, BG, 4.6), [ds, dl] = lightFor(h1, 32*m, 74, BG, 3.2), [ls, ll] = lightFor(a1h, as, 88, BG, 4.6);
+  const line = o.lineH === null ? hsl(h1, 45*m, 88, .16 + .08*t) : hsl(o.lineH, 90*Math.max(m, .3), 70, .6);
+  return {"--bg1":hsl(h1, bs, l1), "--bg2":hsl(h2, bs, l2), "--ink":"#ffffff", "--mut":hsl(h1, ms, ml), "--dim":hsl(h1, ds, dl),
+    "--line":line, "--gold":hsl(a1h, gs, gl), "--gold2":hsl(a2h, as, lb2), "--acc-rgb":hslRgb(wrapH(a1h), as, la).join(","),
+    "--acc-glow":hslRgb(wrapH(a2h), as, 55).join(","), "--acc-a":hsl(a1h, as, Math.min(90, la + 4)), "--acc-b":hsl(a2h, as, lb2),
+    "--acc-ink":hsl(a1h, 70, ink), "--acc-sh":hsl(a2h, 55*Math.max(m, .3), 36), "--acc-light":hsl(a1h, ls, ll), "--acc-top":hsl(a1h, as, 94),
+    "--glow1":hsl(h1 + 10, (70 - 20*t)*m, 30 + 28*t), "--glow2":hsl(h2, (65 - 20*t)*m, 26 + 30*t),
+    "--sheet1":hsl(h1, bs, Math.min(l1 + 12, l2)), "--sheet2":hsl(h1, bs, Math.max(4, l1 + 2)), "--nav-bg":hsl(h1, bs, Math.max(6, l1 + 4), .86)}; }
+function applyLook(o){ if(o === undefined) o = getLook(); const h = document.documentElement, meta = document.querySelector('meta[name="theme-color"]');
+  if(!o){ LOOK_VARS.forEach(k => h.style.removeProperty(k)); delete h.dataset.look; if(meta) meta.content = "#140d33"; return; }
+  const v = lookVars(o); Object.entries(v).forEach(([k, x]) => h.style.setProperty(k, x)); h.dataset.look = "custom"; if(meta) meta.content = v["--bg1"]; }
+function setLook(o){ o = o ? cleanLook(o) : null; try{ localStorage.setItem(LOOK_KEY, o ? JSON.stringify(o) : "classic"); }catch(e){} applyLook(o); }
 applyLook();
+/* the dial itself: draws into box, edits a working copy, saves when you let go */
+function lookUI(box){ let o = getLook(), part = "bg", raf = 0, drag = false;
+  const cur = () => o || {...LOOK_BASE};
+  const presetOf = () => { if(!o) return "classic"; const p = LOOK_PRESETS.find(x => x[2] && Object.keys(x[2]).every(k => x[2][k] === o[k])); return p ? p[0] : ""; };
+  const hueOf = () => { const c = cur(); return part === "bg" ? c.bgH : part === "acc" ? c.accH : c.lineH; };
+  const swatch = p => { if(!p) return "linear-gradient(135deg,#140d33,#24145c)"; const v = lookVars(p); return `linear-gradient(135deg,${v["--bg1"]},${v["--bg2"]} 60%,${v["--gold"]})`; };
+  const draw = () => { const c = cur(), hh = hueOf(), off = hh === null, pr = presetOf();
+    const midCol = part === "bg" ? `linear-gradient(135deg,${lookVars(c)["--bg1"]},${lookVars(c)["--bg2"]})` : part === "acc" ? `linear-gradient(180deg,${lookVars(c)["--acc-a"]},${lookVars(c)["--acc-b"]})` : off ? "rgba(255,255,255,.12)" : hsl(hh, 90, 70);
+    box.innerHTML = `<div class="lk-presets" role="group" aria-label="Colour presets">${LOOK_PRESETS.map(([id, n, p]) => `<button type="button" class="cat${pr === id ? " on" : ""}" data-lp="${id}" aria-pressed="${pr === id}"><span class="lk-sw" style="background:${swatch(p)}"></span>${n}</button>`).join("")}</div>
+      <div class="seg" role="group" aria-label="Which colour to change">${[["bg","Background"],["acc","Accent"],["line","Outlines"]].map(([k, n]) => `<button type="button" data-lt="${k}" class="${part === k ? "on" : ""}" aria-pressed="${part === k}">${n}</button>`).join("")}</div>
+      <div class="lk-dial${off ? " off" : ""}" id="lkd" role="slider" tabindex="0" aria-label="${part === "bg" ? "Background" : part === "acc" ? "Accent" : "Outline"} colour" aria-valuemin="0" aria-valuemax="359" aria-valuenow="${off ? 0 : hh}" aria-valuetext="${off ? "Off" : "Hue " + hh}">
+        <div class="lk-mid" style="background:${midCol}">${part === "line" && off ? "Plain<br>outlines" : part === "bg" ? "Background" : part === "acc" ? "Accent" : "Outlines"}</div><div class="lk-knob" id="lkk"></div></div>
+      <p class="note lk-note">${part === "line" ? (off ? "Drag around the ring to colour the outlines." : `<button type="button" class="link" data-lo>Use plain outlines</button>`) : "Drag around the ring to pick a colour."}</p>
+      <div class="lk-soft"><span>Bold</span><input type="range" id="lks" min="0" max="100" step="1" value="${Math.round(c.soft*100)}" aria-label="Softness, bold to pastel"><span>Pastel</span></div>
+      ${o ? `<button type="button" class="btn ghost full sm" data-lr style="margin-top:12px">↺ Back to Classic</button>` : ""}`;
+    placeKnob(); bind(); };
+  const placeKnob = () => { const k = box.querySelector("#lkk"), hh = hueOf(); if(!k || hh === null) return; const r = 88, a = hh * Math.PI / 180;
+    k.style.left = (110 + r*Math.sin(a)) + "px"; k.style.top = (110 - r*Math.cos(a)) + "px"; k.style.background = hsl(hh, 85, 62); };
+  const live = () => { if(raf) return; raf = requestAnimationFrame(() => { raf = 0; applyLook(cur()); }); };
+  const commit = () => { setLook(o); draw(); };
+  const setHue = hh => { o = {...cur()}; if(part === "bg") o.bgH = hh; else if(part === "acc") o.accH = hh; else o.lineH = hh;
+    const d = box.querySelector("#lkd"); if(d){ d.classList.remove("off"); d.setAttribute("aria-valuenow", hh); d.setAttribute("aria-valuetext", "Hue " + hh); }
+    placeKnob(); const mid = box.querySelector(".lk-mid"); if(mid){ const v = lookVars(o);
+      mid.style.background = part === "bg" ? `linear-gradient(135deg,${v["--bg1"]},${v["--bg2"]})` : part === "acc" ? `linear-gradient(180deg,${v["--acc-a"]},${v["--acc-b"]})` : hsl(hh, 90, 70); if(part === "line") mid.innerHTML = "Outlines"; }
+    live(); };
+  const bind = () => {
+    box.querySelectorAll("[data-lp]").forEach(b => b.onclick = () => { const p = LOOK_PRESETS.find(x => x[0] === b.dataset.lp); o = p[2] ? {...p[2]} : null; commit();
+      toast(`${p[1]} colours on`, "🎨"); });
+    box.querySelectorAll("[data-lt]").forEach(b => b.onclick = () => { part = b.dataset.lt; draw(); });
+    const lo = box.querySelector("[data-lo]"); if(lo) lo.onclick = () => { o = {...cur(), lineH:null}; commit(); };
+    const lr = box.querySelector("[data-lr]"); if(lr) lr.onclick = () => { o = null; commit(); toast("Classic colours on", "🌌"); };
+    const sl = box.querySelector("#lks"); sl.oninput = () => { o = {...cur(), soft:+sl.value/100}; live(); }; sl.onchange = () => { setLook(o); };
+    const d = box.querySelector("#lkd");
+    const fromPt = e => { const r = d.getBoundingClientRect(), x = e.clientX - (r.left + r.width/2), y = e.clientY - (r.top + r.height/2);
+      return wrapH(Math.atan2(y, x) * 180 / Math.PI + 90); };
+    d.addEventListener("pointerdown", e => { drag = true; d.setPointerCapture(e.pointerId); setHue(fromPt(e)); e.preventDefault(); });
+    d.addEventListener("pointermove", e => { if(drag) setHue(fromPt(e)); });
+    const end = () => { if(!drag) return; drag = false; setLook(o); const pr = presetOf();
+      box.querySelectorAll("[data-lp]").forEach(b => { const on = b.dataset.lp === pr; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+      if(!box.querySelector("[data-lr]")) draw(); };
+    d.addEventListener("pointerup", end); d.addEventListener("pointercancel", end);
+    d.addEventListener("keydown", e => { const step = e.shiftKey ? 30 : 5, hh = hueOf() ?? 0;
+      if(["ArrowRight","ArrowUp"].includes(e.key)){ setHue(wrapH(hh + step)); setLook(o); e.preventDefault(); }
+      else if(["ArrowLeft","ArrowDown"].includes(e.key)){ setHue(wrapH(hh - step)); setLook(o); e.preventDefault(); } }); };
+  draw(); }
 const RESCUE = KEY + ".rescue";
 const blank = () => ({v:1, hero:null, cur:"USD", pay:{freq:"monthly", amount:0, next:"", anchor:1},
   bills:[], billPaid:{}, spends:[], incomes:[], debts:[], debtLog:[], goals:[], goalLog:[], impulses:[],
@@ -1408,7 +1511,7 @@ function futureView(){ fyReady(); const f = S.future;
   return `<section class="card" style="padding:16px 18px"><div class="lbl">Future You</div><b style="font-size:20px">Where sticking to it could take you</b>
     <p class="muted" style="font-size:14px;margin:6px 0 12px">Turn the dials. Estimates only, not financial advice. Real returns go up and down.</p>
     ${FYD.map(([k,l,mn,mx,st,fmt]) => `<label class="f" for="fy-${k}" style="display:flex;justify-content:space-between"><span>${l}</span><b id="fyv-${k}">${fmt(f[k])}</b></label>
-      <input type="range" class="fy-range" id="fy-${k}" data-fy="${k}" min="${mn}" max="${mx}" step="${st}" value="${f[k]}" style="width:100%;accent-color:#ffb347;min-height:32px">`).join("")}
+      <input type="range" class="fy-range" id="fy-${k}" data-fy="${k}" min="${mn}" max="${mx}" step="${st}" value="${f[k]}" style="width:100%;accent-color:var(--acc-b);min-height:32px">`).join("")}
     <div class="two" style="margin-top:12px"><button class="btn ghost sm" data-act="fyEdit">Starting pot: ${money(fyStart(),0)}</button><button class="btn ghost sm" data-act="fyEdit">Saving now: ${money(fyBase(),0)}/mo${S.future.save === null ? " (est.)" : ""}</button></div></section>
   <div id="fy-out">${fyNumbers()}</div>
   ${fyDebtCard()}
@@ -1445,7 +1548,7 @@ function fyDebtCard(){ const t = fyDebtTotal();
   return `<section class="card" style="margin-top:14px"><div class="lbl">If I paid off this much debt</div><b style="font-size:18px">See what a lump sum would do</b>
     <p class="muted" style="font-size:14px;margin:6px 0 10px">A what-if only: nothing is paid. You owe ${money(t,0)} across your bosses.</p>
     <label class="f" for="fy-lump" style="display:flex;justify-content:space-between"><span>Pay off now</span><b id="fyv-lump">${money(Math.min(v, t),0)}</b></label>
-    <input type="range" class="fy-range" id="fy-lump" data-fy="lump" min="0" max="${mx}" step="${st}" value="${v}" style="width:100%;accent-color:#ffb347;min-height:44px" aria-label="Debt to pay off">
+    <input type="range" class="fy-range" id="fy-lump" data-fy="lump" min="0" max="${mx}" step="${st}" value="${v}" style="width:100%;accent-color:var(--acc-b);min-height:44px" aria-label="Debt to pay off">
     <div id="fyd-out">${fyDebtOut()}</div></section>`; }
 document.addEventListener("input", e => { if(!(e.target.dataset && e.target.dataset.fy === "lump")) return;
   const v = document.getElementById("fyv-lump"); if(v) v.textContent = money(Math.min(S.future.lump, fyDebtTotal()),0);
@@ -1653,7 +1756,7 @@ function settings(){
       <div><label class="f">Next payday</label><input class="in" id="nx" type="date" value="${p.next}"></div></div>
     <div class="actions"><button class="btn full" id="ok">Save changes</button></div>
     <label class="f" style="margin-top:22px">App colours</label>
-    <div class="seg" id="lk" role="group" aria-label="App colours">${[["classic","🌌 Classic"],["pastel","💜 Pastel"]].map(([v,t]) => `<button type="button" data-l="${v}" class="${getLook() === v ? "on" : ""}" aria-pressed="${getLook() === v}">${t}</button>`).join("")}</div>
+    <div id="lkui"></div>
     ${QFX.button()}
     <label class="f" style="margin-top:22px">Backup</label>
     <div class="two"><button class="btn ghost" id="ex">⬇️ Export backup</button><button class="btn ghost" id="im">⬆️ Restore backup</button></div>
@@ -1661,9 +1764,7 @@ function settings(){
     <label class="f" style="margin-top:22px">Danger zone</label>
     <div class="two"><button class="btn ghost" id="demo">🧪 Load sample data</button><button class="btn red" id="reset">Start over</button></div>`, root => {
       heroPicker(root.querySelector("#hp"), hs);
-      root.querySelectorAll("#lk [data-l]").forEach(b => b.onclick = () => { setLook(b.dataset.l);
-        root.querySelectorAll("#lk [data-l]").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
-        toast(b.dataset.l === "pastel" ? "Pastel colours on" : "Classic colours on", b.dataset.l === "pastel" ? "💜" : "🌌"); });
+      lookUI(root.querySelector("#lkui"));
       root.querySelector("#ok").onclick = () => { const nx = val(root,"#nx"); if(!nx) return toast("Pick your next payday","📅");
         S.hero.name = val(root,"#hn") || S.hero.name; S.cur = val(root,"#cur");
         S.hero.avatar = hs.avatar; S.hero.skin = hs.skin; if(hs.photo) S.hero.photo = hs.photo; else delete S.hero.photo;
