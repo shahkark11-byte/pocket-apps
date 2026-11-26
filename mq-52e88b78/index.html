@@ -429,6 +429,19 @@ textarea.in{resize:vertical;min-height:96px;font:inherit;color:inherit;line-heig
 .ch-t.on small{text-decoration:none}
 html[data-season="christmas"]{--bg1:#08200f;--bg2:#145a2e}
 html[data-season="autumn"]{--bg1:#2b1204;--bg2:#8a3d0a}
+/* Pastel look: soft lavender to pink gradient (Settings → App colours) */
+html[data-look="pastel"]{--bg1:#4a3a7a;--bg2:#9b6492;--mut:#eadcf3;--dim:#cdb5dc;--gold:#ffc6e1;--gold2:#cfaeff;--violet:#d2b9ff;--sky:#c3dcff;
+  --mint:#a9eed2;--coral:#ffa3b5;--card:rgba(255,255,255,.1);--card2:rgba(255,255,255,.17);--line:rgba(255,255,255,.22)}
+html[data-look="pastel"] body{background:radial-gradient(1200px 700px at 85% -10%,#c99be0 0%,transparent 60%),
+  radial-gradient(900px 600px at -10% 110%,#e8a3c4 0%,transparent 55%),linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed}
+html[data-look="pastel"] .gold{background:linear-gradient(180deg,#fff,#ffd3ea 55%,#dcbcff);-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-look="pastel"] .btn:not(.ghost):not(.mint):not(.red),html[data-look="pastel"] nav .fab span{background:linear-gradient(180deg,#ffd9ec,#dcb9ff);color:#3d1f52;box-shadow:0 6px 0 #a47bc4,0 10px 24px rgba(214,160,255,.35)}
+html[data-look="pastel"] .btn:not(.ghost):not(.mint):not(.red):active{box-shadow:0 3px 0 #a47bc4}
+html[data-look="pastel"] nav{background:rgba(78,56,116,.84)}
+html[data-look="pastel"] nav button.on svg{filter:drop-shadow(0 0 8px rgba(255,198,225,.7))}
+html[data-look="pastel"] .cat.on{background:rgba(255,198,225,.2);color:#ffe3f1}
+html[data-look="pastel"] .sheet{background:linear-gradient(180deg,#5f4a8e,#7d5683)}
+html[data-look="pastel"] #g stop:first-child{stop-color:#ffd3ea}html[data-look="pastel"] #g stop:last-child{stop-color:#c9a2ff}
 .vis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:6px}
 .vis-t{position:relative;display:block;padding:0;border-radius:16px;overflow:hidden;aspect-ratio:4/3;border:1px solid var(--line);background:rgba(0,0,0,.25);min-height:44px}
 .vis-t img{width:100%;height:100%;object-fit:cover;display:block}
@@ -695,6 +708,13 @@ html.reduce #qfx-sky i{display:none}html.reduce #qfx-hi{animation:none}
 "use strict";
 /* ───────────────────────── storage ───────────────────────── */
 const KEY = "moneyquest.v1";
+/* app colours: kept on this device, separate from the quest so "Start over" keeps it */
+const LOOK_KEY = KEY + ".look";
+function getLook(){ try{ return localStorage.getItem(LOOK_KEY) === "pastel" ? "pastel" : "classic"; }catch(e){ return "classic"; } }
+function applyLook(l){ l = l || getLook(); const h = document.documentElement; if(l === "pastel") h.dataset.look = "pastel"; else delete h.dataset.look;
+  const m = document.querySelector('meta[name="theme-color"]'); if(m) m.content = l === "pastel" ? "#4a3a7a" : "#140d33"; }
+function setLook(l){ try{ localStorage.setItem(LOOK_KEY, l); }catch(e){} applyLook(l); }
+applyLook();
 const RESCUE = KEY + ".rescue";
 const blank = () => ({v:1, hero:null, cur:"USD", pay:{freq:"monthly", amount:0, next:"", anchor:1},
   bills:[], billPaid:{}, spends:[], incomes:[], debts:[], debtLog:[], goals:[], goalLog:[], impulses:[],
@@ -1632,6 +1652,8 @@ function settings(){
     <div class="two"><div><label class="f">Take-home pay</label><input class="in" id="am" inputmode="decimal" value="${p.amount}"></div>
       <div><label class="f">Next payday</label><input class="in" id="nx" type="date" value="${p.next}"></div></div>
     <div class="actions"><button class="btn full" id="ok">Save changes</button></div>
+    <label class="f" style="margin-top:22px">App colours</label>
+    <div class="seg" id="lk" role="group" aria-label="App colours">${[["classic","🌌 Classic"],["pastel","💜 Pastel"]].map(([v,t]) => `<button type="button" data-l="${v}" class="${getLook() === v ? "on" : ""}" aria-pressed="${getLook() === v}">${t}</button>`).join("")}</div>
     ${QFX.button()}
     <label class="f" style="margin-top:22px">Backup</label>
     <div class="two"><button class="btn ghost" id="ex">⬇️ Export backup</button><button class="btn ghost" id="im">⬆️ Restore backup</button></div>
@@ -1639,6 +1661,9 @@ function settings(){
     <label class="f" style="margin-top:22px">Danger zone</label>
     <div class="two"><button class="btn ghost" id="demo">🧪 Load sample data</button><button class="btn red" id="reset">Start over</button></div>`, root => {
       heroPicker(root.querySelector("#hp"), hs);
+      root.querySelectorAll("#lk [data-l]").forEach(b => b.onclick = () => { setLook(b.dataset.l);
+        root.querySelectorAll("#lk [data-l]").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
+        toast(b.dataset.l === "pastel" ? "Pastel colours on" : "Classic colours on", b.dataset.l === "pastel" ? "💜" : "🌌"); });
       root.querySelector("#ok").onclick = () => { const nx = val(root,"#nx"); if(!nx) return toast("Pick your next payday","📅");
         S.hero.name = val(root,"#hn") || S.hero.name; S.cur = val(root,"#cur");
         S.hero.avatar = hs.avatar; S.hero.skin = hs.skin; if(hs.photo) S.hero.photo = hs.photo; else delete S.hero.photo;
